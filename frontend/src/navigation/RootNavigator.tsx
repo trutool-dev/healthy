@@ -17,6 +17,17 @@ import {
   LoginScreen,
   ForgotPasswordScreen,
 } from '@/screens/auth';
+import {
+  OnboardingWelcome,
+  OnboardingGoal,
+  OnboardingProfile,
+  OnboardingLifestyle,
+  OnboardingTraining,
+  OnboardingNutrition,
+  OnboardingHealth,
+  OnboardingMotivation,
+  OnboardingComplete,
+} from '@/screens/onboarding';
 import { PlaceholderScreen } from './PlaceholderScreen';
 
 export type RootStackParamList = {
@@ -74,14 +85,28 @@ export function RootNavigator() {
           // App principal (tabs) — se implementará en el siguiente sprint
           <Stack.Screen name="MainTabs" component={PlaceholderScreen} />
         ) : (
-          // Flujo de autenticación
           <>
+            {/* Autenticación */}
             <Stack.Screen name="Welcome"        component={WelcomeScreen} />
             <Stack.Screen name="Register"       component={RegisterScreen} />
             <Stack.Screen name="VerifyEmail"    component={VerifyEmailScreen} />
             <Stack.Screen name="SetPassword"    component={SetPasswordScreen} />
             <Stack.Screen name="Login"          component={LoginScreen} />
             <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+            {/* Onboarding */}
+            <Stack.Screen name="OnboardingWelcome"    component={OnboardingWelcome} />
+            <Stack.Screen name="OnboardingGoal"       component={OnboardingGoal} />
+            <Stack.Screen name="OnboardingProfile"    component={OnboardingProfile} />
+            <Stack.Screen name="OnboardingLifestyle"  component={OnboardingLifestyle} />
+            <Stack.Screen name="OnboardingTraining"   component={OnboardingTraining} />
+            <Stack.Screen name="OnboardingNutrition"  component={OnboardingNutrition} />
+            <Stack.Screen name="OnboardingHealth"     component={OnboardingHealth} />
+            <Stack.Screen name="OnboardingMotivation" component={OnboardingMotivation} />
+            <Stack.Screen
+              name="OnboardingComplete"
+              component={OnboardingComplete}
+              options={{ gestureEnabled: false }} // impide salir con swipe durante la generación
+            />
           </>
         )}
       </Stack.Navigator>
