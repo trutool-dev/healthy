@@ -1,103 +1,99 @@
-# CLAUDE.md
-
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+# Agente Backend
 
 ## Rol
 Eres el desarrollador backend de Healthy. Tu responsabilidad es construir
 la API REST con Node.js y Express que conecta el frontend móvil con la
 base de datos y los servicios externos.
 
-## Comandos de desarrollo
-
-```bash
-npm run dev        # Servidor con hot-reload (nodemon)
-npm start          # Servidor en producción
-npm test           # Tests con Jest
-npm run test:watch # Tests en modo watch
-npm run test:coverage
-```
-
-Copiar `.env.example` a `.env` y rellenar las variables antes de arrancar.
-
-## Arquitectura
-
-```
-server.js               → punto de entrada, carga dotenv y levanta Express
-src/
-  app.js                → configura Express: helmet, cors, morgan, rutas, errorHandler
-  prisma/client.js      → instancia singleton de PrismaClient (reutiliza en dev)
-  routes/               → define paths y aplica middleware de validación
-  controllers/          → recibe req/res, llama a services, responde con sendSuccess/sendError
-  middleware/
-    auth.middleware.js          → verifica JWT, adjunta req.user
-    rateLimiter.middleware.js   → 5 intentos / 15 min para rutas /auth/*
-    validate.middleware.js      → lee errores de express-validator
-    errorHandler.middleware.js  → captura errores no controlados, mapea códigos Prisma
-  services/
-    email.service.js    → envío de emails con Nodemailer (verificación y reset)
-    redis.service.js    → cliente ioredis singleton
-    supabase.service.js → cliente Supabase singleton
-  utils/
-    response.util.js    → sendSuccess / sendError — formato estándar de respuesta
-    crypto.util.js      → hashPassword, comparePassword, generateVerificationCode
-    logger.util.js      → Winston (debug en dev, info en prod)
-```
-
-## Reglas críticas
-
-- **Formato de respuesta obligatorio** en todos los endpoints:
-  ```js
-  { success: boolean, data: {}, error: string | null, message: string }
-  ```
-  Usar siempre `sendSuccess` / `sendError` de `utils/response.util.js`.
-
-- **Todos los endpoints excepto `/auth/*`** requieren el middleware `authenticate`.
-
-- **El usuario solo puede acceder a sus propios datos**: filtrar siempre por `user_id: req.user.id`.
-
-- **Rate limiting** en rutas de auth: `authRateLimiter` máximo 5 intentos por 15 min.
-
-- **Los códigos de verificación expiran en 15 minutos** (campo `expires_at` en `VerificationCode`).
-
-- **Variables de entorno** en `.env`, nunca hardcodeadas. Ver `.env.example` para la lista completa.
-
-- Documentar cada endpoint con JSDoc.
-
 ## Tecnologías
-- Node.js + Express — API REST
-- Prisma + PostgreSQL — ORM y base de datos (schema en `../database/schema.prisma`)
-- ioredis — caché y sesiones
-- JWT (jsonwebtoken) — autenticación stateless con access + refresh token
-- Nodemailer — emails transaccionales
-- Supabase — gestión de usuarios
-- express-validator — validación de inputs
-- Winston — logging estructurado
+- Node.js + Express
+- Prisma como ORM
+- JWT para autenticación
+- Nodemailer para envío de emails
+- Supabase para gestión de usuarios
+- Redis para caché y sesiones
 
-## Variables de entorno requeridas
-```
-DATABASE_URL, REDIS_URL,
-JWT_SECRET, JWT_EXPIRES_IN, JWT_REFRESH_EXPIRES_IN,
-SUPABASE_URL, SUPABASE_KEY,
-SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, EMAIL_FROM,
-FRONTEND_URL, NODE_ENV
-```
+## Endpoints principales a implementar
 
-## Endpoints implementados (stubs — pendiente lógica de negocio)
+### Autenticación
+- POST /auth/register        → registro con email y teléfono
+- POST /auth/verify-email    → verificar código de 6 dígitos
+- POST /auth/set-password    → crear contraseña tras verificación
+- POST /auth/login           → login con email y contraseña
+- POST /auth/forgot-password → solicitar recuperación de contraseña
+- POST /auth/reset-password  → establecer nueva contraseña con token
+- POST /auth/logout          → cerrar sesión
+- GET  /auth/me              → datos del usuario autenticado
 
-| Método | Ruta | Auth |
-|--------|------|------|
-| POST | /auth/register | No |
-| POST | /auth/verify-email | No |
-| POST | /auth/set-password | No |
-| POST | /auth/login | No |
-| POST | /auth/forgot-password | No |
-| POST | /auth/reset-password | No |
-| POST | /auth/logout | Sí |
-| GET | /auth/me | Sí |
-| POST/PUT | /onboarding/* | Sí |
-| GET/POST/PUT | /plans/* | Sí |
-| GET/PUT/POST | /training/* | Sí |
-| GET/PUT | /nutrition/meals | Sí |
-| GET | /foods/search, /foods/barcode/:code | Sí |
-| GET/POST | /progress, /progress/stats | Sí |
-| GET/PUT | /logs/today, /logs/history | Sí |
+### Onboarding
+- POST /onboarding/start     → iniciar onboarding y guardar respuestas
+- PUT  /onboarding/profile   → guardar perfil físico
+- PUT  /onboarding/lifestyle → guardar perfil de estilo de vida
+- PUT  /onboarding/training  → guardar preferencias de entrenamiento
+- PUT  /onboarding/nutrition → guardar preferencias nutricionales
+- PUT  /onboarding/health    → guardar condiciones de salud
+- PUT  /onboarding/motivation → guardar perfil de motivación
+- POST /onboarding/complete  → finalizar onboarding y generar plan con IA
+
+### Planes
+- GET  /plans                → obtener plan activo del usuario
+- GET  /plans/:id            → obtener plan concreto
+- POST /plans/regenerate     → regenerar plan con IA
+- PUT  /plans/:id/pause      → pausar plan activo
+
+### Entrenamiento
+- GET  /training/sessions         → sesiones del usuario
+- GET  /training/sessions/:id     → detalle de sesión
+- PUT  /training/sessions/:id/complete → marcar sesión como completada
+- POST /training/sessions/:id/exercises/:exerciseId/complete → completar ejercicio
+
+### Nutrición
+- GET  /nutrition/meals           → comidas del día
+- PUT  /nutrition/meals/:id/complete → marcar comida como completada
+- GET  /foods/search              → buscar alimentos por nombre
+- GET  /foods/barcode/:code       → buscar alimento por código de barras
+
+### Progreso
+- GET  /progress                  → historial de progreso
+- POST /progress                  → registrar nueva medición
+- GET  /progress/stats            → estadísticas y gráficas
+
+### Logs diarios
+- GET  /logs/today                → log del día actual
+- PUT  /logs/today                → actualizar log del día
+- GET  /logs/history              → historial de logs
+
+## Reglas de seguridad
+- Todos los endpoints excepto /auth/* requieren JWT válido
+- Validar siempre que el usuario solo accede a sus propios datos
+- Sanitizar todos los inputs antes de guardar en base de datos
+- Rate limiting en endpoints de autenticación (max 5 intentos)
+- Los códigos de verificación expiran en 15 minutos
+- Logs de todos los accesos fallidos
+
+## Reglas estrictas
+- NUNCA modificar archivos fuera de /backend
+- Toda respuesta de API sigue el formato:
+  { success: boolean, data: {}, error: string, message: string }
+- Siempre manejar errores con try/catch
+- Variables de entorno en .env, nunca hardcodeadas
+- Documentar cada endpoint con JSDoc
+
+## Variables de entorno necesarias
+- DATABASE_URL
+- REDIS_URL
+- JWT_SECRET
+- JWT_EXPIRES_IN
+- SUPABASE_URL
+- SUPABASE_KEY
+- SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS
+- FRONTEND_URL
+- NODE_ENV
+
+## Archivos que gestionas
+- /backend/src/routes/
+- /backend/src/controllers/
+- /backend/src/middleware/
+- /backend/src/services/
+- /backend/src/utils/
+- /backend/.env.example
