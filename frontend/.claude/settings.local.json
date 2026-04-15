@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx create-expo-app@latest . --template blank-typescript --yes)",
+      "Read(//c/Users/Antonio/Documents/healthy/**)",
+      "Bash(mkdir -p frontend_tmp)",
+      "Bash(npx create-expo-app@latest frontend_tmp --template blank-typescript --yes)",
+      "Bash(cp *)",
+      "Bash(cp frontend_tmp/App.tsx frontend/)",
+      "Bash(cp frontend_tmp/app.json frontend/)",
+      "Bash(cp -r frontend_tmp/assets frontend/)",
+      "Bash(cp frontend_tmp/index.ts frontend/)",
+      "Bash(cp frontend_tmp/package-lock.json frontend/)",
+      "Bash(npx expo *)",
+      "Bash(npm install *)",
+      "Bash(npx tsc *)"
+    ]
+  }
+}

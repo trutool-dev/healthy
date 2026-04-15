@@ -1,0 +1,29 @@
+module.exports = function (api) {
+  api.cache(true);
+  return {
+    presets: [
+      ['babel-preset-expo', { jsxImportSource: 'nativewind' }],
+      'nativewind/babel',
+    ],
+    plugins: [
+      // Alias de rutas para importaciones limpias con @/
+      [
+        'module-resolver',
+        {
+          root: ['./'],
+          extensions: ['.ts', '.tsx', '.js', '.jsx'],
+          alias: {
+            '@':          './src',
+            '@design':    '../design',
+            '@screens':   './src/screens',
+            '@components':'./src/components',
+            '@stores':    './src/stores',
+            '@services':  './src/services',
+            '@theme':     './src/theme',
+            '@navigation':'./src/navigation',
+          },
+        },
+      ],
+    ],
+  };
+};
