@@ -1,0 +1,58 @@
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { NativeStackScreenProps }          from '@react-navigation/native-stack';
+import { RootStackParamList }              from '@/navigation/RootNavigator';
+import { useOnboardingStore, PreviousAttempts } from '@/stores/onboardingStore';
+import { OnboardingLayout } from './OnboardingLayout';
+import { SelectCard }       from './SelectCard';
+import { Input }            from '@/components/ui/Input';
+import { colors }    from '@/theme/colors';
+import { textStyles } from '@/theme/typography';
+import { spacing, borderRadius, shadows } from '@/theme/spacing';
+
+type Props = NativeStackScreenProps<RootStackParamList, 'OnboardingMotivation'>;
+
+const MOTIVATIONS = [{id:'health',label:'Mejorar mi salud',icon:'❤️'},{id:'appearance',label:'Verme mejor',icon:'🪞'},{id:'energy',label:'Más energía',icon:'⚡'},{id:'confidence',label:'Ganar confianza',icon:'💪'},{id:'sleep',label:'Dormir mejor',icon:'😴'},{id:'stress',label:'Reducir el estrés',icon:'🧘'},{id:'performance',label:'Rendir mejor',icon:'🏅'},{id:'longevity',label:'Vivir más y mejor',icon:'🌿'}];
+
+export function OnboardingMotivation({ navigation }: Props) {
+  const { data, setMotivation } = useOnboardingStore();
+  const prev = data.motivation;
+  const [motivations, setMotivations] = useState<string[]>(prev?.motivations ?? []);
+  const [attempts,    setAttempts]    = useState<PreviousAttempts|undefined>(prev?.previousAttempts);
+  const [challenge,   setChallenge]   = useState(prev?.mainChallenge ?? '');
+
+  return (
+    <OnboardingLayout step={7} title="Tu motivación" subtitle="Entender qué te mueve nos ayuda a diseñar un plan que no abandones"
+      onBack={() => navigation.goBack()} onContinue={() => { setMotivation({ motivations, previousAttempts: attempts!, mainChallenge: challenge }); navigation.navigate('OnboardingComplete'); }}
+      continueLabel="Generar mi plan" canContinue={motivations.length > 0 && !!attempts}>
+      <Text style={s.sec}>¿Por qué quieres mejorar tu salud?</Text>
+      <Text style={s.hint}>Selecciona todas las que te representen</Text>
+      <View style={s.tags}>
+        {MOTIVATIONS.map((m) => (
+          <Pressable key={m.id} onPress={()=>setMotivations(p=>p.includes(m.id)?p.filter(x=>x!==m.id):[...p,m.id])} style={[s.tag, motivations.includes(m.id) && s.tagSel]}>
+            <Text style={{fontSize:16}}>{m.icon}</Text>
+            <Text style={[s.tagLabel, motivations.includes(m.id) && s.tagLabelSel]}>{m.label}</Text>
+          </Pressable>
+        ))}
+      </View>
+      <Text style={[s.sec,{marginTop:spacing.lg}]}>¿Has seguido planes de salud antes?</Text>
+      {([{value:'none',icon:'🆕',label:'Es mi primera vez',sublabel:'Nunca he seguido un plan'},{value:'few',icon:'📋',label:'Lo he intentado antes',sublabel:'1 o 2 intentos previos'},{value:'many',icon:'🔄',label:'He probado muchas cosas',sublabel:'Sin resultados duraderos'}] as {value:PreviousAttempts;icon:string;label:string;sublabel:string}[]).map((a) => (
+        <SelectCard key={a.value} icon={a.icon} label={a.label} sublabel={a.sublabel} selected={attempts===a.value} onPress={()=>setAttempts(a.value)} />
+      ))}
+      <Text style={[s.sec,{marginTop:spacing.lg}]}>¿Cuál es tu mayor reto? <Text style={s.optional}>(opcional)</Text></Text>
+      <Input label="Ej: la constancia, el tiempo, saber qué comer…" value={challenge} onChangeText={setChallenge} hint="La IA lo tendrá en cuenta" inputProps={{ autoCapitalize: 'sentences' }} />
+    </OnboardingLayout>
+  );
+}
+
+const s = StyleSheet.create({
+  sec:     { ...textStyles.label, color: colors.neutral.midGray, marginBottom: spacing.xs },
+  hint:    { ...textStyles.caption, color: colors.neutral.midGray, marginBottom: spacing.md },
+  optional:{ fontWeight: '400', textTransform: 'none' },
+  tags:    { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginBottom: spacing.sm },
+  tag:     { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, paddingVertical: spacing.sm, paddingHorizontal: spacing.md, borderRadius: borderRadius.pill, borderWidth: 1.5, borderColor: colors.neutral.lightGray, backgroundColor: colors.neutral.offWhite, ...shadows.card },
+  tagSel:  { borderColor: colors.primary.green, backgroundColor: colors.primary.lightGreen },
+  tagLabel:{ ...textStyles.bodyNormal, color: colors.neutral.darkGray },
+  tagLabelSel: { color: colors.primary.darkGreen, fontWeight: '600' },
+});
+export default OnboardingMotivation;
