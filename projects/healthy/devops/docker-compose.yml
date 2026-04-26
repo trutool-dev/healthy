@@ -52,7 +52,7 @@ services:
     restart: unless-stopped
     ports:
       - "${REDIS_PORT:-6379}:6379"
-    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-}
+    command: redis-server --appendonly yes --requirepass healthy_redis_pass
     volumes:
       - redis-data:/data
     healthcheck:

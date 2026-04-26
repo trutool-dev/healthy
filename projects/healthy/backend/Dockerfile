@@ -20,7 +20,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Prisma: genera el cliente desde el schema del workspace
-COPY ../database/schema.prisma ./prisma/schema.prisma
+COPY prisma/schema.prisma ./prisma/schema.prisma
 RUN npx prisma generate --schema=./prisma/schema.prisma || true
 
 RUN chown -R appuser:appgroup /app

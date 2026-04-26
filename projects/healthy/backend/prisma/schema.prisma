@@ -1,0 +1,592 @@
+// Esquema Prisma para la aplicación Healthy
+// Base de datos: PostgreSQL
+// Generador: prisma-client-js
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────────────────────
+// AUTENTICACIÓN Y USUARIOS
+// ─────────────────────────────────────────────────────────────
+
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  phone_number  String?
+  password_hash String
+  email_verified   Boolean  @default(false)
+  phone_verified   Boolean  @default(false)
+  status        UserStatus @default(pending_verification)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  // Relaciones
+  verification_codes     VerificationCode[]
+  password_reset_tokens  PasswordResetToken[]
+  auth_sessions          AuthSession[]
+  profile                Profile?
+  lifestyle_profile      LifestyleProfile?
+  training_preferences   TrainingPreferences?
+  health_conditions      HealthCondition[]
+  nutrition_preferences  NutritionPreferences?
+  food_restrictions      FoodRestriction[]
+  motivation_profile     MotivationProfile?
+  onboarding_answers     OnboardingAnswer[]
+  plans                  Plan[]
+  training_sessions      TrainingSession[]
+  meals                  Meal[]
+  progress_logs          ProgressLog[]
+  daily_logs             DailyLog[]
+
+  @@map("users")
+}
+
+enum UserStatus {
+  pending_verification
+  active
+  suspended
+}
+
+model VerificationCode {
+  id         String               @id @default(uuid())
+  user_id    String
+  email      String
+  code       String               // 6 dígitos
+  type       VerificationCodeType
+  expires_at DateTime
+  used_at    DateTime?
+  attempts   Int                  @default(0) // máximo 3
+  created_at DateTime             @default(now())
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([email])
+  @@index([code])
+  @@map("verification_codes")
+}
+
+enum VerificationCodeType {
+  email_verification
+  password_reset
+}
+
+model PasswordResetToken {
+  id         String    @id @default(uuid())
+  user_id    String
+  token      String    @unique @default(uuid())
+  expires_at DateTime  // 24 horas
+  used_at    DateTime?
+  ip_address String?
+  created_at DateTime  @default(now())
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([token])
+  @@map("password_reset_tokens")
+}
+
+model AuthSession {
+  id            String    @id @default(uuid())
+  user_id       String
+  refresh_token String    @unique
+  device_info   String?
+  ip_address    String?
+  expires_at    DateTime
+  last_used_at  DateTime  @default(now())
+  created_at    DateTime  @default(now())
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([refresh_token])
+  @@map("auth_sessions")
+}
+
+// ─────────────────────────────────────────────────────────────
+// ONBOARDING Y PERFIL DE USUARIO
+// ─────────────────────────────────────────────────────────────
+
+model Profile {
+  id                   String        @id @default(uuid())
+  user_id              String        @unique
+  name                 String
+  birthdate            DateTime
+  gender               String?
+  weight_kg            Decimal?      @db.Decimal(5, 2)
+  height_cm            Decimal?      @db.Decimal(5, 2)
+  body_type            BodyType?
+  activity_level       ActivityLevel?
+  goal                 UserGoal?
+  daily_calories_target Int?
+  daily_protein_target  Int?
+  daily_carbs_target    Int?
+  daily_fat_target      Int?
+  created_at           DateTime      @default(now())
+  updated_at           DateTime      @updatedAt
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
+enum BodyType {
+  ectomorph
+  mesomorph
+  endomorph
+}
+
+enum ActivityLevel {
+  sedentary
+  light
+  moderate
+  active
+  very_active
+}
+
+enum UserGoal {
+  lose_weight
+  gain_muscle
+  maintain
+  general_health
+}
+
+model LifestyleProfile {
+  id                  String        @id @default(uuid())
+  user_id             String        @unique
+  profession          String?
+  work_type           WorkType?
+  work_hours_per_day  Int?
+  stress_level        Int?          // 1-5
+  usual_schedule      ScheduleType?
+  sleep_hours_usual   Decimal?      @db.Decimal(4, 2)
+  sleep_quality       SleepQuality?
+  alcohol_consumption AlcoholLevel?
+  smoker              Boolean       @default(false)
+  daily_water_glasses Int?
+  created_at          DateTime      @default(now())
+  updated_at          DateTime      @updatedAt
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("lifestyle_profiles")
+}
+
+enum WorkType {
+  office
+  physical
+  standing
+  mixed
+}
+
+enum ScheduleType {
+  morning
+  afternoon
+  night
+}
+
+enum SleepQuality {
+  good
+  regular
+  bad
+}
+
+enum AlcoholLevel {
+  never
+  occasional
+  frequent
+}
+
+model TrainingPreferences {
+  id                          String        @id @default(uuid())
+  user_id                     String        @unique
+  available_days_per_week     Int?
+  max_session_duration_minutes Int?
+  preferred_training_time     ScheduleType?
+  has_gym_access              Boolean       @default(false)
+  home_equipment              HomeEquipment @default(none)
+  experience_level            ExperienceLevel?
+  injuries_or_limitations     String?
+  created_at                  DateTime      @default(now())
+  updated_at                  DateTime      @updatedAt
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("training_preferences")
+}
+
+enum HomeEquipment {
+  none
+  dumbbells
+  bands
+  machines
+  full
+}
+
+enum ExperienceLevel {
+  beginner
+  intermediate
+  advanced
+}
+
+model HealthCondition {
+  id                String        @id @default(uuid())
+  user_id           String
+  condition_name    String
+  condition_type    ConditionType
+  affects_training  Boolean       @default(false)
+  affects_nutrition Boolean       @default(false)
+  notes             String?
+  created_at        DateTime      @default(now())
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@map("health_conditions")
+}
+
+enum ConditionType {
+  injury
+  disease
+  medication
+}
+
+model NutritionPreferences {
+  id                       String         @id @default(uuid())
+  user_id                  String         @unique
+  diet_type                DietType?
+  meals_per_day_preferred  Int?
+  cooks_at_home            Boolean        @default(true)
+  eats_out_frequency       EatsOutFrequency?
+  monthly_food_budget_range BudgetRange?
+  created_at               DateTime       @default(now())
+  updated_at               DateTime       @updatedAt
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("nutrition_preferences")
+}
+
+enum DietType {
+  omnivore
+  vegetarian
+  vegan
+  gluten_free
+  lactose_free
+}
+
+enum EatsOutFrequency {
+  never
+  sometimes
+  often
+  always
+}
+
+enum BudgetRange {
+  low
+  medium
+  high
+}
+
+model FoodRestriction {
+  id               String           @id @default(uuid())
+  user_id          String
+  restriction_type RestrictionType
+  food_name        String
+  severity         Severity
+  created_at       DateTime         @default(now())
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@map("food_restrictions")
+}
+
+enum RestrictionType {
+  allergy
+  intolerance
+  dislike
+}
+
+enum Severity {
+  mild
+  moderate
+  severe
+}
+
+model MotivationProfile {
+  id                      String              @id @default(uuid())
+  user_id                 String              @unique
+  main_motivation         MotivationType?
+  previous_attempts       Boolean             @default(false)
+  previous_attempts_notes String?
+  tracking_preference     TrackingPreference?
+  has_support_network     Boolean             @default(false)
+  created_at              DateTime            @default(now())
+  updated_at              DateTime            @updatedAt
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("motivation_profile")
+}
+
+enum MotivationType {
+  health
+  aesthetics
+  performance
+  mental_wellbeing
+}
+
+enum TrackingPreference {
+  detailed
+  basic
+  results_only
+}
+
+model OnboardingAnswer {
+  id                String              @id @default(uuid())
+  user_id           String
+  question_key      String
+  answer_value      String
+  question_category OnboardingCategory
+  created_at        DateTime            @default(now())
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([question_category])
+  @@map("onboarding_answers")
+}
+
+enum OnboardingCategory {
+  lifestyle
+  training
+  nutrition
+  health
+  motivation
+}
+
+// ─────────────────────────────────────────────────────────────
+// PLANES DE ENTRENAMIENTO Y NUTRICIÓN
+// ─────────────────────────────────────────────────────────────
+
+model Plan {
+  id                String     @id @default(uuid())
+  user_id           String
+  type              PlanType
+  start_date        DateTime
+  end_date          DateTime?
+  status            PlanStatus @default(active)
+  generated_by_ai   Boolean    @default(false)
+  ai_prompt_used    String?
+  ai_model_version  String?
+  created_at        DateTime   @default(now())
+  updated_at        DateTime   @updatedAt
+
+  user              User               @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  training_sessions TrainingSession[]
+  meals             Meal[]
+
+  @@index([user_id])
+  @@index([status])
+  @@map("plans")
+}
+
+enum PlanType {
+  nutrition
+  training
+  combined
+}
+
+enum PlanStatus {
+  active
+  completed
+  paused
+}
+
+// ─────────────────────────────────────────────────────────────
+// ENTRENAMIENTO
+// ─────────────────────────────────────────────────────────────
+
+model TrainingSession {
+  id               String        @id @default(uuid())
+  plan_id          String
+  user_id          String
+  scheduled_date   DateTime
+  completed_at     DateTime?
+  duration_minutes Int?
+  calories_burned  Int?
+  notes            String?
+  status           SessionStatus @default(scheduled)
+
+  plan              Plan              @relation(fields: [plan_id], references: [id], onDelete: Cascade)
+  user              User              @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  session_exercises SessionExercise[]
+
+  @@index([plan_id])
+  @@index([user_id])
+  @@index([scheduled_date])
+  @@map("training_sessions")
+}
+
+enum SessionStatus {
+  scheduled
+  completed
+  skipped
+}
+
+model Exercise {
+  id             String          @id @default(uuid())
+  name           String
+  muscle_group   String
+  equipment_needed String?
+  difficulty     ExperienceLevel
+  instructions   String?
+  video_url      String?
+
+  session_exercises SessionExercise[]
+
+  @@index([muscle_group])
+  @@index([difficulty])
+  @@map("exercises")
+}
+
+model SessionExercise {
+  id          String  @id @default(uuid())
+  session_id  String
+  exercise_id String
+  sets        Int?
+  reps        Int?
+  weight_kg   Decimal? @db.Decimal(6, 2)
+  rest_seconds Int?
+  order_index Int
+  completed   Boolean @default(false)
+
+  session  TrainingSession @relation(fields: [session_id], references: [id], onDelete: Cascade)
+  exercise Exercise        @relation(fields: [exercise_id], references: [id])
+
+  @@index([session_id])
+  @@index([exercise_id])
+  @@map("session_exercises")
+}
+
+// ─────────────────────────────────────────────────────────────
+// NUTRICIÓN
+// ─────────────────────────────────────────────────────────────
+
+model Meal {
+  id             String     @id @default(uuid())
+  plan_id        String
+  user_id        String
+  meal_type      MealType
+  scheduled_date DateTime
+  calories       Int?
+  protein_g      Decimal?   @db.Decimal(6, 2)
+  carbs_g        Decimal?   @db.Decimal(6, 2)
+  fat_g          Decimal?   @db.Decimal(6, 2)
+  status         MealStatus @default(scheduled)
+
+  plan       Plan       @relation(fields: [plan_id], references: [id], onDelete: Cascade)
+  user       User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  meal_foods MealFood[]
+
+  @@index([plan_id])
+  @@index([user_id])
+  @@index([scheduled_date])
+  @@map("meals")
+}
+
+enum MealType {
+  breakfast
+  lunch
+  dinner
+  snack
+}
+
+enum MealStatus {
+  scheduled
+  completed
+  skipped
+}
+
+model Food {
+  id                 String   @id @default(uuid())
+  name               String
+  brand              String?
+  calories_per_100g  Decimal  @db.Decimal(7, 2)
+  protein_per_100g   Decimal  @db.Decimal(6, 2)
+  carbs_per_100g     Decimal  @db.Decimal(6, 2)
+  fat_per_100g       Decimal  @db.Decimal(6, 2)
+  barcode            String?  @unique
+  verified           Boolean  @default(false)
+
+  meal_foods MealFood[]
+
+  @@index([name])
+  @@index([barcode])
+  @@map("foods")
+}
+
+model MealFood {
+  id         String  @id @default(uuid())
+  meal_id    String
+  food_id    String
+  quantity_g Decimal @db.Decimal(7, 2)
+
+  meal Meal @relation(fields: [meal_id], references: [id], onDelete: Cascade)
+  food Food @relation(fields: [food_id], references: [id])
+
+  @@index([meal_id])
+  @@index([food_id])
+  @@map("meal_foods")
+}
+
+// ─────────────────────────────────────────────────────────────
+// SEGUIMIENTO Y PROGRESO
+// ─────────────────────────────────────────────────────────────
+
+model ProgressLog {
+  id                  String    @id @default(uuid())
+  user_id             String
+  log_date            DateTime
+  weight_kg           Decimal?  @db.Decimal(5, 2)
+  body_fat_percentage Decimal?  @db.Decimal(5, 2)
+  muscle_mass_kg      Decimal?  @db.Decimal(5, 2)
+  waist_cm            Decimal?  @db.Decimal(5, 2)
+  hip_cm              Decimal?  @db.Decimal(5, 2)
+  chest_cm            Decimal?  @db.Decimal(5, 2)
+  notes               String?
+  photo_url           String?
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([log_date])
+  @@map("progress_logs")
+}
+
+model DailyLog {
+  id            String   @id @default(uuid())
+  user_id       String
+  log_date      DateTime
+  water_ml      Int?
+  sleep_hours   Decimal? @db.Decimal(4, 2)
+  sleep_quality Int?     // 1-5
+  energy_level  Int?     // 1-5
+  mood          Int?     // 1-5
+  steps         Int?
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, log_date])
+  @@index([user_id])
+  @@index([log_date])
+  @@map("daily_logs")
+}
