@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node --check index.js)",
+      "Bash(node --check src/bot.js)",
+      "Bash(node --check src/handlers/commandHandler.js)",
+      "Bash(node --check src/handlers/messageHandler.js)",
+      "Bash(node --check src/services/claudeService.js)"
+    ]
+  }
+}
