@@ -16,7 +16,8 @@ El foco actual es conectar las piezas y llevarlo a producción.
 | Base datos  | PostgreSQL + Redis                     |
 | IA          | Claude API (claude-sonnet-4-6)         |
 | Auth        | Supabase                               |
-| Cloud       | AWS                                    |
+| Landing     | HTML/CSS/JS estático — S3 + CloudFront |
+| Cloud       | AWS (ECS, RDS, ElastiCache, S3, CloudFront, Route 53) |
 | CI/CD       | GitHub Actions + Expo EAS              |
 
 ---
@@ -99,20 +100,26 @@ El foco actual es conectar las piezas y llevarlo a producción.
 - [ ] **FE-10** Soporte modo oscuro completo usando NativeWind y tokens de diseño
 - [ ] **FE-11** Loading states y manejo de errores en todas las pantallas (skeleton loaders, toasts)
 - [ ] **FE-12** Accesibilidad WCAG AA: etiquetas accessibilityLabel, contraste, tamaños mínimos táctiles
+- [ ] **FE-13** Integrar en `TrainingScreen` los componentes del sistema de diseño: `WorkoutCard variant="inProgress"` como cabecera, `ExerciseRow` (reemplaza `ExerciseCard` ad-hoc), `RestTimer` (reemplaza el timer inline), `WorkoutSummary` al completar sesión. Añadir paleta `whoop` a `@/theme/colors.ts`
+- [ ] **FE-14** Integrar en `ProgressScreen` los componentes del sistema de diseño: `ActivityRings` mostrando move/exercise/stand, `RecoveryScore` como card protagonista, `MetricGrid` con HRV, sueño, pasos y calorías reemplazando las `StatCard` inline. Mantener `WeightChart` y `StreakCalendar` existentes
 
-**Dependencias:** BE-01..BE-09, DS-01
+**Dependencias:** BE-01..BE-09, DS-01..DS-10
 
 ---
 
 ### Design
 > Carpeta: `projects/healthy/design/`
 
-- [ ] **DS-01** Auditoría del sistema de diseño actual: verificar que todos los tokens (color, spacing, tipografía) están aplicados consistentemente en las pantallas
-- [ ] **DS-02** Definir paleta de colores modo oscuro y tokens correspondientes en NativeWind
+- [x] **DS-01** Auditoría del sistema de diseño actual: tokens de color, spacing y tipografía verificados y exportados consistentemente desde `components/index.js`
+- [x] **DS-02** Paleta modo oscuro definida en `tokens/colors.js` (`dark.*`) y paleta Whoop-inspired (`whoop.*`) para dashboards de métricas de salud
 - [ ] **DS-03** Revisar onboarding: flujo de 7 pasos visualmente coherente, barra de progreso, transiciones
 - [ ] **DS-04** Revisar pantalla de plan diario: jerarquía visual clara entre entrenamiento y nutrición
 - [ ] **DS-05** Diseñar estados vacíos (sin datos aún) y estados de error para todas las pantallas principales
 - [ ] **DS-06** Validar accesibilidad visual: contraste mínimo 4.5:1 en texto normal, 3:1 en texto grande
+- [x] **DS-07** Crear `ProgressRing`, `ActivityRings`, `DailyProgressRing` — anillos de progreso animados inspirados en Apple Watch / Fitness+ con gradiente y fallback sin SVG
+- [x] **DS-08** Crear `MetricCard`, `RecoveryScore`, `MetricGrid` — tarjetas de métricas de salud estilo Whoop con sparkline, trend y animación de número
+- [x] **DS-09** Crear `WorkoutCard`, `ExerciseRow`, `RestTimer`, `WorkoutSummary` — componentes de sesión de entrenamiento estilo Apple Fitness+ con variantes featured / compact / inProgress
+- [x] **DS-10** Diseñar landing page HTML estilo Tag Heuer Connected — paleta cinemática oscura, tipografía premium. Movida a `landing/index.html`
 
 **Dependencias:** ninguna (puede trabajar en paralelo con Backend)
 
@@ -161,8 +168,13 @@ El foco actual es conectar las piezas y llevarlo a producción.
 - [ ] **DO-06** Configurar Expo EAS Submit para enviar a TestFlight (iOS) y Google Play Internal (Android)
 - [ ] **DO-07** Añadir health check endpoint `GET /health` y configurar monitorización básica (UptimeRobot o AWS CloudWatch)
 - [ ] **DO-08** Configurar backups automáticos diarios de la base de datos en S3
+- [ ] **DO-09** Crear bucket S3 `healthy-landing-prod` para sitio estático: activar static website hosting, bucket policy de acceso público, bloquear uploads directos (solo CI)
+- [ ] **DO-10** Configurar CloudFront distribution frente al bucket S3: certificado SSL via ACM, dominio personalizado (`healthy.app`), compresión gzip/brotli, redirección HTTP → HTTPS, TTL de caché `86400` para assets
+- [ ] **DO-11** Configurar DNS en Route 53: registrar o delegar dominio `healthy.app`, crear registro A alias apuntando a la CloudFront distribution
+- [ ] **DO-12** Añadir job `deploy-landing` en el pipeline GitHub Actions: se dispara en push a `main` con cambios en `landing/`; ejecuta `aws s3 sync landing/ s3://healthy-landing-prod --delete` seguido de `aws cloudfront create-invalidation --paths "/*"`
+- [ ] **DO-13** Configurar cabeceras de seguridad en CloudFront para la landing vía Lambda@Edge o CloudFront Functions: `Strict-Transport-Security`, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy`
 
-**Dependencias:** SEC-01 (variables de entorno auditadas antes de configurar CI)
+**Dependencias:** SEC-01 (variables de entorno auditadas antes de configurar CI); DO-09 antes de DO-10 antes de DO-11 antes de DO-12
 
 ---
 
@@ -174,8 +186,11 @@ El foco actual es conectar las piezas y llevarlo a producción.
 - [ ] **DOC-03** Documentar arquitectura de la IA: cómo se construye el prompt, qué datos entran, qué JSON sale
 - [ ] **DOC-04** Actualizar documentación RGPD con los flujos reales implementados (consentimiento, exportación, borrado)
 - [ ] **DOC-05** Escribir README del proyecto con requisitos, instalación, variables de entorno y comandos principales
+- [ ] **DOC-06** Crear `docs/architecture-web.md`: diagrama de la arquitectura AWS completa — flujo usuario → Route 53 → CloudFront → S3 (landing) y Route 53 → ALB → ECS → API → RDS/Redis (backend). Incluir decisiones de red (VPC, subnets, security groups) y estimación de costes mensuales
+- [ ] **DOC-07** Crear `docs/landing-deploy.md`: guía para actualizar la landing — estructura de `landing/index.html`, tokens de diseño usados, cómo añadir secciones, proceso de despliegue manual (`aws s3 sync`) vs automático (CI en push a `main`), y cómo forzar invalidación de CloudFront
+- [ ] **DOC-08** Crear `docs/landing-content.md`: guía para el equipo de marketing — secciones de la landing (hero, stats, features, manifesto, download), copy editable, cómo cambiar imágenes de mockup y actualizar CTAs sin tocar CSS
 
-**Dependencias:** BE-01..BE-09, AI-01..AI-07, SEC-04
+**Dependencias:** BE-01..BE-09, AI-01..AI-07, SEC-04; DOC-06 depende de DO-09..DO-13 para reflejar infraestructura real
 
 ---
 
@@ -184,22 +199,25 @@ El foco actual es conectar las piezas y llevarlo a producción.
 ```
 Fase 1 — Infraestructura (en paralelo)
   Database (DB-01..DB-06)
-  Design   (DS-01..DS-06)
+  Design   (DS-01..DS-10)   ← DS-01..DS-10 ya completados
   AI       (AI-01..AI-07)
 
 Fase 2 — Backend (depende de Fase 1)
   Backend  (BE-01..BE-10)
 
 Fase 3 — Frontend + Seguridad (en paralelo, dependen de Fase 2)
-  Frontend  (FE-01..FE-12)
+  Frontend  (FE-01..FE-14)
   Security  (SEC-01..SEC-08)
+
+Fase 3b — Landing infra (independiente, puede correr en paralelo con Fase 3)
+  DevOps    (DO-09..DO-13)  ← bucket S3, CloudFront, DNS, pipeline landing
 
 Fase 4 — Tests (depende de Fase 2 y 3)
   Tests    (TS-01..TS-08)
 
 Fase 5 — DevOps + Docs (en paralelo, dependen de Fase 3 y 4)
   DevOps   (DO-01..DO-08)
-  Docs     (DOC-01..DOC-05)
+  Docs     (DOC-01..DOC-08)
 ```
 
 ---
@@ -214,6 +232,8 @@ Fase 5 — DevOps + Docs (en paralelo, dependen de Fase 3 y 4)
 | Fallback sin IA | Si Claude falla, el usuario recibe un plan genérico calculado por reglas para no bloquear el onboarding |
 | MMKV para persistencia local | Más rápido que AsyncStorage; necesario para modo offline básico |
 | Zod para validación | Tipado compartido entre validación en runtime y TypeScript en compilación |
+| S3 + CloudFront para landing | Sitio estático sin servidor: CDN global con baja latencia, SSL gratuito vía ACM, coste < $2/mes, invalidación instantánea en cada deploy |
+| Landing en `landing/index.html` | Fichero único autocontenido (sin build step) — fácil de editar por diseño/marketing y de desplegar con `aws s3 sync` |
 
 ---
 
@@ -225,3 +245,5 @@ Fase 5 — DevOps + Docs (en paralelo, dependen de Fase 3 y 4)
 - [ ] Auditoría RGPD sin hallazgos críticos
 - [ ] Pipeline CI/CD verde en rama `develop`
 - [ ] Modo oscuro funcional en todas las pantallas
+- [ ] Landing publicada en producción con SSL, dominio propio y score Lighthouse ≥ 95
+- [ ] Pipeline de despliegue de landing operativo (push a `main` → S3 → CloudFront invalidation < 60 s)
