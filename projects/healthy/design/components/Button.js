@@ -19,10 +19,12 @@ import { borderRadius, shadows, componentHeight, duration, pressedScale } from '
 
 // Variantes disponibles del botón
 const VARIANTS = {
-  primary:     'primary',
-  secondary:   'secondary',
-  ghost:       'ghost',
-  destructive: 'destructive',
+  primary:      'primary',
+  secondary:    'secondary',
+  ghost:        'ghost',
+  destructive:  'destructive',
+  outlineWhite: 'outlineWhite', // para fondos oscuros (landing)
+  landingCta:   'landingCta',   // CTA prominente sobre fondo negro
 };
 
 /**
@@ -151,6 +153,23 @@ const styles = StyleSheet.create({
     backgroundColor: colors.neutral.lightGray,
   },
 
+  // Borde blanco semitransparente — para fondos oscuros tipo landing
+  outlineWhite: {
+    backgroundColor: 'transparent',
+    borderWidth:      1.5,
+    borderColor:      'rgba(255,255,255,0.40)',
+  },
+
+  // CTA de landing: fondo verde con glow — máxima prominencia
+  landingCta: {
+    backgroundColor: colors.primary.green,
+    shadowColor:     colors.primary.green,
+    shadowOffset:    { width: 0, height: 0 },
+    shadowOpacity:   0.45,
+    shadowRadius:    24,
+    elevation:       6,
+  },
+
   // ── Variantes de texto ──────────────────────────────────────────────────────
 
   label: {
@@ -176,6 +195,15 @@ const styles = StyleSheet.create({
 
   disabledLabel: {
     color: colors.neutral.midGray,
+  },
+
+  outlineWhiteLabel: {
+    color: colors.neutral.white,
+  },
+
+  landingCtaLabel: {
+    color:         colors.neutral.white,
+    letterSpacing: 0.3,
   },
 });
 

@@ -7,7 +7,7 @@ import { Input }   from '@/components/ui/Input';
 import { colors }  from '@/theme/colors';
 import { textStyles } from '@/theme/typography';
 import { spacing } from '@/theme/spacing';
-import api         from '@/services/api';
+import { authService } from '@/services/authService';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ForgotPassword'>;
 
@@ -20,7 +20,7 @@ export function ForgotPasswordScreen({ navigation }: Props) {
   const handleSend = async () => {
     if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError('Email no válido'); return; }
     setLoading(true);
-    try { await api.post('/auth/forgot-password', { email: email.trim() }); }
+    try { await authService.forgotPassword(email.trim()); }
     catch {}
     finally { setLoading(false); setSent(true); }
   };

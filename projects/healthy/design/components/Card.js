@@ -144,6 +144,42 @@ const styles = StyleSheet.create({
     borderColor:  colors.primary.green,
     backgroundColor: colors.primary.lightGreen,
   },
+
+  // Card oscura estilo Whoop — para métricas en modo oscuro
+  dark: {
+    backgroundColor: colors.whoop.card,
+    borderWidth:     1,
+    borderColor:     colors.whoop.cardBorder,
+    shadowColor:     '#000000',
+    shadowOffset:    { width: 0, height: 4 },
+    shadowOpacity:   0.40,
+    shadowRadius:    16,
+    elevation:       5,
+  },
+
+  // Variante métrica: sin padding exterior, diseño data-first
+  metric: {
+    backgroundColor: colors.whoop.card,
+    borderWidth:     1,
+    borderColor:     colors.whoop.cardBorder,
+    shadowColor:     '#000000',
+    shadowOffset:    { width: 0, height: 2 },
+    shadowOpacity:   0.50,
+    shadowRadius:    12,
+    elevation:       4,
+  },
+
+  // Glass morphism — para overlays sobre imágenes (landing, workout en progreso)
+  glass: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderWidth:     1,
+    borderColor:     'rgba(255,255,255,0.14)',
+    shadowColor:     '#000000',
+    shadowOffset:    { width: 0, height: 8 },
+    shadowOpacity:   0.20,
+    shadowRadius:    32,
+    elevation:       6,
+  },
 });
 
 const rowStyles = StyleSheet.create({

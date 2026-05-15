@@ -7,7 +7,7 @@ import { Input }     from '@/components/ui/Input';
 import { colors }    from '@/theme/colors';
 import { textStyles } from '@/theme/typography';
 import { spacing }   from '@/theme/spacing';
-import api           from '@/services/api';
+import { authService } from '@/services/authService';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Register'>;
 
@@ -28,7 +28,7 @@ export function RegisterScreen({ navigation }: Props) {
     if (!validate()) return;
     setLoading(true);
     try {
-      await api.post('/auth/register', { email: email.trim(), phone: phone.trim() });
+      await authService.register(email.trim(), phone.trim());
       navigation.navigate('VerifyEmail', { email: email.trim() });
     } catch (err: any) {
       setErrors({ general: err.response?.data?.message ?? 'Error al registrar' });

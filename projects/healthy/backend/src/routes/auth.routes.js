@@ -66,6 +66,14 @@ router.post(
   ctrl.resetPassword
 );
 
+router.post(
+  '/resend-code',
+  authRateLimiter,
+  [body('email').isEmail()],
+  validate,
+  ctrl.resendCode
+);
+
 router.post('/logout', authenticate, ctrl.logout);
 
 router.get('/me', authenticate, ctrl.me);

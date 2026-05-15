@@ -1,4 +1,4 @@
-const { PrismaClient } = require('@prisma/client');
+const { PrismaClient } = require('../generated/prisma');
 
 // Reutilizar instancia en desarrollo para evitar múltiples conexiones por hot-reload
 const prisma = global.prisma || new PrismaClient({

@@ -6,7 +6,7 @@ import { Button }    from '@/components/ui/Button';
 import { colors }    from '@/theme/colors';
 import { textStyles, fontSize } from '@/theme/typography';
 import { spacing, borderRadius } from '@/theme/spacing';
-import api from '@/services/api';
+import { authService } from '@/services/authService';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'VerifyEmail'>;
 const CODE_LENGTH = 6;
@@ -31,7 +31,7 @@ export function VerifyEmailScreen({ navigation, route }: Props) {
     if (code.length < CODE_LENGTH) { setError('Introduce los 6 dígitos'); return; }
     setLoading(true);
     try {
-      await api.post('/auth/verify-email', { email, code });
+      await authService.verifyEmail(email, code);
       navigation.navigate('SetPassword', { email, code });
     } catch (err: any) {
       setError(err.response?.data?.message ?? 'Código incorrecto');
@@ -42,7 +42,7 @@ export function VerifyEmailScreen({ navigation, route }: Props) {
 
   const handleResend = async () => {
     setResending(true); setError(''); setResendMsg('');
-    try { await api.post('/auth/resend-code', { email }); setResendMsg('Código reenviado.'); }
+    try { await authService.resendCode(email); setResendMsg('Código reenviado.'); }
     catch { setError('No se pudo reenviar.'); }
     finally { setResending(false); }
   };

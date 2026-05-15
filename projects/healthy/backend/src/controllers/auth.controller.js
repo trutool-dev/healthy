@@ -40,6 +40,16 @@ const login = async (req, res, next) => {
   }
 };
 
+/** POST /auth/resend-code */
+const resendCode = async (req, res, next) => {
+  try {
+    // TODO: reenviar código de verificación al email
+    sendSuccess(res, {}, 'Endpoint en construcción', 501);
+  } catch (err) {
+    next(err);
+  }
+};
+
 /** POST /auth/forgot-password */
 const forgotPassword = async (req, res, next) => {
   try {
@@ -80,4 +90,4 @@ const me = async (req, res, next) => {
   }
 };
 
-module.exports = { register, verifyEmail, setPassword, login, forgotPassword, resetPassword, logout, me };
+module.exports = { register, verifyEmail, resendCode, setPassword, login, forgotPassword, resetPassword, logout, me };

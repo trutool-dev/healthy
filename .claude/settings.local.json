@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Start-Process \"c:\\\\Users\\\\Antonio\\\\Documents\\\\ai-studio\\\\projects\\\\healthy\\\\landing\\\\index.html\")",
+      "PowerShell(Start-Process \"c:\\\\Users\\\\Antonio\\\\Documents\\\\ai-studio\\\\projects\\\\healthy\\\\docs\\\\architecture-web.md\")",
+      "PowerShell(Start-Process \"c:\\\\Users\\\\Antonio\\\\Documents\\\\ai-studio\\\\projects\\\\healthy\\\\docs\\\\landing-deploy.md\")",
+      "PowerShell(Start-Process \"c:\\\\Users\\\\Antonio\\\\Documents\\\\ai-studio\\\\projects\\\\healthy\\\\landing\\\\index2.html\")",
+      "PowerShell(New-Item -ItemType Directory -Force -Path \"c:\\\\Users\\\\Antonio\\\\Documents\\\\ai-studio\\\\projects\\\\healthy\\\\landing\\\\public\\\\images\")",
+      "PowerShell(Start-Process \"c:\\\\Users\\\\Antonio\\\\Documents\\\\ai-studio\\\\projects\\\\healthy\\\\landing\\\\public\\\\images\\\\logo-icon.svg\")",
+      "Bash(npm install *)",
+      "Bash(npx vite *)"
+    ]
+  }
+}

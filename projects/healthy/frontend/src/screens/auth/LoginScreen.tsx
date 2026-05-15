@@ -8,7 +8,7 @@ import { colors }       from '@/theme/colors';
 import { textStyles }   from '@/theme/typography';
 import { spacing }      from '@/theme/spacing';
 import { useAuthStore } from '@/stores/authStore';
-import api              from '@/services/api';
+import { authService }  from '@/services/authService';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
@@ -31,7 +31,7 @@ export function LoginScreen({ navigation }: Props) {
     if (!validate()) return;
     setLoading(true);
     try {
-      const { data } = await api.post('/auth/login', { email: email.trim(), password: pwd });
+      const { data } = await authService.login(email.trim(), pwd);
       await setAuth(data.user, data.token);
     } catch (err: any) {
       const msg = err.response?.status === 401 ? 'Email o contraseña incorrectos' : err.response?.data?.message ?? 'Error al iniciar sesión';

@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Healthy — El cuerpo que mereces</title>
+  <meta name="description" content="IA personalizada para entrenamiento, nutrición y progreso. Solo para quienes se toman en serio su salud." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── RESET ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── VARIABLES ── */
+    :root {
+      --bg:           #080808;
+      --fg:           #ffffff;
+      --fg-muted:     rgba(255,255,255,0.55);
+      --fg-subtle:    rgba(255,255,255,0.28);
+      --glass-bg:     rgba(255,255,255,0.08);
+      --glass-border: rgba(255,255,255,0.15);
+      --glass-blur:   16px;
+      --green:        #22C55E;
+      --green-dark:   #16A34A;
+      --green-glow:   rgba(34,197,94,0.22);
+      --radius:       9999px;
+      --nav-h:        72px;
+      --ease:         cubic-bezier(0.16, 1, 0.3, 1);
+      --font-heading: 'Instrument Serif', serif;
+      --font-body:    'Barlow', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family:            var(--font-body);
+      font-weight:            400;
+      background:             var(--bg);
+      color:                  var(--fg);
+      -webkit-font-smoothing: antialiased;
+      overflow-x:             hidden;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; }
+
+    /* ── LIQUID GLASS ── */
+    .liquid-glass {
+      background:              var(--glass-bg);
+      backdrop-filter:         blur(var(--glass-blur)) saturate(1.6);
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.6);
+      position: relative;
+    }
+    .liquid-glass::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(135deg,
+        rgba(255,255,255,0.28) 0%,
+        rgba(255,255,255,0.04) 50%,
+        rgba(255,255,255,0.12) 100%
+      );
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    .liquid-glass-strong {
+      background:              rgba(255,255,255,0.10);
+      backdrop-filter:         blur(50px) saturate(1.8);
+      -webkit-backdrop-filter: blur(50px) saturate(1.8);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.50),
+                  0 0 0 1px rgba(255,255,255,0.06),
+                  inset 0 1px 0 rgba(255,255,255,0.14);
+      position: relative;
+    }
+    .liquid-glass-strong::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(135deg,
+        rgba(255,255,255,0.40) 0%,
+        rgba(255,255,255,0.05) 45%,
+        rgba(255,255,255,0.18) 100%
+      );
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    /* ── BLUR TEXT ANIMATION ── */
+    .blur-word {
+      display:    inline-block;
+      opacity:    0;
+      filter:     blur(10px);
+      transform:  translateY(14px);
+      transition: opacity 0.65s var(--ease), filter 0.65s var(--ease), transform 0.65s var(--ease);
+    }
+    .blur-word.visible { opacity: 1; filter: blur(0); transform: translateY(0); }
+
+    /* ── REVEAL ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .rd1 { transition-delay: 0.10s; }
+    .rd2 { transition-delay: 0.22s; }
+    .rd3 { transition-delay: 0.34s; }
+    .rd4 { transition-delay: 0.46s; }
+    .rd5 { transition-delay: 0.58s; }
+
+    /* ── UTILITIES ── */
+    .container { width: 100%; max-width: 1160px; margin: 0 auto; padding: 0 32px; }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 16px; border-radius: var(--radius);
+      font-size: 11px; font-weight: 600; letter-spacing: 1.6px;
+      text-transform: uppercase; color: rgba(255,255,255,0.75);
+    }
+    .badge-dot {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: var(--green); box-shadow: 0 0 8px var(--green);
+      flex-shrink: 0;
+    }
+
+    /* ── CINEMATIC BG ── */
+    .cine-bg {
+      position: absolute; inset: 0;
+      overflow: hidden; pointer-events: none;
+    }
+    .cine-bg::before {
+      content: '';
+      position: absolute; inset: -20%;
+      background:
+        radial-gradient(ellipse at 30% 40%, rgba(34,197,94,0.09) 0%, transparent 55%),
+        radial-gradient(ellipse at 70% 65%, rgba(59,130,246,0.05) 0%, transparent 55%),
+        radial-gradient(ellipse at 50% 10%, rgba(168,85,247,0.04) 0%, transparent 50%);
+      animation: cineDrift 14s ease-in-out infinite alternate;
+    }
+    @keyframes cineDrift {
+      0%   { transform: scale(1.0) translate(0%,  0%) rotate(0deg);    }
+      33%  { transform: scale(1.1) translate(-2%, 3%) rotate(0.8deg);  }
+      66%  { transform: scale(1.05) translate(3%,-2%) rotate(-0.8deg); }
+      100% { transform: scale(1.15) translate(-1%,-3%) rotate(0.4deg); }
+    }
+
+    /* ── NAVBAR ── */
+    .nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: var(--nav-h); display: flex; align-items: center;
+      transition: background 0.4s ease, border-color 0.4s ease;
+    }
+    .nav.scrolled {
+      background: rgba(8,8,8,0.88);
+      backdrop-filter: blur(20px) saturate(1.8);
+      -webkit-backdrop-filter: blur(20px) saturate(1.8);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .nav-inner {
+      display: flex; align-items: center;
+      justify-content: space-between; width: 100%;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 18px; font-weight: 600; letter-spacing: -0.3px;
+    }
+    .nav-logo-icon {
+      width: 44px; height: 44px; background: var(--green);
+      border-radius: 12px; display: flex; align-items: center;
+      justify-content: center; font-size: 22px;
+      box-shadow: 0 0 22px var(--green-glow);
+    }
+    .nav-pill {
+      display: flex; align-items: center; gap: 2px;
+      padding: 5px 6px; border-radius: var(--radius);
+    }
+    .nav-pill a {
+      padding: 8px 18px; border-radius: var(--radius);
+      font-size: 14px; font-weight: 500; color: var(--fg-muted);
+      transition: color 0.2s, background 0.2s;
+    }
+    .nav-pill a:hover { color: var(--fg); background: rgba(255,255,255,0.08); }
+    .nav-cta {
+      display: flex; align-items: center; gap: 8px;
+      padding: 11px 22px; background: var(--fg); color: var(--bg);
+      font-size: 14px; font-weight: 600; border-radius: var(--radius);
+      transition: background 0.2s, transform 0.15s;
+    }
+    .nav-cta:hover { background: rgba(255,255,255,0.88); transform: translateY(-1px); }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative; min-height: 1000px;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      text-align: center; padding: var(--nav-h) 32px 80px;
+      overflow: hidden;
+    }
+    .hero-fade-bottom {
+      position: absolute; bottom: 0; left: 0; right: 0; height: 320px;
+      background: linear-gradient(to bottom, transparent, var(--bg));
+      z-index: 2; pointer-events: none;
+    }
+    .hero-content { position: relative; z-index: 3; }
+    .hero-h1 {
+      font-family: var(--font-heading); font-style: italic;
+      font-size: clamp(56px, 9vw, 96px); font-weight: 400;
+      line-height: 0.90; letter-spacing: -2px;
+      color: var(--fg); max-width: 820px;
+      margin: 28px auto 32px;
+    }
+    .hero-sub {
+      font-size: clamp(15px, 2vw, 18px); font-weight: 300;
+      color: var(--fg-muted); max-width: 480px;
+      margin: 0 auto 48px; line-height: 1.7;
+    }
+    .hero-actions {
+      display: flex; gap: 14px;
+      justify-content: center; flex-wrap: wrap;
+      margin-bottom: 80px;
+    }
+    .btn-glass {
+      display: flex; align-items: center; gap: 10px;
+      padding: 15px 28px; border-radius: var(--radius);
+      font-size: 15px; font-weight: 600; color: var(--fg);
+      transition: transform 0.15s, box-shadow 0.2s;
+    }
+    .btn-glass:hover { transform: translateY(-2px); box-shadow: 0 16px 48px rgba(0,0,0,0.45); }
+    .btn-outline {
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px 28px; border-radius: var(--radius);
+      border: 1.5px solid rgba(255,255,255,0.18);
+      font-size: 15px; font-weight: 500; color: var(--fg-muted);
+      transition: color 0.2s, border-color 0.2s, transform 0.15s;
+    }
+    .btn-outline:hover { color: var(--fg); border-color: rgba(255,255,255,0.35); transform: translateY(-2px); }
+    .partner-bar {
+      display: flex; align-items: center;
+      justify-content: center; gap: 36px; flex-wrap: wrap;
+    }
+    .partner-label {
+      font-size: 11px; font-weight: 600; letter-spacing: 1.4px;
+      text-transform: uppercase; color: var(--fg-subtle);
+    }
+    .partner-logos { display: flex; align-items: center; gap: 32px; }
+    .partner-logo {
+      font-family: var(--font-heading); font-style: italic;
+      font-size: 17px; color: var(--fg-subtle);
+      transition: color 0.2s;
+    }
+    .partner-logo:hover { color: var(--fg-muted); }
+
+    /* ── HOW IT WORKS ── */
+    .section-how {
+      position: relative; padding: 160px 0;
+      text-align: center; overflow: hidden;
+    }
+    .how-content { position: relative; z-index: 2; }
+    .section-title {
+      font-family: var(--font-heading); font-style: italic;
+      font-size: clamp(38px, 5.5vw, 68px); font-weight: 400;
+      line-height: 1.0; letter-spacing: -1.5px; color: var(--fg);
+      margin-bottom: 20px;
+    }
+    .section-sub {
+      font-size: 17px; font-weight: 300; color: var(--fg-muted);
+      max-width: 520px; margin: 0 auto 72px; line-height: 1.7;
+    }
+    .how-steps {
+      display: grid; grid-template-columns: repeat(3,1fr);
+      gap: 20px; max-width: 900px; margin: 0 auto;
+    }
+    .how-step { padding: 36px 28px; border-radius: 24px; text-align: left; }
+    .how-num {
+      font-family: var(--font-heading); font-style: italic;
+      font-size: 52px; color: var(--green); line-height: 1; margin-bottom: 20px;
+    }
+    .how-step-title { font-size: 16px; font-weight: 600; margin-bottom: 10px; }
+    .how-step-body  { font-size: 14px; font-weight: 300; color: var(--fg-muted); line-height: 1.65; }
+
+    /* ── FEATURES CHESS ── */
+    .section-features { padding: 60px 0 140px; }
+    .divider { height: 1px; background: rgba(255,255,255,0.06); }
+    .feature-row {
+      display: flex; align-items: center;
+      gap: 80px; padding: 100px 0;
+    }
+    .feature-row.rev { flex-direction: row-reverse; }
+    .feature-text { flex: 1; min-width: 0; }
+    .feature-visual { flex: 1; min-width: 0; display: flex; justify-content: center; }
+    .feature-label {
+      font-size: 11px; font-weight: 600; letter-spacing: 1.6px;
+      text-transform: uppercase; color: var(--green);
+      display: flex; align-items: center; gap: 10px; margin-bottom: 20px;
+    }
+    .feature-label::before { content:''; width:20px; height:1px; background:var(--green); }
+    .feature-h2 {
+      font-family: var(--font-heading); font-style: italic;
+      font-size: clamp(34px, 4.5vw, 52px); font-weight: 400;
+      line-height: 1.02; letter-spacing: -1px;
+      color: var(--fg); margin-bottom: 20px;
+    }
+    .feature-body {
+      font-size: 16px; font-weight: 300; color: var(--fg-muted);
+      line-height: 1.75; max-width: 420px; margin-bottom: 36px;
+    }
+    .feature-list { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+    .feature-list li {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 14px; font-weight: 400; color: var(--fg-muted);
+    }
+    .feature-list li::before {
+      content: ''; flex-shrink: 0; width: 5px; height: 5px;
+      border-radius: 50%; background: var(--green); box-shadow: 0 0 6px var(--green);
+    }
+
+    /* Phone mockup */
+    .phone {
+      width: 300px; min-height: 540px; border-radius: 44px;
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 40px 80px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.04);
+      padding: 44px 20px 28px; overflow: hidden;
+    }
+    .phone-header {
+      font-size: 9px; font-weight: 600; letter-spacing: 1.6px;
+      text-transform: uppercase; color: rgba(255,255,255,0.32); margin-bottom: 20px;
+    }
+    /* Training screen */
+    .ex-list { display: flex; flex-direction: column; gap: 10px; }
+    .ex-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 13px 14px; border-radius: 14px;
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06);
+    }
+    .ex-item.active { background: rgba(34,197,94,0.07); border-color: rgba(34,197,94,0.28); }
+    .ex-check {
+      width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .ex-check.done { background: var(--green); font-size: 11px; color: #fff; font-weight: 700; }
+    .ex-check.todo { border: 2px solid rgba(255,255,255,0.18); }
+    .ex-check.now  { border: 2px solid var(--green); }
+    .ex-info { flex: 1; }
+    .ex-name { font-size: 13px; font-weight: 600; color: #fff; }
+    .ex-name.hl { color: var(--green); }
+    .ex-detail { font-size: 11px; color: rgba(255,255,255,0.36); margin-top: 2px; }
+    .progress-row {
+      margin-top: 20px; display: flex;
+      justify-content: space-between; align-items: center; margin-bottom: 8px;
+    }
+    .progress-lbl { font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: rgba(255,255,255,0.32); }
+    .progress-val { font-size: 12px; font-weight: 700; color: var(--green); }
+    .track { height: 4px; background: rgba(255,255,255,0.08); border-radius: 99px; overflow: hidden; }
+    .fill { height: 100%; width: 40%; background: linear-gradient(to right, var(--green-dark), var(--green)); border-radius: 99px; }
+
+    /* Nutrition screen */
+    .macro-row { display: flex; justify-content: space-around; padding: 16px 0 24px; }
+    .macro-item { text-align: center; }
+    .macro-ring {
+      width: 52px; height: 52px; border-radius: 50%;
+      border: 4px solid rgba(255,255,255,0.10);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 800; margin: 0 auto 8px;
+    }
+    .ring-c { border-color: #F59E0B; color: #F59E0B; }
+    .ring-p { border-color: var(--green); color: var(--green); }
+    .ring-f { border-color: #3B82F6; color: #3B82F6; }
+    .macro-lbl { font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: rgba(255,255,255,0.28); }
+    .meal-list { display: flex; flex-direction: column; gap: 8px; }
+    .meal-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 14px; border-radius: 12px;
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06);
+    }
+    .meal-item.done { border-color: rgba(34,197,94,0.25); background: rgba(34,197,94,0.05); }
+    .meal-name { font-size: 13px; font-weight: 500; }
+    .meal-kcal { font-size: 12px; color: var(--green); font-weight: 600; }
+    .meal-add  { font-size: 12px; color: var(--green); }
+
+    /* ── WHY GRID ── */
+    .section-grid { padding: 80px 0 140px; }
+    .grid-intro { text-align: center; margin-bottom: 64px; }
+    .why-grid {
+      display: grid; grid-template-columns: repeat(4,1fr); gap: 16px;
+    }
+    .why-card { padding: 36px 28px; border-radius: 24px; display: flex; flex-direction: column; gap: 20px; }
+    .why-icon {
+      width: 48px; height: 48px; border-radius: 14px;
+      background: rgba(34,197,94,0.12); color: var(--green);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .why-title { font-size: 17px; font-weight: 600; }
+    .why-body  { font-size: 14px; font-weight: 300; color: var(--fg-muted); line-height: 1.65; }
+
+    /* ── STATS ── */
+    .section-stats { position: relative; padding: 140px 0; overflow: hidden; }
+    .stats-noise {
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% 50%, rgba(255,255,255,0.025) 0%, transparent 65%);
+      filter: grayscale(1);
+    }
+    .stats-noise::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(to bottom, var(--bg) 0%, transparent 18%, transparent 82%, var(--bg) 100%);
+    }
+    .stats-inner { position: relative; z-index: 2; text-align: center; }
+    .stats-card { max-width: 820px; margin: 52px auto 0; padding: 56px 48px; border-radius: 32px; }
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(4,1fr);
+      gap: 1px; background: rgba(255,255,255,0.07); border-radius: 20px; overflow: hidden;
+    }
+    .stat-cell {
+      background: rgba(8,8,8,0.65); padding: 40px 24px;
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+    }
+    .stat-val {
+      font-family: var(--font-heading); font-style: italic;
+      font-size: clamp(36px, 4vw, 52px); font-weight: 400;
+      color: var(--fg); letter-spacing: -2px; line-height: 1;
+    }
+    .stat-val span { color: var(--green); }
+    .stat-lbl { font-size: 13px; font-weight: 400; color: var(--fg-subtle); }
+
+    /* ── TESTIMONIALS ── */
+    .section-test { padding: 80px 0 140px; }
+    .test-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-top: 64px; }
+    .test-card { padding: 36px 28px; border-radius: 24px; display: flex; flex-direction: column; gap: 28px; }
+    .test-quote {
+      font-family: var(--font-heading); font-style: italic;
+      font-size: 18px; font-weight: 400;
+      color: rgba(255,255,255,0.68); line-height: 1.65; flex: 1;
+    }
+    .test-author { display: flex; align-items: center; gap: 14px; }
+    .test-avatar {
+      width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--green-dark), var(--green));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: 700; color: var(--bg);
+    }
+    .test-name  { font-size: 14px; font-weight: 600; }
+    .test-title { font-size: 12px; font-weight: 400; color: var(--fg-subtle); }
+
+    /* ── CTA + FOOTER ── */
+    .section-cta {
+      position: relative; padding: 160px 0 0;
+      text-align: center; overflow: hidden;
+    }
+    .cta-content { position: relative; z-index: 2; }
+    .cta-h2 {
+      font-family: var(--font-heading); font-style: italic;
+      font-size: clamp(48px, 8vw, 88px); font-weight: 400;
+      letter-spacing: -3px; line-height: 0.90;
+      color: var(--fg); max-width: 720px; margin: 24px auto 24px;
+    }
+    .cta-h2 em { font-style: normal; color: var(--green); }
+    .cta-sub { font-size: 17px; font-weight: 300; color: var(--fg-muted); margin-bottom: 48px; }
+    .cta-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .btn-white-solid {
+      display: flex; align-items: center; gap: 8px;
+      padding: 15px 28px; background: var(--fg); color: var(--bg);
+      font-size: 15px; font-weight: 600; border-radius: var(--radius);
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-white-solid:hover { background: rgba(255,255,255,0.88); transform: translateY(-2px); }
+    footer {
+      margin-top: 100px; padding: 28px 0;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .footer-row {
+      display: flex; align-items: center;
+      justify-content: space-between;
+    }
+    .footer-copy { font-size: 13px; color: var(--fg-subtle); }
+    .footer-links { display: flex; gap: 28px; }
+    .footer-links a { font-size: 13px; color: var(--fg-subtle); transition: color 0.2s; }
+    .footer-links a:hover { color: var(--fg-muted); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .nav-pill { display: none; }
+      .how-steps { grid-template-columns: 1fr; }
+      .feature-row, .feature-row.rev { flex-direction: column; gap: 48px; }
+      .feature-visual { order: -1; }
+      .phone { width: 100%; max-width: 300px; }
+      .why-grid { grid-template-columns: repeat(2,1fr); }
+      .stats-grid { grid-template-columns: repeat(2,1fr); }
+      .test-grid { grid-template-columns: 1fr; }
+      .footer-row { flex-direction: column; gap: 16px; text-align: center; }
+    }
+    @media (max-width: 600px) {
+      .container { padding: 0 20px; }
+      .section-how, .section-features, .section-grid,
+      .section-stats, .section-test, .section-cta { padding-top: 80px; padding-bottom: 80px; }
+      .why-grid { grid-template-columns: 1fr; }
+      .hero-actions, .cta-actions { flex-direction: column; align-items: center; }
+      .partner-bar { flex-direction: column; gap: 20px; }
+      .stats-card { padding: 28px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── NAVBAR ── -->
+  <nav class="nav" id="nav">
+    <div class="container">
+      <div class="nav-inner">
+        <a href="#" class="nav-logo">
+          <div class="nav-logo-icon">🌿</div>
+          Healthy
+        </a>
+        <div class="nav-pill liquid-glass">
+          <a href="#proceso">Proceso</a>
+          <a href="#entrena">Entrena</a>
+          <a href="#nutricion">Nutrición</a>
+          <a href="#planes">Planes</a>
+        </div>
+        <a href="#descarga" class="nav-cta">
+          Descargar gratis
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m7 7 10 10"/><path d="M7 17V7h10"/></svg>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── HERO ── -->
+  <section class="hero">
+    <div class="cine-bg"></div>
+    <div class="hero-fade-bottom"></div>
+    <div class="hero-content">
+
+      <div class="reveal">
+        <div class="badge liquid-glass">
+          <span class="badge-dot"></span>
+          IA de salud · generación 2026
+        </div>
+      </div>
+
+      <h1 class="hero-h1" data-blur-text>El cuerpo que mereces.</h1>
+
+      <p class="hero-sub reveal rd2">
+        IA que aprende cómo eres, diseña tu entrenamiento,
+        optimiza tu nutrición y mide tu progreso real.
+        Solo para quienes se toman en serio su salud.
+      </p>
+
+      <div class="hero-actions reveal rd3">
+        <a href="#descarga" class="btn-glass liquid-glass-strong">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Descargar Healthy
+        </a>
+        <a href="#proceso" class="btn-outline">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Ver cómo funciona
+        </a>
+      </div>
+
+      <div class="partner-bar reveal rd4">
+        <span class="partner-label">Integrado con</span>
+        <div class="partner-logos">
+          <span class="partner-logo">Apple Health</span>
+          <span class="partner-logo">Garmin</span>
+          <span class="partner-logo">Strava</span>
+          <span class="partner-logo">Oura</span>
+          <span class="partner-logo">Whoop</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── HOW IT WORKS ── -->
+  <section class="section-how" id="proceso">
+    <div class="cine-bg"></div>
+    <div class="how-content">
+      <div class="container">
+        <div class="reveal" style="margin-bottom:28px;">
+          <div class="badge liquid-glass" style="display:inline-flex;">
+            <span class="badge-dot"></span>Proceso
+          </div>
+        </div>
+        <h2 class="section-title" data-blur-text>Lo imaginas. La IA lo construye.</h2>
+        <p class="section-sub reveal rd2">
+          En menos de 5 minutos, la IA analiza tu perfil completo y genera un plan de
+          entrenamiento y nutrición exactamente a tu medida. Sin genéricos. Sin excusas.
+        </p>
+        <div class="how-steps">
+          <div class="how-step liquid-glass reveal rd1">
+            <div class="how-num">01</div>
+            <div class="how-step-title">Cuéntanos quién eres</div>
+            <div class="how-step-body">Objetivos, estilo de vida, equipamiento y restricciones. 7 preguntas clave, sin relleno.</div>
+          </div>
+          <div class="how-step liquid-glass reveal rd2">
+            <div class="how-num">02</div>
+            <div class="how-step-title">La IA diseña tu plan</div>
+            <div class="how-step-body">Claude genera tu rutina semanal completa con macros calculados al gramo, en tiempo real.</div>
+          </div>
+          <div class="how-step liquid-glass reveal rd3">
+            <div class="how-num">03</div>
+            <div class="how-step-title">Entrena, come, evoluciona</div>
+            <div class="how-step-body">El plan se ajusta solo. La IA detecta estancamientos y adapta antes de que los notes tú.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FEATURES CHESS ── -->
+  <section class="section-features" id="entrena">
+    <div class="container">
+
+      <div class="divider"></div>
+
+      <!-- Fila 1: texto izq / teléfono der -->
+      <div class="feature-row">
+        <div class="feature-text">
+          <p class="feature-label reveal">Entrenamiento</p>
+          <h2 class="feature-h2" data-blur-text>Cada sesión, diseñada para hoy.</h2>
+          <p class="feature-body reveal rd2">
+            No un plan genérico. El entrenamiento exacto que tu cuerpo necesita hoy,
+            calculado en función de tu recuperación, tu historial y tus objetivos.
+          </p>
+          <ul class="feature-list reveal rd3">
+            <li>Fuerza, HIIT, yoga y cardio</li>
+            <li>Ajuste automático según fatiga y recuperación</li>
+            <li>Timer de descanso y feedback en tiempo real</li>
+            <li>Guía en vídeo para cada ejercicio</li>
+          </ul>
+        </div>
+        <div class="feature-visual reveal rd2">
+          <div class="phone liquid-glass" style="background:#0D1810;">
+            <p class="phone-header">Sesión · Fuerza tren superior</p>
+            <div class="ex-list">
+              <div class="ex-item">
+                <div class="ex-check done">✓</div>
+                <div class="ex-info">
+                  <p class="ex-name">Press de banca</p>
+                  <p class="ex-detail">4 × 10 · 80 kg</p>
+                </div>
+              </div>
+              <div class="ex-item">
+                <div class="ex-check done">✓</div>
+                <div class="ex-info">
+                  <p class="ex-name">Remo con barra</p>
+                  <p class="ex-detail">4 × 8 · 70 kg</p>
+                </div>
+              </div>
+              <div class="ex-item active">
+                <div class="ex-check now"></div>
+                <div class="ex-info">
+                  <p class="ex-name hl">Press militar</p>
+                  <p class="ex-detail">Serie 2 / 4 · 60 kg</p>
+                </div>
+              </div>
+              <div class="ex-item">
+                <div class="ex-check todo"></div>
+                <div class="ex-info">
+                  <p class="ex-name">Dominadas</p>
+                  <p class="ex-detail">4 × 6 · peso corporal</p>
+                </div>
+              </div>
+              <div class="ex-item">
+                <div class="ex-check todo"></div>
+                <div class="ex-info">
+                  <p class="ex-name">Curl de bíceps</p>
+                  <p class="ex-detail">3 × 12 · 20 kg</p>
+                </div>
+              </div>
+            </div>
+            <div class="progress-row"><span class="progress-lbl">Progreso</span><span class="progress-val">2 / 5</span></div>
+            <div class="track"><div class="fill"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Fila 2: teléfono izq / texto der -->
+      <div class="feature-row rev" id="nutricion">
+        <div class="feature-text">
+          <p class="feature-label reveal">Nutrición</p>
+          <h2 class="feature-h2" data-blur-text>Come bien, sin obsesionarte.</h2>
+          <p class="feature-body reveal rd2">
+            Tu plan nutricional ajustado a la carga de entrenamiento del día.
+            Base de datos de 2 millones de alimentos. Escáner de código de barras instantáneo.
+          </p>
+          <ul class="feature-list reveal rd3">
+            <li>Macros calculados por la IA cada día</li>
+            <li>Escáner de código de barras</li>
+            <li>Recetas adaptadas a tus macros disponibles</li>
+            <li>Registro de agua e hidratación</li>
+          </ul>
+        </div>
+        <div class="feature-visual reveal rd2">
+          <div class="phone liquid-glass" style="background:#0A0F1A;">
+            <p class="phone-header">Nutrición · Hoy</p>
+            <div class="macro-row">
+              <div class="macro-item">
+                <div class="macro-ring ring-c">68%</div>
+                <span class="macro-lbl">Carbos</span>
+              </div>
+              <div class="macro-item">
+                <div class="macro-ring ring-p">82%</div>
+                <span class="macro-lbl">Proteína</span>
+              </div>
+              <div class="macro-item">
+                <div class="macro-ring ring-f">55%</div>
+                <span class="macro-lbl">Grasa</span>
+              </div>
+            </div>
+            <div class="meal-list">
+              <div class="meal-item done">
+                <span class="meal-name">Desayuno</span>
+                <span class="meal-kcal">480 kcal</span>
+              </div>
+              <div class="meal-item done">
+                <span class="meal-name">Media mañana</span>
+                <span class="meal-kcal">220 kcal</span>
+              </div>
+              <div class="meal-item" style="border-color:rgba(34,197,94,0.22);background:rgba(34,197,94,0.05);">
+                <span class="meal-name" style="color:var(--green)">Comida</span>
+                <span class="meal-add">+ Añadir</span>
+              </div>
+              <div class="meal-item">
+                <span class="meal-name">Cena</span>
+                <span class="meal-kcal" style="color:rgba(255,255,255,0.28)">Pendiente</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+    </div>
+  </section>
+
+  <!-- ── WHY HEALTHY ── -->
+  <section class="section-grid" id="planes">
+    <div class="container">
+      <div class="grid-intro">
+        <div class="reveal" style="margin-bottom:24px;">
+          <div class="badge liquid-glass" style="display:inline-flex;">
+            <span class="badge-dot"></span>Por qué Healthy
+          </div>
+        </div>
+        <h2 class="section-title" data-blur-text>Diseñada para durar, no para impresionar.</h2>
+        <p class="section-sub reveal rd2" style="margin-bottom:0;">
+          Cada decisión de diseño responde a una sola pregunta: ¿te ayuda a ser más constante?
+        </p>
+      </div>
+      <div class="why-grid">
+        <div class="why-card liquid-glass reveal rd1">
+          <div class="why-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <div>
+            <div class="why-title">5 minutos para empezar</div>
+            <div class="why-body">Cuéntanos quién eres. Tu plan completo listo antes de que termines el onboarding.</div>
+          </div>
+        </div>
+        <div class="why-card liquid-glass reveal rd2">
+          <div class="why-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg>
+          </div>
+          <div>
+            <div class="why-title">Diseño Apple-quality</div>
+            <div class="why-body">Interfaz limpia, animaciones fluidas. Que usar la app sea el momento del día que esperas.</div>
+          </div>
+        </div>
+        <div class="why-card liquid-glass reveal rd3">
+          <div class="why-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          </div>
+          <div>
+            <div class="why-title">3.2× más progreso</div>
+            <div class="why-body">Usuarios de Healthy alcanzan sus objetivos 3.2 veces más rápido que con métodos convencionales.</div>
+          </div>
+        </div>
+        <div class="why-card liquid-glass reveal rd4">
+          <div class="why-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div>
+            <div class="why-title">Privacidad total</div>
+            <div class="why-body">Tus datos de salud son tuyos. RGPD compliant. Sin publicidad ni venta de datos, jamás.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── STATS ── -->
+  <section class="section-stats">
+    <div class="stats-noise"></div>
+    <div class="stats-inner">
+      <div class="container">
+        <div class="reveal" style="margin-bottom:20px;">
+          <div class="badge liquid-glass" style="display:inline-flex;">
+            <span class="badge-dot"></span>Resultados reales
+          </div>
+        </div>
+        <h2 class="section-title" data-blur-text>Los números hablan.</h2>
+        <div class="stats-card liquid-glass-strong reveal rd2">
+          <div class="stats-grid">
+            <div class="stat-cell">
+              <div class="stat-val">50<span>K+</span></div>
+              <div class="stat-lbl">Usuarios activos</div>
+            </div>
+            <div class="stat-cell">
+              <div class="stat-val">98<span>%</span></div>
+              <div class="stat-lbl">Satisfacción</div>
+            </div>
+            <div class="stat-cell">
+              <div class="stat-val">3<span>.2×</span></div>
+              <div class="stat-lbl">Más progreso</div>
+            </div>
+            <div class="stat-cell">
+              <div class="stat-val">5<span>min</span></div>
+              <div class="stat-lbl">Para empezar</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── TESTIMONIALS ── -->
+  <section class="section-test">
+    <div class="container">
+      <div style="text-align:center;">
+        <div class="reveal" style="margin-bottom:24px;">
+          <div class="badge liquid-glass" style="display:inline-flex;">
+            <span class="badge-dot"></span>Testimonios
+          </div>
+        </div>
+        <h2 class="section-title" data-blur-text>Lo que dicen nuestros usuarios.</h2>
+      </div>
+      <div class="test-grid">
+        <div class="test-card liquid-glass reveal rd1">
+          <p class="test-quote">"Perdí 12 kilos en 4 meses sin pasar hambre. El plan nutricional se adapta a mi semana real, no a una ideal que nunca existe."</p>
+          <div class="test-author">
+            <div class="test-avatar">M</div>
+            <div>
+              <div class="test-name">María G.</div>
+              <div class="test-title">Directora de Marketing · Madrid</div>
+            </div>
+          </div>
+        </div>
+        <div class="test-card liquid-glass reveal rd2">
+          <p class="test-quote">"Llevo 6 meses entrenando con Healthy y por primera vez en mi vida soy constante. El plan cambia solo cuando yo cambio."</p>
+          <div class="test-author">
+            <div class="test-avatar">C</div>
+            <div>
+              <div class="test-name">Carlos R.</div>
+              <div class="test-title">Ingeniero de Software · Barcelona</div>
+            </div>
+          </div>
+        </div>
+        <div class="test-card liquid-glass reveal rd3">
+          <p class="test-quote">"La IA detectó que me estaba sobreentrenando antes que yo. Redujo la carga, me recuperé y ahora entreno más fuerte que nunca."</p>
+          <div class="test-author">
+            <div class="test-avatar">L</div>
+            <div>
+              <div class="test-name">Laura M.</div>
+              <div class="test-title">Emprendedora · Valencia</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CTA + FOOTER ── -->
+  <section class="section-cta" id="descarga">
+    <div class="cine-bg"></div>
+    <div class="cta-content">
+      <div class="container">
+        <div class="reveal" style="margin-bottom:24px;">
+          <div class="badge liquid-glass" style="display:inline-flex;">
+            <span class="badge-dot"></span>Disponible ahora · Gratis
+          </div>
+        </div>
+        <h2 class="cta-h2" data-blur-text>Tu transformación empieza <em>hoy.</em></h2>
+        <p class="cta-sub reveal rd2">Sin tarjeta de crédito. Plan listo en 5 minutos.</p>
+        <div class="cta-actions reveal rd3">
+          <a href="#" class="btn-glass liquid-glass-strong">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06z"/><path d="M10 2c0 2.5 2 4 2 4"/></svg>
+            App Store
+          </a>
+          <a href="#" class="btn-glass liquid-glass-strong">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M3 20.5v-17c0-.83 1-1.28 1.63-.75l15 8.5c.58.33.58 1.17 0 1.5l-15 8.5C4 21.78 3 21.33 3 20.5z"/></svg>
+            Google Play
+          </a>
+          <a href="#proceso" class="btn-white-solid">
+            Ver cómo funciona
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <div class="container">
+        <div class="footer-row">
+          <span class="footer-copy">© 2026 Healthy. Todos los derechos reservados.</span>
+          <nav class="footer-links">
+            <a href="#">Privacidad</a>
+            <a href="#">Términos</a>
+            <a href="#">Cookies</a>
+            <a href="#">RGPD</a>
+            <a href="#">Contacto</a>
+          </nav>
+        </div>
+      </div>
+    </footer>
+  </section>
+
+  <script>
+    /* NAV scroll */
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 20);
+    }, { passive: true });
+
+    /* BlurText — split words, animate on IntersectionObserver */
+    function initBlurText() {
+      document.querySelectorAll('[data-blur-text]').forEach(el => {
+        const words = el.textContent.trim().split(/\s+/);
+        el.innerHTML = words
+          .map((w, i) => `<span class="blur-word" style="transition-delay:${(i * 0.08).toFixed(2)}s">${w}</span>`)
+          .join(' ');
+
+        const obs = new IntersectionObserver(entries => {
+          entries.forEach(e => {
+            if (!e.isIntersecting) return;
+            e.target.querySelectorAll('.blur-word').forEach(w => w.classList.add('visible'));
+            obs.unobserve(e.target);
+          });
+        }, { threshold: 0.2 });
+
+        obs.observe(el);
+      });
+    }
+
+    /* Reveal on scroll */
+    function initReveal() {
+      const obs = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+          if (!e.isIntersecting) return;
+          e.target.classList.add('visible');
+          obs.unobserve(e.target);
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+      document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+    }
+
+    /* Hero elements visible immediately */
+    function initHero() {
+      document.querySelectorAll('.hero .reveal').forEach(el => {
+        setTimeout(() => el.classList.add('visible'), 80);
+      });
+      document.querySelectorAll('.hero .blur-word').forEach(el => {
+        setTimeout(() => el.classList.add('visible'), 80);
+      });
+    }
+
+    initBlurText();
+    initReveal();
+    initHero();
+  </script>
+</body>
+</html>

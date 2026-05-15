@@ -4,15 +4,16 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  Animated, Easing, Pressable, SafeAreaView,
+  Animated, Easing, SafeAreaView,
   ScrollView, StyleSheet, Text, View,
 } from 'react-native';
 import { usePlanStore }   from '@/stores/planStore';
-import { ExerciseCard }   from '@/components/ui/ExerciseCard';
+import { WorkoutCard, ExerciseRow, RestTimer, WorkoutSummary } from '@/components/ui/WorkoutCard';
+import { DailyProgressRing } from '@/components/ui/ProgressRing';
 import { Button }         from '@/components/ui/Button';
 import { colors }         from '@/theme/colors';
 import { textStyles }     from '@/theme/typography';
-import { spacing, borderRadius, shadows } from '@/theme/spacing';
+import { spacing, borderRadius } from '@/theme/spacing';
 
 export function TrainingScreen() {
   const { todayWorkout, toggleExercise } = usePlanStore();
@@ -24,6 +25,9 @@ export function TrainingScreen() {
   const totalCount     = todayWorkout.exercises.length;
   const allDone        = completedCount === totalCount;
   const pct            = totalCount > 0 ? completedCount / totalCount : 0;
+
+  // Id del primer ejercicio no completado (activo actual)
+  const activeExerciseId = todayWorkout.exercises.find((e) => !e.completed)?.id ?? null;
 
   // Pulso en el contador cuando queda poco
   useEffect(() => {
@@ -74,32 +78,18 @@ export function TrainingScreen() {
           </View>
         </View>
 
-        {/* Barra de progreso */}
-        <View style={styles.progressCard}>
-          <View style={styles.progressHeader}>
-            <Text style={styles.progressLabel}>Progreso</Text>
-            <Animated.Text style={[styles.progressFraction, { transform: [{ scale: pulseAnim }] }]}>
-              {completedCount}/{totalCount}
-            </Animated.Text>
-          </View>
-          <View style={styles.progressTrack}>
-            <View style={[styles.progressFill, { width: `${pct * 100}%` }]} />
-          </View>
-          {allDone && <Text style={styles.doneBanner}>🎉 ¡Sesión completada!</Text>}
+        {/* Anillo de progreso diario */}
+        <View style={styles.ringWrapper}>
+          <DailyProgressRing progress={pct} label="Sesión de hoy" size={160} />
         </View>
 
         {/* Temporizador de descanso */}
         {timerRunning && restTimer !== null && restTimer > 0 && (
-          <View style={styles.restTimer}>
-            <Text style={styles.restEmoji}>⏳</Text>
-            <View>
-              <Text style={styles.restLabel}>Descanso</Text>
-              <Text style={styles.restSeconds}>{restTimer}s</Text>
-            </View>
-            <Pressable onPress={() => { setTimerRunning(false); setRestTimer(null); }} style={styles.skipBtn}>
-              <Text style={styles.skipText}>Saltar</Text>
-            </Pressable>
-          </View>
+          <RestTimer
+            totalSeconds={restTimer ?? 90}
+            remaining={restTimer ?? 0}
+            onComplete={() => { setTimerRunning(false); setRestTimer(null); }}
+          />
         )}
 
         {/* Lista de ejercicios agrupada por músculo */}
@@ -110,11 +100,29 @@ export function TrainingScreen() {
             <View key={group}>
               <Text style={styles.groupTitle}>{group}</Text>
               {exs.map((e) => (
-                <ExerciseCard key={e.id} exercise={e} onToggle={handleToggle} />
+                <ExerciseRow
+                  key={e.id}
+                  name={e.name}
+                  detail={`${e.sets} × ${e.reps} reps`}
+                  completed={e.completed}
+                  active={activeExerciseId === e.id}
+                  onToggle={() => handleToggle(e.id)}
+                />
               ))}
             </View>
           );
         })}
+
+        {/* Resumen al finalizar */}
+        {allDone && (
+          <WorkoutSummary
+            duration={todayWorkout.durationMinutes}
+            calories={todayWorkout.estimatedCalories ?? 0}
+            exercises={totalCount}
+            sets={todayWorkout.exercises.reduce((acc, e) => acc + (e.sets ?? 1), 0)}
+            workoutName={todayWorkout.name}
+          />
+        )}
 
         {/* CTA finalizar */}
         <Button
@@ -141,36 +149,7 @@ const styles = StyleSheet.create({
   },
   chipText: { ...textStyles.caption, color: colors.neutral.darkGray, fontWeight: '600' },
 
-  // Progreso
-  progressCard: {
-    backgroundColor: colors.neutral.white, borderRadius: borderRadius.card,
-    padding: spacing.md, ...shadows.card, marginBottom: spacing.lg,
-  },
-  progressHeader:   { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.sm },
-  progressLabel:    { ...textStyles.bodyNormal, color: colors.neutral.midGray },
-  progressFraction: { ...textStyles.titleSmall, color: colors.primary.green },
-  progressTrack: {
-    height: 8, backgroundColor: colors.neutral.lightGray,
-    borderRadius: borderRadius.pill, overflow: 'hidden',
-  },
-  progressFill: { height: '100%', backgroundColor: colors.primary.green, borderRadius: borderRadius.pill },
-  doneBanner: { ...textStyles.bodyNormal, color: colors.primary.darkGreen, fontWeight: '600', textAlign: 'center', marginTop: spacing.md },
-
-  // Timer descanso
-  restTimer: {
-    flexDirection: 'row', alignItems: 'center', gap: spacing.md,
-    backgroundColor: '#FEF3C7', borderRadius: borderRadius.card,
-    padding: spacing.md, marginBottom: spacing.lg, ...shadows.card,
-    borderWidth: 1.5, borderColor: '#FCD34D',
-  },
-  restEmoji:   { fontSize: 28 },
-  restLabel:   { ...textStyles.caption, color: '#92400E', fontWeight: '600' },
-  restSeconds: { ...textStyles.titleSmall, color: '#D97706' },
-  skipBtn: {
-    marginLeft: 'auto', paddingHorizontal: spacing.md, paddingVertical: spacing.xs,
-    borderRadius: borderRadius.pill, borderWidth: 1.5, borderColor: '#D97706',
-  },
-  skipText: { ...textStyles.caption, color: '#D97706', fontWeight: '700' },
+  ringWrapper: { alignItems: 'center', marginBottom: spacing.lg },
 
   groupTitle: { ...textStyles.label, color: colors.neutral.midGray, marginTop: spacing.lg, marginBottom: spacing.sm },
   cta:        { marginTop: spacing.lg },

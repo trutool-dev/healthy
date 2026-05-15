@@ -8,7 +8,7 @@ import { colors }       from '@/theme/colors';
 import { textStyles }   from '@/theme/typography';
 import { spacing, borderRadius } from '@/theme/spacing';
 import { useAuthStore } from '@/stores/authStore';
-import api              from '@/services/api';
+import { authService }  from '@/services/authService';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'SetPassword'>;
 
@@ -41,7 +41,7 @@ export function SetPasswordScreen({ navigation, route }: Props) {
     if (!validate()) return;
     setLoading(true);
     try {
-      const { data } = await api.post('/auth/set-password', { email, code, password: pwd });
+      const { data } = await authService.setPassword(email, code, pwd);
       await setAuth(data.user, data.token);
     } catch (err: any) {
       setErrors({ general: err.response?.data?.message ?? 'Error al crear contraseña' });
