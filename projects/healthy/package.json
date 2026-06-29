@@ -1,0 +1,21 @@
+{
+  "name": "healthy-ai",
+  "version": "1.0.0",
+  "description": "Servicio de IA para generación de planes de salud personalizados",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "test": "jest --testPathPattern=tests/"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.52.0",
+    "@prisma/client": "^5.0.0",
+    "dotenv": "^16.0.0",
+    "ioredis": "^5.3.0"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0",
+    "nodemon": "^3.0.0"
+  }
+}

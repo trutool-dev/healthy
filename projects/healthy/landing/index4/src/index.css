@@ -1,0 +1,186 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --green:        #22C55E;
+    --green-dark:   #16A34A;
+    --green-glow:   rgba(34,197,94,0.22);
+    --green-muted:  rgba(34,197,94,0.10);
+    --bg:           #0a0a0a;
+    --surface:      #111111;
+    --elevated:     #181818;
+    --border:       rgba(255,255,255,0.07);
+    --border-mid:   rgba(255,255,255,0.14);
+    --text:         #FFFFFF;
+    --text-sub:     rgba(255,255,255,0.65);
+    --text-muted:   rgba(255,255,255,0.35);
+    --ease-expo:    cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-in-out:  cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background: var(--green-glow);
+    color: var(--green);
+  }
+}
+
+@layer components {
+  /* ── Liquid glass ──────────────────────────────────────── */
+  .glass {
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(20px) saturate(1.5);
+    -webkit-backdrop-filter: blur(20px) saturate(1.5);
+    border: 1px solid rgba(255,255,255,0.08);
+    position: relative;
+  }
+
+  .glass-strong {
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(28px) saturate(1.8);
+    -webkit-backdrop-filter: blur(28px) saturate(1.8);
+    border: 1px solid rgba(255,255,255,0.12);
+  }
+
+  /* ── Green gradient ────────────────────────────────────── */
+  .gradient-green {
+    background: linear-gradient(90deg, #22C55E 0%, #16A34A 100%);
+  }
+
+  .text-gradient-green {
+    background: linear-gradient(90deg, #22C55E 0%, #4ade80 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ── Buttons ───────────────────────────────────────────── */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 30px;
+    background: linear-gradient(90deg, #22C55E, #16A34A);
+    color: #000;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    border-radius: 100px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: opacity 0.2s, transform 0.15s;
+    white-space: nowrap;
+  }
+
+  .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 29px;
+    background: transparent;
+    color: rgba(255,255,255,0.8);
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    border-radius: 100px;
+    border: 1px solid rgba(255,255,255,0.18);
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s, transform 0.15s;
+    white-space: nowrap;
+  }
+
+  .btn-ghost:hover {
+    border-color: rgba(255,255,255,0.4);
+    color: #fff;
+    transform: translateY(-1px);
+  }
+
+  /* ── Badge pill ────────────────────────────────────────── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 14px;
+    border-radius: 100px;
+    background: var(--green-muted);
+    border: 1px solid var(--green-glow);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--green);
+  }
+
+  /* ── Video overlay helpers ─────────────────────────────── */
+  .video-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+
+  .video-fade-y::before,
+  .video-fade-y::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 200px;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .video-fade-y::before {
+    top: 0;
+    background: linear-gradient(to bottom, var(--bg) 0%, transparent 100%);
+  }
+
+  .video-fade-y::after {
+    bottom: 0;
+    background: linear-gradient(to top, var(--bg) 0%, transparent 100%);
+  }
+
+  /* ── Marquee ───────────────────────────────────────────── */
+  .marquee-track {
+    display: flex;
+    gap: 0;
+    white-space: nowrap;
+    will-change: transform;
+  }
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  .marquee-run {
+    animation: marquee 18s linear infinite;
+  }
+}
+
+@layer utilities {
+  .font-display { font-family: 'Instrument Serif', Georgia, serif; font-style: italic; }
+
+  /* Clamp shortcuts */
+  .text-hero    { font-size: clamp(52px, 9vw, 110px); line-height: 0.95; letter-spacing: -0.02em; }
+  .text-section { font-size: clamp(36px, 5vw, 64px);  line-height: 1.08; letter-spacing: -0.02em; }
+  .text-card    { font-size: clamp(22px, 3vw, 30px);  line-height: 1.2; }
+
+  .will-change-transform { will-change: transform; }
+}
