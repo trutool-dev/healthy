@@ -404,7 +404,8 @@ export const ModelName = {
   Food: 'Food',
   MealFood: 'MealFood',
   ProgressLog: 'ProgressLog',
-  DailyLog: 'DailyLog'
+  DailyLog: 'DailyLog',
+  TokenUsageLog: 'TokenUsageLog'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -420,7 +421,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "verificationCode" | "passwordResetToken" | "authSession" | "profile" | "lifestyleProfile" | "trainingPreferences" | "healthCondition" | "nutritionPreferences" | "foodRestriction" | "motivationProfile" | "onboardingAnswer" | "plan" | "trainingSession" | "exercise" | "sessionExercise" | "meal" | "food" | "mealFood" | "progressLog" | "dailyLog"
+    modelProps: "user" | "verificationCode" | "passwordResetToken" | "authSession" | "profile" | "lifestyleProfile" | "trainingPreferences" | "healthCondition" | "nutritionPreferences" | "foodRestriction" | "motivationProfile" | "onboardingAnswer" | "plan" | "trainingSession" | "exercise" | "sessionExercise" | "meal" | "food" | "mealFood" | "progressLog" | "dailyLog" | "tokenUsageLog"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1978,6 +1979,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    TokenUsageLog: {
+      payload: Prisma.$TokenUsageLogPayload<ExtArgs>
+      fields: Prisma.TokenUsageLogFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TokenUsageLogFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TokenUsageLogPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TokenUsageLogFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TokenUsageLogPayload>
+        }
+        findFirst: {
+          args: Prisma.TokenUsageLogFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TokenUsageLogPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TokenUsageLogFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TokenUsageLogPayload>
+        }
+        findMany: {
+          args: Prisma.TokenUsageLogFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TokenUsageLogPayload>[]
+        }
+        create: {
+          args: Prisma.TokenUsageLogCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TokenUsageLogPayload>
+        }
+        createMany: {
+          args: Prisma.TokenUsageLogCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TokenUsageLogCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TokenUsageLogPayload>[]
+        }
+        delete: {
+          args: Prisma.TokenUsageLogDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TokenUsageLogPayload>
+        }
+        update: {
+          args: Prisma.TokenUsageLogUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TokenUsageLogPayload>
+        }
+        deleteMany: {
+          args: Prisma.TokenUsageLogDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TokenUsageLogUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TokenUsageLogUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TokenUsageLogPayload>[]
+        }
+        upsert: {
+          args: Prisma.TokenUsageLogUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TokenUsageLogPayload>
+        }
+        aggregate: {
+          args: Prisma.TokenUsageLogAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTokenUsageLog>
+        }
+        groupBy: {
+          args: Prisma.TokenUsageLogGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TokenUsageLogGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TokenUsageLogCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TokenUsageLogCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2026,7 +2101,9 @@ export const UserScalarFieldEnum = {
   phone_verified: 'phone_verified',
   status: 'status',
   created_at: 'created_at',
-  updated_at: 'updated_at'
+  updated_at: 'updated_at',
+  health_consent_given_at: 'health_consent_given_at',
+  health_consent_version: 'health_consent_version'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -2332,6 +2409,22 @@ export const DailyLogScalarFieldEnum = {
 } as const
 
 export type DailyLogScalarFieldEnum = (typeof DailyLogScalarFieldEnum)[keyof typeof DailyLogScalarFieldEnum]
+
+
+export const TokenUsageLogScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  request_type: 'request_type',
+  input_tokens: 'input_tokens',
+  output_tokens: 'output_tokens',
+  cache_read_tokens: 'cache_read_tokens',
+  cache_write_tokens: 'cache_write_tokens',
+  model_version: 'model_version',
+  cost_usd: 'cost_usd',
+  created_at: 'created_at'
+} as const
+
+export type TokenUsageLogScalarFieldEnum = (typeof TokenUsageLogScalarFieldEnum)[keyof typeof TokenUsageLogScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -2921,6 +3014,7 @@ export type GlobalOmitConfig = {
   mealFood?: Prisma.MealFoodOmit
   progressLog?: Prisma.ProgressLogOmit
   dailyLog?: Prisma.DailyLogOmit
+  tokenUsageLog?: Prisma.TokenUsageLogOmit
 }
 
 /* Types for Logging */

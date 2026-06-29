@@ -20,4 +20,5 @@ const authRateLimiter = rateLimit({
   },
 });
 
-module.exports = { authRateLimiter };
+/**
+ * Rate limiter general para la AP

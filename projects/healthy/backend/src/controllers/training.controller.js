@@ -1,30 +1,99 @@
-const { sendSuccess } = require('../utils/response.util');
+/**
+ * Controlador de entrenamiento (BE-03).
+ */
 
-/** GET /training/sessions */
+const { sendSuccess, sendError } = require('../utils/response.util');
+const prisma = require('../prisma/client');
+const logger = require('../utils/logger.util');
+
+/** GET /training/sessions — Sesiones del usuario (también sirve como /today) */
 const getSessions = async (req, res, next) => {
   try {
-    sendSuccess(res, {}, 'Endpoint en construcción', 501);
+    const userId = req.user.userId;
+    const { date, status } = req.query;
+
+    const where = { user_id: userId };
+    if (status) where.status = status;
+
+    if (date) {
+      const d = new Date(date);
+      where.scheduled_date = {
+        gte: new Date(d.setHours(0, 0, 0, 0)),
+        lte: new Date(d.setHours(23, 59, 59, 999)),
+      };
+    }
+
+    const sessions = await prisma.trainingSession.findMany({
+      where,
+      include: { session_exercises: { include: { exercise: true }, orderBy: { order_index: 'asc' } } },
+      orderBy: { scheduled_date: 'asc' },
+    });
+
+    // Si se pide fecha de hoy y hay exactamente 1 sesión, exponerla como "today"
+    return sendSuccess(res, { sessions, total: sessions.length }, 'Sesiones de entrenamiento');
   } catch (err) { next(err); }
 };
 
 /** GET /training/sessions/:id */
 const getSessionById = async (req, res, next) => {
   try {
-    sendSuccess(res, {}, 'Endpoint en construcción', 501);
+    const userId = req.user.userId;
+    const { id } = req.params;
+
+    const session = await prisma.trainingSession.findFirst({
+      where: { id, user_id: userId },
+      include: {
+        session_exercises: { include: { exercise: true }, orderBy: { order_index: 'asc' } },
+        plan: { select: { id: true, status: true } },
+      },
+    });
+
+    if (!session) return sendError(res, 'NOT_FOUND', 'Sesión no encontrada', 404);
+    return sendSuccess(res, { session }, 'Detalle de sesión');
   } catch (err) { next(err); }
 };
 
 /** PUT /training/sessions/:id/complete */
 const completeSession = async (req, res, next) => {
   try {
-    sendSuccess(res, {}, 'Endpoint en construcción', 501);
+    const userId = req.user.userId;
+    const { id } = req.params;
+    const { duration_minutes, calories_burned, notes } = req.body;
+
+    const session = await prisma.trainingSession.findFirst({ where: { id, user_id: userId } });
+    if (!session) return sendError(res, 'NOT_FOUND', 'Sesión no encontrada', 404);
+    if (session.status === 'completed') return sendError(res, 'SESSION_ALREADY_COMPLETED', 'Esta sesión ya fue completada', 400);
+
+    const updated = await prisma.trainingSession.update({
+      where: { id },
+      data: { status: 'completed', completed_at: new Date(), duration_minutes: duration_minutes || null, calories_burned: calories_burned || null, notes: notes || null },
+    });
+
+    return sendSuccess(res, { session: updated }, 'Sesión completada correctamente');
   } catch (err) { next(err); }
 };
 
-/** POST /training/sessions/:id/exercises/:exerciseId/complete */
+/** POST /training/sessions/:id/exercises/:exerciseId/complete — Registrar serie */
 const completeExercise = async (req, res, next) => {
   try {
-    sendSuccess(res, {}, 'Endpoint en construcción', 501);
+    const userId = req.user.userId;
+    const { id: sessionId, exerciseId } = req.params;
+    const { weight_kg, reps } = req.body;
+
+    const session = await prisma.trainingSession.findFirst({ where: { id: sessionId, user_id: userId } });
+    if (!session) return sendError(res, 'NOT_FOUND', 'Sesión no encontrada', 404);
+
+    const sessionExercise = await prisma.sessionExercise.findFirst({
+      where: { session_id: sessionId, exercise_id: exerciseId },
+    });
+    if (!sessionExercise) return sendError(res, 'NOT_FOUND', 'Ejercicio no encontrado en esta sesión', 404);
+
+    const updated = await prisma.sessionExercise.update({
+      where: { id: sessionExercise.id },
+      data: { weight_kg: weight_kg || null, reps: reps !== undefined ? reps : sessionExercise.reps, completed: true },
+    });
+
+    return sendSuccess(res, { session_exercise: updated }, 'Serie registrada correctamente');
   } catch (err) { next(err); }
 };
 

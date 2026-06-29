@@ -34,6 +34,8 @@ export type UserMinAggregateOutputType = {
   status: $Enums.UserStatus | null
   created_at: Date | null
   updated_at: Date | null
+  health_consent_given_at: Date | null
+  health_consent_version: string | null
 }
 
 export type UserMaxAggregateOutputType = {
@@ -46,6 +48,8 @@ export type UserMaxAggregateOutputType = {
   status: $Enums.UserStatus | null
   created_at: Date | null
   updated_at: Date | null
+  health_consent_given_at: Date | null
+  health_consent_version: string | null
 }
 
 export type UserCountAggregateOutputType = {
@@ -58,6 +62,8 @@ export type UserCountAggregateOutputType = {
   status: number
   created_at: number
   updated_at: number
+  health_consent_given_at: number
+  health_consent_version: number
   _all: number
 }
 
@@ -72,6 +78,8 @@ export type UserMinAggregateInputType = {
   status?: true
   created_at?: true
   updated_at?: true
+  health_consent_given_at?: true
+  health_consent_version?: true
 }
 
 export type UserMaxAggregateInputType = {
@@ -84,6 +92,8 @@ export type UserMaxAggregateInputType = {
   status?: true
   created_at?: true
   updated_at?: true
+  health_consent_given_at?: true
+  health_consent_version?: true
 }
 
 export type UserCountAggregateInputType = {
@@ -96,6 +106,8 @@ export type UserCountAggregateInputType = {
   status?: true
   created_at?: true
   updated_at?: true
+  health_consent_given_at?: true
+  health_consent_version?: true
   _all?: true
 }
 
@@ -181,6 +193,8 @@ export type UserGroupByOutputType = {
   status: $Enums.UserStatus
   created_at: Date
   updated_at: Date
+  health_consent_given_at: Date | null
+  health_consent_version: string | null
   _count: UserCountAggregateOutputType | null
   _min: UserMinAggregateOutputType | null
   _max: UserMaxAggregateOutputType | null
@@ -214,6 +228,8 @@ export type UserWhereInput = {
   status?: Prisma.EnumUserStatusFilter<"User"> | $Enums.UserStatus
   created_at?: Prisma.DateTimeFilter<"User"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"User"> | Date | string
+  health_consent_given_at?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
+  health_consent_version?: Prisma.StringNullableFilter<"User"> | string | null
   verification_codes?: Prisma.VerificationCodeListRelationFilter
   password_reset_tokens?: Prisma.PasswordResetTokenListRelationFilter
   auth_sessions?: Prisma.AuthSessionListRelationFilter
@@ -230,6 +246,7 @@ export type UserWhereInput = {
   meals?: Prisma.MealListRelationFilter
   progress_logs?: Prisma.ProgressLogListRelationFilter
   daily_logs?: Prisma.DailyLogListRelationFilter
+  token_usage_logs?: Prisma.TokenUsageLogListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -242,6 +259,8 @@ export type UserOrderByWithRelationInput = {
   status?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  health_consent_given_at?: Prisma.SortOrderInput | Prisma.SortOrder
+  health_consent_version?: Prisma.SortOrderInput | Prisma.SortOrder
   verification_codes?: Prisma.VerificationCodeOrderByRelationAggregateInput
   password_reset_tokens?: Prisma.PasswordResetTokenOrderByRelationAggregateInput
   auth_sessions?: Prisma.AuthSessionOrderByRelationAggregateInput
@@ -258,6 +277,7 @@ export type UserOrderByWithRelationInput = {
   meals?: Prisma.MealOrderByRelationAggregateInput
   progress_logs?: Prisma.ProgressLogOrderByRelationAggregateInput
   daily_logs?: Prisma.DailyLogOrderByRelationAggregateInput
+  token_usage_logs?: Prisma.TokenUsageLogOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -273,6 +293,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.EnumUserStatusFilter<"User"> | $Enums.UserStatus
   created_at?: Prisma.DateTimeFilter<"User"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"User"> | Date | string
+  health_consent_given_at?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
+  health_consent_version?: Prisma.StringNullableFilter<"User"> | string | null
   verification_codes?: Prisma.VerificationCodeListRelationFilter
   password_reset_tokens?: Prisma.PasswordResetTokenListRelationFilter
   auth_sessions?: Prisma.AuthSessionListRelationFilter
@@ -289,6 +311,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   meals?: Prisma.MealListRelationFilter
   progress_logs?: Prisma.ProgressLogListRelationFilter
   daily_logs?: Prisma.DailyLogListRelationFilter
+  token_usage_logs?: Prisma.TokenUsageLogListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -301,6 +324,8 @@ export type UserOrderByWithAggregationInput = {
   status?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  health_consent_given_at?: Prisma.SortOrderInput | Prisma.SortOrder
+  health_consent_version?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
   _max?: Prisma.UserMaxOrderByAggregateInput
   _min?: Prisma.UserMinOrderByAggregateInput
@@ -319,6 +344,8 @@ export type UserScalarWhereWithAggregatesInput = {
   status?: Prisma.EnumUserStatusWithAggregatesFilter<"User"> | $Enums.UserStatus
   created_at?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
+  health_consent_given_at?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
+  health_consent_version?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
 }
 
 export type UserCreateInput = {
@@ -331,6 +358,8 @@ export type UserCreateInput = {
   status?: $Enums.UserStatus
   created_at?: Date | string
   updated_at?: Date | string
+  health_consent_given_at?: Date | string | null
+  health_consent_version?: string | null
   verification_codes?: Prisma.VerificationCodeCreateNestedManyWithoutUserInput
   password_reset_tokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   auth_sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
@@ -347,6 +376,7 @@ export type UserCreateInput = {
   meals?: Prisma.MealCreateNestedManyWithoutUserInput
   progress_logs?: Prisma.ProgressLogCreateNestedManyWithoutUserInput
   daily_logs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
+  token_usage_logs?: Prisma.TokenUsageLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -359,6 +389,8 @@ export type UserUncheckedCreateInput = {
   status?: $Enums.UserStatus
   created_at?: Date | string
   updated_at?: Date | string
+  health_consent_given_at?: Date | string | null
+  health_consent_version?: string | null
   verification_codes?: Prisma.VerificationCodeUncheckedCreateNestedManyWithoutUserInput
   password_reset_tokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   auth_sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
@@ -375,6 +407,7 @@ export type UserUncheckedCreateInput = {
   meals?: Prisma.MealUncheckedCreateNestedManyWithoutUserInput
   progress_logs?: Prisma.ProgressLogUncheckedCreateNestedManyWithoutUserInput
   daily_logs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
+  token_usage_logs?: Prisma.TokenUsageLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -387,6 +420,8 @@ export type UserUpdateInput = {
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  health_consent_given_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  health_consent_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification_codes?: Prisma.VerificationCodeUpdateManyWithoutUserNestedInput
   password_reset_tokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   auth_sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
@@ -403,6 +438,7 @@ export type UserUpdateInput = {
   meals?: Prisma.MealUpdateManyWithoutUserNestedInput
   progress_logs?: Prisma.ProgressLogUpdateManyWithoutUserNestedInput
   daily_logs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
+  token_usage_logs?: Prisma.TokenUsageLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -415,6 +451,8 @@ export type UserUncheckedUpdateInput = {
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  health_consent_given_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  health_consent_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification_codes?: Prisma.VerificationCodeUncheckedUpdateManyWithoutUserNestedInput
   password_reset_tokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   auth_sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
@@ -431,6 +469,7 @@ export type UserUncheckedUpdateInput = {
   meals?: Prisma.MealUncheckedUpdateManyWithoutUserNestedInput
   progress_logs?: Prisma.ProgressLogUncheckedUpdateManyWithoutUserNestedInput
   daily_logs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
+  token_usage_logs?: Prisma.TokenUsageLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -443,6 +482,8 @@ export type UserCreateManyInput = {
   status?: $Enums.UserStatus
   created_at?: Date | string
   updated_at?: Date | string
+  health_consent_given_at?: Date | string | null
+  health_consent_version?: string | null
 }
 
 export type UserUpdateManyMutationInput = {
@@ -455,6 +496,8 @@ export type UserUpdateManyMutationInput = {
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  health_consent_given_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  health_consent_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type UserUncheckedUpdateManyInput = {
@@ -467,6 +510,8 @@ export type UserUncheckedUpdateManyInput = {
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  health_consent_given_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  health_consent_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type UserCountOrderByAggregateInput = {
@@ -479,6 +524,8 @@ export type UserCountOrderByAggregateInput = {
   status?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  health_consent_given_at?: Prisma.SortOrder
+  health_consent_version?: Prisma.SortOrder
 }
 
 export type UserMaxOrderByAggregateInput = {
@@ -491,6 +538,8 @@ export type UserMaxOrderByAggregateInput = {
   status?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  health_consent_given_at?: Prisma.SortOrder
+  health_consent_version?: Prisma.SortOrder
 }
 
 export type UserMinOrderByAggregateInput = {
@@ -503,6 +552,8 @@ export type UserMinOrderByAggregateInput = {
   status?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  health_consent_given_at?: Prisma.SortOrder
+  health_consent_version?: Prisma.SortOrder
 }
 
 export type UserScalarRelationFilter = {
@@ -528,6 +579,10 @@ export type EnumUserStatusFieldUpdateOperationsInput = {
 
 export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
+}
+
+export type NullableDateTimeFieldUpdateOperationsInput = {
+  set?: Date | string | null
 }
 
 export type UserCreateNestedOneWithoutVerification_codesInput = {
@@ -754,6 +809,20 @@ export type UserUpdateOneRequiredWithoutDaily_logsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutDaily_logsInput, Prisma.UserUpdateWithoutDaily_logsInput>, Prisma.UserUncheckedUpdateWithoutDaily_logsInput>
 }
 
+export type UserCreateNestedOneWithoutToken_usage_logsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutToken_usage_logsInput, Prisma.UserUncheckedCreateWithoutToken_usage_logsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutToken_usage_logsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutToken_usage_logsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutToken_usage_logsInput, Prisma.UserUncheckedCreateWithoutToken_usage_logsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutToken_usage_logsInput
+  upsert?: Prisma.UserUpsertWithoutToken_usage_logsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutToken_usage_logsInput, Prisma.UserUpdateWithoutToken_usage_logsInput>, Prisma.UserUncheckedUpdateWithoutToken_usage_logsInput>
+}
+
 export type UserCreateWithoutVerification_codesInput = {
   id?: string
   email: string
@@ -764,6 +833,8 @@ export type UserCreateWithoutVerification_codesInput = {
   status?: $Enums.UserStatus
   created_at?: Date | string
   updated_at?: Date | string
+  health_consent_given_at?: Date | string | null
+  health_consent_version?: string | null
   password_reset_tokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   auth_sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
   profile?: Prisma.ProfileCreateNestedOneWithoutUserInput
@@ -779,6 +850,7 @@ export type UserCreateWithoutVerification_codesInput = {
   meals?: Prisma.MealCreateNestedManyWithoutUserInput
   progress_logs?: Prisma.ProgressLogCreateNestedManyWithoutUserInput
   daily_logs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
+  token_usage_logs?: Prisma.TokenUsageLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutVerification_codesInput = {
@@ -791,6 +863,8 @@ export type UserUncheckedCreateWithoutVerification_codesInput = {
   status?: $Enums.UserStatus
   created_at?: Date | string
   updated_at?: Date | string
+  health_consent_given_at?: Date | string | null
+  health_consent_version?: string | null
   password_reset_tokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   auth_sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.ProfileUncheckedCreateNestedOneWithoutUserInput
@@ -806,6 +880,7 @@ export type UserUncheckedCreateWithoutVerification_codesInput = {
   meals?: Prisma.MealUncheckedCreateNestedManyWithoutUserInput
   progress_logs?: Prisma.ProgressLogUncheckedCreateNestedManyWithoutUserInput
   daily_logs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
+  token_usage_logs?: Prisma.TokenUsageLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutVerification_codesInput = {
@@ -834,6 +909,8 @@ export type UserUpdateWithoutVerification_codesInput = {
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  health_consent_given_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  health_consent_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   password_reset_tokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   auth_sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
   profile?: Prisma.ProfileUpdateOneWithoutUserNestedInput
@@ -849,6 +926,7 @@ export type UserUpdateWithoutVerification_codesInput = {
   meals?: Prisma.MealUpdateManyWithoutUserNestedInput
   progress_logs?: Prisma.ProgressLogUpdateManyWithoutUserNestedInput
   daily_logs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
+  token_usage_logs?: Prisma.TokenUsageLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutVerification_codesInput = {
@@ -861,6 +939,8 @@ export type UserUncheckedUpdateWithoutVerification_codesInput = {
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  health_consent_given_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  health_consent_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   password_reset_tokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   auth_sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.ProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -876,6 +956,7 @@ export type UserUncheckedUpdateWithoutVerification_codesInput = {
   meals?: Prisma.MealUncheckedUpdateManyWithoutUserNestedInput
   progress_logs?: Prisma.ProgressLogUncheckedUpdateManyWithoutUserNestedInput
   daily_logs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
+  token_usage_logs?: Prisma.TokenUsageLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPassword_reset_tokensInput = {
@@ -888,6 +969,8 @@ export type UserCreateWithoutPassword_reset_tokensInput = {
   status?: $Enums.UserStatus
   created_at?: Date | string
   updated_at?: Date | string
+  health_consent_given_at?: Date | string | null
+  health_consent_version?: string | null
   verification_codes?: Prisma.VerificationCodeCreateNestedManyWithoutUserInput
   auth_sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
   profile?: Prisma.ProfileCreateNestedOneWithoutUserInput
@@ -903,6 +986,7 @@ export type UserCreateWithoutPassword_reset_tokensInput = {
   meals?: Prisma.MealCreateNestedManyWithoutUserInput
   progress_logs?: Prisma.ProgressLogCreateNestedManyWithoutUserInput
   daily_logs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
+  token_usage_logs?: Prisma.TokenUsageLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPassword_reset_tokensInput = {
@@ -915,6 +999,8 @@ export type UserUncheckedCreateWithoutPassword_reset_tokensInput = {
   status?: $Enums.UserStatus
   created_at?: Date | string
   updated_at?: Date | string
+  health_consent_given_at?: Date | string | null
+  health_consent_version?: string | null
   verification_codes?: Prisma.VerificationCodeUncheckedCreateNestedManyWithoutUserInput
   auth_sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.ProfileUncheckedCreateNestedOneWithoutUserInput
@@ -930,6 +1016,7 @@ export type UserUncheckedCreateWithoutPassword_reset_tokensInput = {
   meals?: Prisma.MealUncheckedCreateNestedManyWithoutUserInput
   progress_logs?: Prisma.ProgressLogUncheckedCreateNestedManyWithoutUserInput
   daily_logs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
+  token_usage_logs?: Prisma.TokenUsageLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPassword_reset_tokensInput = {
@@ -958,6 +1045,8 @@ export type UserUpdateWithoutPassword_reset_tokensInput = {
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  health_consent_given_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  health_consent_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification_codes?: Prisma.VerificationCodeUpdateManyWithoutUserNestedInput
   auth_sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
   profile?: Prisma.ProfileUpdateOneWithoutUserNestedInput
@@ -973,6 +1062,7 @@ export type UserUpdateWithoutPassword_reset_tokensInput = {
   meals?: Prisma.MealUpdateManyWithoutUserNestedInput
   progress_logs?: Prisma.ProgressLogUpdateManyWithoutUserNestedInput
   daily_logs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
+  token_usage_logs?: Prisma.TokenUsageLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPassword_reset_tokensInput = {
@@ -985,6 +1075,8 @@ export type UserUncheckedUpdateWithoutPassword_reset_tokensInput = {
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  health_consent_given_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  health_consent_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification_codes?: Prisma.VerificationCodeUncheckedUpdateManyWithoutUserNestedInput
   auth_sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.ProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -1000,6 +1092,7 @@ export type UserUncheckedUpdateWithoutPassword_reset_tokensInput = {
   meals?: Prisma.MealUncheckedUpdateManyWithoutUserNestedInput
   progress_logs?: Prisma.ProgressLogUncheckedUpdateManyWithoutUserNestedInput
   daily_logs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
+  token_usage_logs?: Prisma.TokenUsageLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAuth_sessionsInput = {
@@ -1012,6 +1105,8 @@ export type UserCreateWithoutAuth_sessionsInput = {
   status?: $Enums.UserStatus
   created_at?: Date | string
   updated_at?: Date | string
+  health_consent_given_at?: Date | string | null
+  health_consent_version?: string | null
   verification_codes?: Prisma.VerificationCodeCreateNestedManyWithoutUserInput
   password_reset_tokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   profile?: Prisma.ProfileCreateNestedOneWithoutUserInput
@@ -1027,6 +1122,7 @@ export type UserCreateWithoutAuth_sessionsInput = {
   meals?: Prisma.MealCreateNestedManyWithoutUserInput
   progress_logs?: Prisma.ProgressLogCreateNestedManyWithoutUserInput
   daily_logs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
+  token_usage_logs?: Prisma.TokenUsageLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAuth_sessionsInput = {
@@ -1039,6 +1135,8 @@ export type UserUncheckedCreateWithoutAuth_sessionsInput = {
   status?: $Enums.UserStatus
   created_at?: Date | string
   updated_at?: Date | string
+  health_consent_given_at?: Date | string | null
+  health_consent_version?: string | null
   verification_codes?: Prisma.VerificationCodeUncheckedCreateNestedManyWithoutUserInput
   password_reset_tokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.ProfileUncheckedCreateNestedOneWithoutUserInput
@@ -1054,6 +1152,7 @@ export type UserUncheckedCreateWithoutAuth_sessionsInput = {
   meals?: Prisma.MealUncheckedCreateNestedManyWithoutUserInput
   progress_logs?: Prisma.ProgressLogUncheckedCreateNestedManyWithoutUserInput
   daily_logs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
+  token_usage_logs?: Prisma.TokenUsageLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAuth_sessionsInput = {
@@ -1082,6 +1181,8 @@ export type UserUpdateWithoutAuth_sessionsInput = {
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  health_consent_given_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  health_consent_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification_codes?: Prisma.VerificationCodeUpdateManyWithoutUserNestedInput
   password_reset_tokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   profile?: Prisma.ProfileUpdateOneWithoutUserNestedInput
@@ -1097,6 +1198,7 @@ export type UserUpdateWithoutAuth_sessionsInput = {
   meals?: Prisma.MealUpdateManyWithoutUserNestedInput
   progress_logs?: Prisma.ProgressLogUpdateManyWithoutUserNestedInput
   daily_logs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
+  token_usage_logs?: Prisma.TokenUsageLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAuth_sessionsInput = {
@@ -1109,6 +1211,8 @@ export type UserUncheckedUpdateWithoutAuth_sessionsInput = {
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  health_consent_given_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  health_consent_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification_codes?: Prisma.VerificationCodeUncheckedUpdateManyWithoutUserNestedInput
   password_reset_tokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.ProfileUncheckedUpdateOneWithoutUserNestedInput
@@ -1124,6 +1228,7 @@ export type UserUncheckedUpdateWithoutAuth_sessionsInput = {
   meals?: Prisma.MealUncheckedUpdateManyWithoutUserNestedInput
   progress_logs?: Prisma.ProgressLogUncheckedUpdateManyWithoutUserNestedInput
   daily_logs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
+  token_usage_logs?: Prisma.TokenUsageLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutProfileInput = {
@@ -1136,6 +1241,8 @@ export type UserCreateWithoutProfileInput = {
   status?: $Enums.UserStatus
   created_at?: Date | string
   updated_at?: Date | string
+  health_consent_given_at?: Date | string | null
+  health_consent_version?: string | null
   verification_codes?: Prisma.VerificationCodeCreateNestedManyWithoutUserInput
   password_reset_tokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   auth_sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
@@ -1151,6 +1258,7 @@ export type UserCreateWithoutProfileInput = {
   meals?: Prisma.MealCreateNestedManyWithoutUserInput
   progress_logs?: Prisma.ProgressLogCreateNestedManyWithoutUserInput
   daily_logs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
+  token_usage_logs?: Prisma.TokenUsageLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutProfileInput = {
@@ -1163,6 +1271,8 @@ export type UserUncheckedCreateWithoutProfileInput = {
   status?: $Enums.UserStatus
   created_at?: Date | string
   updated_at?: Date | string
+  health_consent_given_at?: Date | string | null
+  health_consent_version?: string | null
   verification_codes?: Prisma.VerificationCodeUncheckedCreateNestedManyWithoutUserInput
   password_reset_tokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   auth_sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
@@ -1178,6 +1288,7 @@ export type UserUncheckedCreateWithoutProfileInput = {
   meals?: Prisma.MealUncheckedCreateNestedManyWithoutUserInput
   progress_logs?: Prisma.ProgressLogUncheckedCreateNestedManyWithoutUserInput
   daily_logs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
+  token_usage_logs?: Prisma.TokenUsageLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutProfileInput = {
@@ -1206,6 +1317,8 @@ export type UserUpdateWithoutProfileInput = {
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  health_consent_given_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  health_consent_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification_codes?: Prisma.VerificationCodeUpdateManyWithoutUserNestedInput
   password_reset_tokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   auth_sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
@@ -1221,6 +1334,7 @@ export type UserUpdateWithoutProfileInput = {
   meals?: Prisma.MealUpdateManyWithoutUserNestedInput
   progress_logs?: Prisma.ProgressLogUpdateManyWithoutUserNestedInput
   daily_logs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
+  token_usage_logs?: Prisma.TokenUsageLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutProfileInput = {
@@ -1233,6 +1347,8 @@ export type UserUncheckedUpdateWithoutProfileInput = {
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  health_consent_given_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  health_consent_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification_codes?: Prisma.VerificationCodeUncheckedUpdateManyWithoutUserNestedInput
   password_reset_tokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   auth_sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
@@ -1248,6 +1364,7 @@ export type UserUncheckedUpdateWithoutProfileInput = {
   meals?: Prisma.MealUncheckedUpdateManyWithoutUserNestedInput
   progress_logs?: Prisma.ProgressLogUncheckedUpdateManyWithoutUserNestedInput
   daily_logs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
+  token_usage_logs?: Prisma.TokenUsageLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutLifestyle_profileInput = {
@@ -1260,6 +1377,8 @@ export type UserCreateWithoutLifestyle_profileInput = {
   status?: $Enums.UserStatus
   created_at?: Date | string
   updated_at?: Date | string
+  health_consent_given_at?: Date | string | null
+  health_consent_version?: string | null
   verification_codes?: Prisma.VerificationCodeCreateNestedManyWithoutUserInput
   password_reset_tokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   auth_sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
@@ -1275,6 +1394,7 @@ export type UserCreateWithoutLifestyle_profileInput = {
   meals?: Prisma.MealCreateNestedManyWithoutUserInput
   progress_logs?: Prisma.ProgressLogCreateNestedManyWithoutUserInput
   daily_logs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
+  token_usage_logs?: Prisma.TokenUsageLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutLifestyle_profileInput = {
@@ -1287,6 +1407,8 @@ export type UserUncheckedCreateWithoutLifestyle_profileInput = {
   status?: $Enums.UserStatus
   created_at?: Date | string
   updated_at?: Date | string
+  health_consent_given_at?: Date | string | null
+  health_consent_version?: string | null
   verification_codes?: Prisma.VerificationCodeUncheckedCreateNestedManyWithoutUserInput
   password_reset_tokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   auth_sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
@@ -1302,6 +1424,7 @@ export type UserUncheckedCreateWithoutLifestyle_profileInput = {
   meals?: Prisma.MealUncheckedCreateNestedManyWithoutUserInput
   progress_logs?: Prisma.ProgressLogUncheckedCreateNestedManyWithoutUserInput
   daily_logs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
+  token_usage_logs?: Prisma.TokenUsageLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutLifestyle_profileInput = {
@@ -1330,6 +1453,8 @@ export type UserUpdateWithoutLifestyle_profileInput = {
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  health_consent_given_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  health_consent_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification_codes?: Prisma.VerificationCodeUpdateManyWithoutUserNestedInput
   password_reset_tokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   auth_sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
@@ -1345,6 +1470,7 @@ export type UserUpdateWithoutLifestyle_profileInput = {
   meals?: Prisma.MealUpdateManyWithoutUserNestedInput
   progress_logs?: Prisma.ProgressLogUpdateManyWithoutUserNestedInput
   daily_logs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
+  token_usage_logs?: Prisma.TokenUsageLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutLifestyle_profileInput = {
@@ -1357,6 +1483,8 @@ export type UserUncheckedUpdateWithoutLifestyle_profileInput = {
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  health_consent_given_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  health_consent_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification_codes?: Prisma.VerificationCodeUncheckedUpdateManyWithoutUserNestedInput
   password_reset_tokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   auth_sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
@@ -1372,6 +1500,7 @@ export type UserUncheckedUpdateWithoutLifestyle_profileInput = {
   meals?: Prisma.MealUncheckedUpdateManyWithoutUserNestedInput
   progress_logs?: Prisma.ProgressLogUncheckedUpdateManyWithoutUserNestedInput
   daily_logs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
+  token_usage_logs?: Prisma.TokenUsageLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutTraining_preferencesInput = {
@@ -1384,6 +1513,8 @@ export type UserCreateWithoutTraining_preferencesInput = {
   status?: $Enums.UserStatus
   created_at?: Date | string
   updated_at?: Date | string
+  health_consent_given_at?: Date | string | null
+  health_consent_version?: string | null
   verification_codes?: Prisma.VerificationCodeCreateNestedManyWithoutUserInput
   password_reset_tokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   auth_sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
@@ -1399,6 +1530,7 @@ export type UserCreateWithoutTraining_preferencesInput = {
   meals?: Prisma.MealCreateNestedManyWithoutUserInput
   progress_logs?: Prisma.ProgressLogCreateNestedManyWithoutUserInput
   daily_logs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
+  token_usage_logs?: Prisma.TokenUsageLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutTraining_preferencesInput = {
@@ -1411,6 +1543,8 @@ export type UserUncheckedCreateWithoutTraining_preferencesInput = {
   status?: $Enums.UserStatus
   created_at?: Date | string
   updated_at?: Date | string
+  health_consent_given_at?: Date | string | null
+  health_consent_version?: string | null
   verification_codes?: Prisma.VerificationCodeUncheckedCreateNestedManyWithoutUserInput
   password_reset_tokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   auth_sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
@@ -1426,6 +1560,7 @@ export type UserUncheckedCreateWithoutTraining_preferencesInput = {
   meals?: Prisma.MealUncheckedCreateNestedManyWithoutUserInput
   progress_logs?: Prisma.ProgressLogUncheckedCreateNestedManyWithoutUserInput
   daily_logs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
+  token_usage_logs?: Prisma.TokenUsageLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutTraining_preferencesInput = {
@@ -1454,6 +1589,8 @@ export type UserUpdateWithoutTraining_preferencesInput = {
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  health_consent_given_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  health_consent_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification_codes?: Prisma.VerificationCodeUpdateManyWithoutUserNestedInput
   password_reset_tokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   auth_sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
@@ -1469,6 +1606,7 @@ export type UserUpdateWithoutTraining_preferencesInput = {
   meals?: Prisma.MealUpdateManyWithoutUserNestedInput
   progress_logs?: Prisma.ProgressLogUpdateManyWithoutUserNestedInput
   daily_logs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
+  token_usage_logs?: Prisma.TokenUsageLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTraining_preferencesInput = {
@@ -1481,6 +1619,8 @@ export type UserUncheckedUpdateWithoutTraining_preferencesInput = {
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  health_consent_given_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  health_consent_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification_codes?: Prisma.VerificationCodeUncheckedUpdateManyWithoutUserNestedInput
   password_reset_tokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   auth_sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
@@ -1496,6 +1636,7 @@ export type UserUncheckedUpdateWithoutTraining_preferencesInput = {
   meals?: Prisma.MealUncheckedUpdateManyWithoutUserNestedInput
   progress_logs?: Prisma.ProgressLogUncheckedUpdateManyWithoutUserNestedInput
   daily_logs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
+  token_usage_logs?: Prisma.TokenUsageLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutHealth_conditionsInput = {
@@ -1508,6 +1649,8 @@ export type UserCreateWithoutHealth_conditionsInput = {
   status?: $Enums.UserStatus
   created_at?: Date | string
   updated_at?: Date | string
+  health_consent_given_at?: Date | string | null
+  health_consent_version?: string | null
   verification_codes?: Prisma.VerificationCodeCreateNestedManyWithoutUserInput
   password_reset_tokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   auth_sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
@@ -1523,6 +1666,7 @@ export type UserCreateWithoutHealth_conditionsInput = {
   meals?: Prisma.MealCreateNestedManyWithoutUserInput
   progress_logs?: Prisma.ProgressLogCreateNestedManyWithoutUserInput
   daily_logs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
+  token_usage_logs?: Prisma.TokenUsageLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutHealth_conditionsInput = {
@@ -1535,6 +1679,8 @@ export type UserUncheckedCreateWithoutHealth_conditionsInput = {
   status?: $Enums.UserStatus
   created_at?: Date | string
   updated_at?: Date | string
+  health_consent_given_at?: Date | string | null
+  health_consent_version?: string | null
   verification_codes?: Prisma.VerificationCodeUncheckedCreateNestedManyWithoutUserInput
   password_reset_tokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   auth_sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
@@ -1550,6 +1696,7 @@ export type UserUncheckedCreateWithoutHealth_conditionsInput = {
   meals?: Prisma.MealUncheckedCreateNestedManyWithoutUserInput
   progress_logs?: Prisma.ProgressLogUncheckedCreateNestedManyWithoutUserInput
   daily_logs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
+  token_usage_logs?: Prisma.TokenUsageLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutHealth_conditionsInput = {
@@ -1578,6 +1725,8 @@ export type UserUpdateWithoutHealth_conditionsInput = {
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  health_consent_given_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  health_consent_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification_codes?: Prisma.VerificationCodeUpdateManyWithoutUserNestedInput
   password_reset_tokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   auth_sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
@@ -1593,6 +1742,7 @@ export type UserUpdateWithoutHealth_conditionsInput = {
   meals?: Prisma.MealUpdateManyWithoutUserNestedInput
   progress_logs?: Prisma.ProgressLogUpdateManyWithoutUserNestedInput
   daily_logs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
+  token_usage_logs?: Prisma.TokenUsageLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutHealth_conditionsInput = {
@@ -1605,6 +1755,8 @@ export type UserUncheckedUpdateWithoutHealth_conditionsInput = {
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  health_consent_given_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  health_consent_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification_codes?: Prisma.VerificationCodeUncheckedUpdateManyWithoutUserNestedInput
   password_reset_tokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   auth_sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
@@ -1620,6 +1772,7 @@ export type UserUncheckedUpdateWithoutHealth_conditionsInput = {
   meals?: Prisma.MealUncheckedUpdateManyWithoutUserNestedInput
   progress_logs?: Prisma.ProgressLogUncheckedUpdateManyWithoutUserNestedInput
   daily_logs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
+  token_usage_logs?: Prisma.TokenUsageLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutNutrition_preferencesInput = {
@@ -1632,6 +1785,8 @@ export type UserCreateWithoutNutrition_preferencesInput = {
   status?: $Enums.UserStatus
   created_at?: Date | string
   updated_at?: Date | string
+  health_consent_given_at?: Date | string | null
+  health_consent_version?: string | null
   verification_codes?: Prisma.VerificationCodeCreateNestedManyWithoutUserInput
   password_reset_tokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   auth_sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
@@ -1647,6 +1802,7 @@ export type UserCreateWithoutNutrition_preferencesInput = {
   meals?: Prisma.MealCreateNestedManyWithoutUserInput
   progress_logs?: Prisma.ProgressLogCreateNestedManyWithoutUserInput
   daily_logs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
+  token_usage_logs?: Prisma.TokenUsageLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutNutrition_preferencesInput = {
@@ -1659,6 +1815,8 @@ export type UserUncheckedCreateWithoutNutrition_preferencesInput = {
   status?: $Enums.UserStatus
   created_at?: Date | string
   updated_at?: Date | string
+  health_consent_given_at?: Date | string | null
+  health_consent_version?: string | null
   verification_codes?: Prisma.VerificationCodeUncheckedCreateNestedManyWithoutUserInput
   password_reset_tokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   auth_sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
@@ -1674,6 +1832,7 @@ export type UserUncheckedCreateWithoutNutrition_preferencesInput = {
   meals?: Prisma.MealUncheckedCreateNestedManyWithoutUserInput
   progress_logs?: Prisma.ProgressLogUncheckedCreateNestedManyWithoutUserInput
   daily_logs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
+  token_usage_logs?: Prisma.TokenUsageLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutNutrition_preferencesInput = {
@@ -1702,6 +1861,8 @@ export type UserUpdateWithoutNutrition_preferencesInput = {
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  health_consent_given_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  health_consent_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification_codes?: Prisma.VerificationCodeUpdateManyWithoutUserNestedInput
   password_reset_tokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   auth_sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
@@ -1717,6 +1878,7 @@ export type UserUpdateWithoutNutrition_preferencesInput = {
   meals?: Prisma.MealUpdateManyWithoutUserNestedInput
   progress_logs?: Prisma.ProgressLogUpdateManyWithoutUserNestedInput
   daily_logs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
+  token_usage_logs?: Prisma.TokenUsageLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutNutrition_preferencesInput = {
@@ -1729,6 +1891,8 @@ export type UserUncheckedUpdateWithoutNutrition_preferencesInput = {
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  health_consent_given_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  health_consent_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification_codes?: Prisma.VerificationCodeUncheckedUpdateManyWithoutUserNestedInput
   password_reset_tokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   auth_sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
@@ -1744,6 +1908,7 @@ export type UserUncheckedUpdateWithoutNutrition_preferencesInput = {
   meals?: Prisma.MealUncheckedUpdateManyWithoutUserNestedInput
   progress_logs?: Prisma.ProgressLogUncheckedUpdateManyWithoutUserNestedInput
   daily_logs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
+  token_usage_logs?: Prisma.TokenUsageLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutFood_restrictionsInput = {
@@ -1756,6 +1921,8 @@ export type UserCreateWithoutFood_restrictionsInput = {
   status?: $Enums.UserStatus
   created_at?: Date | string
   updated_at?: Date | string
+  health_consent_given_at?: Date | string | null
+  health_consent_version?: string | null
   verification_codes?: Prisma.VerificationCodeCreateNestedManyWithoutUserInput
   password_reset_tokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   auth_sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
@@ -1771,6 +1938,7 @@ export type UserCreateWithoutFood_restrictionsInput = {
   meals?: Prisma.MealCreateNestedManyWithoutUserInput
   progress_logs?: Prisma.ProgressLogCreateNestedManyWithoutUserInput
   daily_logs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
+  token_usage_logs?: Prisma.TokenUsageLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutFood_restrictionsInput = {
@@ -1783,6 +1951,8 @@ export type UserUncheckedCreateWithoutFood_restrictionsInput = {
   status?: $Enums.UserStatus
   created_at?: Date | string
   updated_at?: Date | string
+  health_consent_given_at?: Date | string | null
+  health_consent_version?: string | null
   verification_codes?: Prisma.VerificationCodeUncheckedCreateNestedManyWithoutUserInput
   password_reset_tokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   auth_sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
@@ -1798,6 +1968,7 @@ export type UserUncheckedCreateWithoutFood_restrictionsInput = {
   meals?: Prisma.MealUncheckedCreateNestedManyWithoutUserInput
   progress_logs?: Prisma.ProgressLogUncheckedCreateNestedManyWithoutUserInput
   daily_logs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
+  token_usage_logs?: Prisma.TokenUsageLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutFood_restrictionsInput = {
@@ -1826,6 +1997,8 @@ export type UserUpdateWithoutFood_restrictionsInput = {
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  health_consent_given_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  health_consent_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification_codes?: Prisma.VerificationCodeUpdateManyWithoutUserNestedInput
   password_reset_tokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   auth_sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
@@ -1841,6 +2014,7 @@ export type UserUpdateWithoutFood_restrictionsInput = {
   meals?: Prisma.MealUpdateManyWithoutUserNestedInput
   progress_logs?: Prisma.ProgressLogUpdateManyWithoutUserNestedInput
   daily_logs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
+  token_usage_logs?: Prisma.TokenUsageLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutFood_restrictionsInput = {
@@ -1853,6 +2027,8 @@ export type UserUncheckedUpdateWithoutFood_restrictionsInput = {
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  health_consent_given_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  health_consent_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification_codes?: Prisma.VerificationCodeUncheckedUpdateManyWithoutUserNestedInput
   password_reset_tokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   auth_sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
@@ -1868,6 +2044,7 @@ export type UserUncheckedUpdateWithoutFood_restrictionsInput = {
   meals?: Prisma.MealUncheckedUpdateManyWithoutUserNestedInput
   progress_logs?: Prisma.ProgressLogUncheckedUpdateManyWithoutUserNestedInput
   daily_logs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
+  token_usage_logs?: Prisma.TokenUsageLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutMotivation_profileInput = {
@@ -1880,6 +2057,8 @@ export type UserCreateWithoutMotivation_profileInput = {
   status?: $Enums.UserStatus
   created_at?: Date | string
   updated_at?: Date | string
+  health_consent_given_at?: Date | string | null
+  health_consent_version?: string | null
   verification_codes?: Prisma.VerificationCodeCreateNestedManyWithoutUserInput
   password_reset_tokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   auth_sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
@@ -1895,6 +2074,7 @@ export type UserCreateWithoutMotivation_profileInput = {
   meals?: Prisma.MealCreateNestedManyWithoutUserInput
   progress_logs?: Prisma.ProgressLogCreateNestedManyWithoutUserInput
   daily_logs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
+  token_usage_logs?: Prisma.TokenUsageLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutMotivation_profileInput = {
@@ -1907,6 +2087,8 @@ export type UserUncheckedCreateWithoutMotivation_profileInput = {
   status?: $Enums.UserStatus
   created_at?: Date | string
   updated_at?: Date | string
+  health_consent_given_at?: Date | string | null
+  health_consent_version?: string | null
   verification_codes?: Prisma.VerificationCodeUncheckedCreateNestedManyWithoutUserInput
   password_reset_tokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   auth_sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
@@ -1922,6 +2104,7 @@ export type UserUncheckedCreateWithoutMotivation_profileInput = {
   meals?: Prisma.MealUncheckedCreateNestedManyWithoutUserInput
   progress_logs?: Prisma.ProgressLogUncheckedCreateNestedManyWithoutUserInput
   daily_logs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
+  token_usage_logs?: Prisma.TokenUsageLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutMotivation_profileInput = {
@@ -1950,6 +2133,8 @@ export type UserUpdateWithoutMotivation_profileInput = {
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  health_consent_given_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  health_consent_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification_codes?: Prisma.VerificationCodeUpdateManyWithoutUserNestedInput
   password_reset_tokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   auth_sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
@@ -1965,6 +2150,7 @@ export type UserUpdateWithoutMotivation_profileInput = {
   meals?: Prisma.MealUpdateManyWithoutUserNestedInput
   progress_logs?: Prisma.ProgressLogUpdateManyWithoutUserNestedInput
   daily_logs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
+  token_usage_logs?: Prisma.TokenUsageLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMotivation_profileInput = {
@@ -1977,6 +2163,8 @@ export type UserUncheckedUpdateWithoutMotivation_profileInput = {
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  health_consent_given_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  health_consent_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification_codes?: Prisma.VerificationCodeUncheckedUpdateManyWithoutUserNestedInput
   password_reset_tokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   auth_sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
@@ -1992,6 +2180,7 @@ export type UserUncheckedUpdateWithoutMotivation_profileInput = {
   meals?: Prisma.MealUncheckedUpdateManyWithoutUserNestedInput
   progress_logs?: Prisma.ProgressLogUncheckedUpdateManyWithoutUserNestedInput
   daily_logs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
+  token_usage_logs?: Prisma.TokenUsageLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutOnboarding_answersInput = {
@@ -2004,6 +2193,8 @@ export type UserCreateWithoutOnboarding_answersInput = {
   status?: $Enums.UserStatus
   created_at?: Date | string
   updated_at?: Date | string
+  health_consent_given_at?: Date | string | null
+  health_consent_version?: string | null
   verification_codes?: Prisma.VerificationCodeCreateNestedManyWithoutUserInput
   password_reset_tokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   auth_sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
@@ -2019,6 +2210,7 @@ export type UserCreateWithoutOnboarding_answersInput = {
   meals?: Prisma.MealCreateNestedManyWithoutUserInput
   progress_logs?: Prisma.ProgressLogCreateNestedManyWithoutUserInput
   daily_logs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
+  token_usage_logs?: Prisma.TokenUsageLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutOnboarding_answersInput = {
@@ -2031,6 +2223,8 @@ export type UserUncheckedCreateWithoutOnboarding_answersInput = {
   status?: $Enums.UserStatus
   created_at?: Date | string
   updated_at?: Date | string
+  health_consent_given_at?: Date | string | null
+  health_consent_version?: string | null
   verification_codes?: Prisma.VerificationCodeUncheckedCreateNestedManyWithoutUserInput
   password_reset_tokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   auth_sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
@@ -2046,6 +2240,7 @@ export type UserUncheckedCreateWithoutOnboarding_answersInput = {
   meals?: Prisma.MealUncheckedCreateNestedManyWithoutUserInput
   progress_logs?: Prisma.ProgressLogUncheckedCreateNestedManyWithoutUserInput
   daily_logs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
+  token_usage_logs?: Prisma.TokenUsageLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutOnboarding_answersInput = {
@@ -2074,6 +2269,8 @@ export type UserUpdateWithoutOnboarding_answersInput = {
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  health_consent_given_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  health_consent_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification_codes?: Prisma.VerificationCodeUpdateManyWithoutUserNestedInput
   password_reset_tokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   auth_sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
@@ -2089,6 +2286,7 @@ export type UserUpdateWithoutOnboarding_answersInput = {
   meals?: Prisma.MealUpdateManyWithoutUserNestedInput
   progress_logs?: Prisma.ProgressLogUpdateManyWithoutUserNestedInput
   daily_logs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
+  token_usage_logs?: Prisma.TokenUsageLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOnboarding_answersInput = {
@@ -2101,6 +2299,8 @@ export type UserUncheckedUpdateWithoutOnboarding_answersInput = {
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  health_consent_given_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  health_consent_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification_codes?: Prisma.VerificationCodeUncheckedUpdateManyWithoutUserNestedInput
   password_reset_tokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   auth_sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
@@ -2116,6 +2316,7 @@ export type UserUncheckedUpdateWithoutOnboarding_answersInput = {
   meals?: Prisma.MealUncheckedUpdateManyWithoutUserNestedInput
   progress_logs?: Prisma.ProgressLogUncheckedUpdateManyWithoutUserNestedInput
   daily_logs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
+  token_usage_logs?: Prisma.TokenUsageLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPlansInput = {
@@ -2128,6 +2329,8 @@ export type UserCreateWithoutPlansInput = {
   status?: $Enums.UserStatus
   created_at?: Date | string
   updated_at?: Date | string
+  health_consent_given_at?: Date | string | null
+  health_consent_version?: string | null
   verification_codes?: Prisma.VerificationCodeCreateNestedManyWithoutUserInput
   password_reset_tokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   auth_sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
@@ -2143,6 +2346,7 @@ export type UserCreateWithoutPlansInput = {
   meals?: Prisma.MealCreateNestedManyWithoutUserInput
   progress_logs?: Prisma.ProgressLogCreateNestedManyWithoutUserInput
   daily_logs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
+  token_usage_logs?: Prisma.TokenUsageLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPlansInput = {
@@ -2155,6 +2359,8 @@ export type UserUncheckedCreateWithoutPlansInput = {
   status?: $Enums.UserStatus
   created_at?: Date | string
   updated_at?: Date | string
+  health_consent_given_at?: Date | string | null
+  health_consent_version?: string | null
   verification_codes?: Prisma.VerificationCodeUncheckedCreateNestedManyWithoutUserInput
   password_reset_tokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   auth_sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
@@ -2170,6 +2376,7 @@ export type UserUncheckedCreateWithoutPlansInput = {
   meals?: Prisma.MealUncheckedCreateNestedManyWithoutUserInput
   progress_logs?: Prisma.ProgressLogUncheckedCreateNestedManyWithoutUserInput
   daily_logs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
+  token_usage_logs?: Prisma.TokenUsageLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPlansInput = {
@@ -2198,6 +2405,8 @@ export type UserUpdateWithoutPlansInput = {
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  health_consent_given_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  health_consent_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification_codes?: Prisma.VerificationCodeUpdateManyWithoutUserNestedInput
   password_reset_tokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   auth_sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
@@ -2213,6 +2422,7 @@ export type UserUpdateWithoutPlansInput = {
   meals?: Prisma.MealUpdateManyWithoutUserNestedInput
   progress_logs?: Prisma.ProgressLogUpdateManyWithoutUserNestedInput
   daily_logs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
+  token_usage_logs?: Prisma.TokenUsageLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPlansInput = {
@@ -2225,6 +2435,8 @@ export type UserUncheckedUpdateWithoutPlansInput = {
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  health_consent_given_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  health_consent_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification_codes?: Prisma.VerificationCodeUncheckedUpdateManyWithoutUserNestedInput
   password_reset_tokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   auth_sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
@@ -2240,6 +2452,7 @@ export type UserUncheckedUpdateWithoutPlansInput = {
   meals?: Prisma.MealUncheckedUpdateManyWithoutUserNestedInput
   progress_logs?: Prisma.ProgressLogUncheckedUpdateManyWithoutUserNestedInput
   daily_logs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
+  token_usage_logs?: Prisma.TokenUsageLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutTraining_sessionsInput = {
@@ -2252,6 +2465,8 @@ export type UserCreateWithoutTraining_sessionsInput = {
   status?: $Enums.UserStatus
   created_at?: Date | string
   updated_at?: Date | string
+  health_consent_given_at?: Date | string | null
+  health_consent_version?: string | null
   verification_codes?: Prisma.VerificationCodeCreateNestedManyWithoutUserInput
   password_reset_tokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   auth_sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
@@ -2267,6 +2482,7 @@ export type UserCreateWithoutTraining_sessionsInput = {
   meals?: Prisma.MealCreateNestedManyWithoutUserInput
   progress_logs?: Prisma.ProgressLogCreateNestedManyWithoutUserInput
   daily_logs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
+  token_usage_logs?: Prisma.TokenUsageLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutTraining_sessionsInput = {
@@ -2279,6 +2495,8 @@ export type UserUncheckedCreateWithoutTraining_sessionsInput = {
   status?: $Enums.UserStatus
   created_at?: Date | string
   updated_at?: Date | string
+  health_consent_given_at?: Date | string | null
+  health_consent_version?: string | null
   verification_codes?: Prisma.VerificationCodeUncheckedCreateNestedManyWithoutUserInput
   password_reset_tokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   auth_sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
@@ -2294,6 +2512,7 @@ export type UserUncheckedCreateWithoutTraining_sessionsInput = {
   meals?: Prisma.MealUncheckedCreateNestedManyWithoutUserInput
   progress_logs?: Prisma.ProgressLogUncheckedCreateNestedManyWithoutUserInput
   daily_logs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
+  token_usage_logs?: Prisma.TokenUsageLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutTraining_sessionsInput = {
@@ -2322,6 +2541,8 @@ export type UserUpdateWithoutTraining_sessionsInput = {
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  health_consent_given_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  health_consent_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification_codes?: Prisma.VerificationCodeUpdateManyWithoutUserNestedInput
   password_reset_tokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   auth_sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
@@ -2337,6 +2558,7 @@ export type UserUpdateWithoutTraining_sessionsInput = {
   meals?: Prisma.MealUpdateManyWithoutUserNestedInput
   progress_logs?: Prisma.ProgressLogUpdateManyWithoutUserNestedInput
   daily_logs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
+  token_usage_logs?: Prisma.TokenUsageLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTraining_sessionsInput = {
@@ -2349,6 +2571,8 @@ export type UserUncheckedUpdateWithoutTraining_sessionsInput = {
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  health_consent_given_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  health_consent_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification_codes?: Prisma.VerificationCodeUncheckedUpdateManyWithoutUserNestedInput
   password_reset_tokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   auth_sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
@@ -2364,6 +2588,7 @@ export type UserUncheckedUpdateWithoutTraining_sessionsInput = {
   meals?: Prisma.MealUncheckedUpdateManyWithoutUserNestedInput
   progress_logs?: Prisma.ProgressLogUncheckedUpdateManyWithoutUserNestedInput
   daily_logs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
+  token_usage_logs?: Prisma.TokenUsageLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutMealsInput = {
@@ -2376,6 +2601,8 @@ export type UserCreateWithoutMealsInput = {
   status?: $Enums.UserStatus
   created_at?: Date | string
   updated_at?: Date | string
+  health_consent_given_at?: Date | string | null
+  health_consent_version?: string | null
   verification_codes?: Prisma.VerificationCodeCreateNestedManyWithoutUserInput
   password_reset_tokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   auth_sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
@@ -2391,6 +2618,7 @@ export type UserCreateWithoutMealsInput = {
   training_sessions?: Prisma.TrainingSessionCreateNestedManyWithoutUserInput
   progress_logs?: Prisma.ProgressLogCreateNestedManyWithoutUserInput
   daily_logs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
+  token_usage_logs?: Prisma.TokenUsageLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutMealsInput = {
@@ -2403,6 +2631,8 @@ export type UserUncheckedCreateWithoutMealsInput = {
   status?: $Enums.UserStatus
   created_at?: Date | string
   updated_at?: Date | string
+  health_consent_given_at?: Date | string | null
+  health_consent_version?: string | null
   verification_codes?: Prisma.VerificationCodeUncheckedCreateNestedManyWithoutUserInput
   password_reset_tokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   auth_sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
@@ -2418,6 +2648,7 @@ export type UserUncheckedCreateWithoutMealsInput = {
   training_sessions?: Prisma.TrainingSessionUncheckedCreateNestedManyWithoutUserInput
   progress_logs?: Prisma.ProgressLogUncheckedCreateNestedManyWithoutUserInput
   daily_logs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
+  token_usage_logs?: Prisma.TokenUsageLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutMealsInput = {
@@ -2446,6 +2677,8 @@ export type UserUpdateWithoutMealsInput = {
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  health_consent_given_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  health_consent_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification_codes?: Prisma.VerificationCodeUpdateManyWithoutUserNestedInput
   password_reset_tokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   auth_sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
@@ -2461,6 +2694,7 @@ export type UserUpdateWithoutMealsInput = {
   training_sessions?: Prisma.TrainingSessionUpdateManyWithoutUserNestedInput
   progress_logs?: Prisma.ProgressLogUpdateManyWithoutUserNestedInput
   daily_logs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
+  token_usage_logs?: Prisma.TokenUsageLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMealsInput = {
@@ -2473,6 +2707,8 @@ export type UserUncheckedUpdateWithoutMealsInput = {
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  health_consent_given_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  health_consent_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification_codes?: Prisma.VerificationCodeUncheckedUpdateManyWithoutUserNestedInput
   password_reset_tokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   auth_sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
@@ -2488,6 +2724,7 @@ export type UserUncheckedUpdateWithoutMealsInput = {
   training_sessions?: Prisma.TrainingSessionUncheckedUpdateManyWithoutUserNestedInput
   progress_logs?: Prisma.ProgressLogUncheckedUpdateManyWithoutUserNestedInput
   daily_logs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
+  token_usage_logs?: Prisma.TokenUsageLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutProgress_logsInput = {
@@ -2500,6 +2737,8 @@ export type UserCreateWithoutProgress_logsInput = {
   status?: $Enums.UserStatus
   created_at?: Date | string
   updated_at?: Date | string
+  health_consent_given_at?: Date | string | null
+  health_consent_version?: string | null
   verification_codes?: Prisma.VerificationCodeCreateNestedManyWithoutUserInput
   password_reset_tokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   auth_sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
@@ -2515,6 +2754,7 @@ export type UserCreateWithoutProgress_logsInput = {
   training_sessions?: Prisma.TrainingSessionCreateNestedManyWithoutUserInput
   meals?: Prisma.MealCreateNestedManyWithoutUserInput
   daily_logs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
+  token_usage_logs?: Prisma.TokenUsageLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutProgress_logsInput = {
@@ -2527,6 +2767,8 @@ export type UserUncheckedCreateWithoutProgress_logsInput = {
   status?: $Enums.UserStatus
   created_at?: Date | string
   updated_at?: Date | string
+  health_consent_given_at?: Date | string | null
+  health_consent_version?: string | null
   verification_codes?: Prisma.VerificationCodeUncheckedCreateNestedManyWithoutUserInput
   password_reset_tokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   auth_sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
@@ -2542,6 +2784,7 @@ export type UserUncheckedCreateWithoutProgress_logsInput = {
   training_sessions?: Prisma.TrainingSessionUncheckedCreateNestedManyWithoutUserInput
   meals?: Prisma.MealUncheckedCreateNestedManyWithoutUserInput
   daily_logs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
+  token_usage_logs?: Prisma.TokenUsageLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutProgress_logsInput = {
@@ -2570,6 +2813,8 @@ export type UserUpdateWithoutProgress_logsInput = {
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  health_consent_given_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  health_consent_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification_codes?: Prisma.VerificationCodeUpdateManyWithoutUserNestedInput
   password_reset_tokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   auth_sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
@@ -2585,6 +2830,7 @@ export type UserUpdateWithoutProgress_logsInput = {
   training_sessions?: Prisma.TrainingSessionUpdateManyWithoutUserNestedInput
   meals?: Prisma.MealUpdateManyWithoutUserNestedInput
   daily_logs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
+  token_usage_logs?: Prisma.TokenUsageLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutProgress_logsInput = {
@@ -2597,6 +2843,8 @@ export type UserUncheckedUpdateWithoutProgress_logsInput = {
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  health_consent_given_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  health_consent_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification_codes?: Prisma.VerificationCodeUncheckedUpdateManyWithoutUserNestedInput
   password_reset_tokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   auth_sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
@@ -2612,6 +2860,7 @@ export type UserUncheckedUpdateWithoutProgress_logsInput = {
   training_sessions?: Prisma.TrainingSessionUncheckedUpdateManyWithoutUserNestedInput
   meals?: Prisma.MealUncheckedUpdateManyWithoutUserNestedInput
   daily_logs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
+  token_usage_logs?: Prisma.TokenUsageLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutDaily_logsInput = {
@@ -2624,6 +2873,8 @@ export type UserCreateWithoutDaily_logsInput = {
   status?: $Enums.UserStatus
   created_at?: Date | string
   updated_at?: Date | string
+  health_consent_given_at?: Date | string | null
+  health_consent_version?: string | null
   verification_codes?: Prisma.VerificationCodeCreateNestedManyWithoutUserInput
   password_reset_tokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   auth_sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
@@ -2639,6 +2890,7 @@ export type UserCreateWithoutDaily_logsInput = {
   training_sessions?: Prisma.TrainingSessionCreateNestedManyWithoutUserInput
   meals?: Prisma.MealCreateNestedManyWithoutUserInput
   progress_logs?: Prisma.ProgressLogCreateNestedManyWithoutUserInput
+  token_usage_logs?: Prisma.TokenUsageLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutDaily_logsInput = {
@@ -2651,6 +2903,8 @@ export type UserUncheckedCreateWithoutDaily_logsInput = {
   status?: $Enums.UserStatus
   created_at?: Date | string
   updated_at?: Date | string
+  health_consent_given_at?: Date | string | null
+  health_consent_version?: string | null
   verification_codes?: Prisma.VerificationCodeUncheckedCreateNestedManyWithoutUserInput
   password_reset_tokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   auth_sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
@@ -2666,6 +2920,7 @@ export type UserUncheckedCreateWithoutDaily_logsInput = {
   training_sessions?: Prisma.TrainingSessionUncheckedCreateNestedManyWithoutUserInput
   meals?: Prisma.MealUncheckedCreateNestedManyWithoutUserInput
   progress_logs?: Prisma.ProgressLogUncheckedCreateNestedManyWithoutUserInput
+  token_usage_logs?: Prisma.TokenUsageLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutDaily_logsInput = {
@@ -2694,6 +2949,8 @@ export type UserUpdateWithoutDaily_logsInput = {
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  health_consent_given_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  health_consent_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification_codes?: Prisma.VerificationCodeUpdateManyWithoutUserNestedInput
   password_reset_tokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   auth_sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
@@ -2709,6 +2966,7 @@ export type UserUpdateWithoutDaily_logsInput = {
   training_sessions?: Prisma.TrainingSessionUpdateManyWithoutUserNestedInput
   meals?: Prisma.MealUpdateManyWithoutUserNestedInput
   progress_logs?: Prisma.ProgressLogUpdateManyWithoutUserNestedInput
+  token_usage_logs?: Prisma.TokenUsageLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutDaily_logsInput = {
@@ -2721,6 +2979,8 @@ export type UserUncheckedUpdateWithoutDaily_logsInput = {
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  health_consent_given_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  health_consent_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verification_codes?: Prisma.VerificationCodeUncheckedUpdateManyWithoutUserNestedInput
   password_reset_tokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   auth_sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
@@ -2736,6 +2996,143 @@ export type UserUncheckedUpdateWithoutDaily_logsInput = {
   training_sessions?: Prisma.TrainingSessionUncheckedUpdateManyWithoutUserNestedInput
   meals?: Prisma.MealUncheckedUpdateManyWithoutUserNestedInput
   progress_logs?: Prisma.ProgressLogUncheckedUpdateManyWithoutUserNestedInput
+  token_usage_logs?: Prisma.TokenUsageLogUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutToken_usage_logsInput = {
+  id?: string
+  email: string
+  phone_number?: string | null
+  password_hash: string
+  email_verified?: boolean
+  phone_verified?: boolean
+  status?: $Enums.UserStatus
+  created_at?: Date | string
+  updated_at?: Date | string
+  health_consent_given_at?: Date | string | null
+  health_consent_version?: string | null
+  verification_codes?: Prisma.VerificationCodeCreateNestedManyWithoutUserInput
+  password_reset_tokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  auth_sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
+  profile?: Prisma.ProfileCreateNestedOneWithoutUserInput
+  lifestyle_profile?: Prisma.LifestyleProfileCreateNestedOneWithoutUserInput
+  training_preferences?: Prisma.TrainingPreferencesCreateNestedOneWithoutUserInput
+  health_conditions?: Prisma.HealthConditionCreateNestedManyWithoutUserInput
+  nutrition_preferences?: Prisma.NutritionPreferencesCreateNestedOneWithoutUserInput
+  food_restrictions?: Prisma.FoodRestrictionCreateNestedManyWithoutUserInput
+  motivation_profile?: Prisma.MotivationProfileCreateNestedOneWithoutUserInput
+  onboarding_answers?: Prisma.OnboardingAnswerCreateNestedManyWithoutUserInput
+  plans?: Prisma.PlanCreateNestedManyWithoutUserInput
+  training_sessions?: Prisma.TrainingSessionCreateNestedManyWithoutUserInput
+  meals?: Prisma.MealCreateNestedManyWithoutUserInput
+  progress_logs?: Prisma.ProgressLogCreateNestedManyWithoutUserInput
+  daily_logs?: Prisma.DailyLogCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutToken_usage_logsInput = {
+  id?: string
+  email: string
+  phone_number?: string | null
+  password_hash: string
+  email_verified?: boolean
+  phone_verified?: boolean
+  status?: $Enums.UserStatus
+  created_at?: Date | string
+  updated_at?: Date | string
+  health_consent_given_at?: Date | string | null
+  health_consent_version?: string | null
+  verification_codes?: Prisma.VerificationCodeUncheckedCreateNestedManyWithoutUserInput
+  password_reset_tokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  auth_sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.ProfileUncheckedCreateNestedOneWithoutUserInput
+  lifestyle_profile?: Prisma.LifestyleProfileUncheckedCreateNestedOneWithoutUserInput
+  training_preferences?: Prisma.TrainingPreferencesUncheckedCreateNestedOneWithoutUserInput
+  health_conditions?: Prisma.HealthConditionUncheckedCreateNestedManyWithoutUserInput
+  nutrition_preferences?: Prisma.NutritionPreferencesUncheckedCreateNestedOneWithoutUserInput
+  food_restrictions?: Prisma.FoodRestrictionUncheckedCreateNestedManyWithoutUserInput
+  motivation_profile?: Prisma.MotivationProfileUncheckedCreateNestedOneWithoutUserInput
+  onboarding_answers?: Prisma.OnboardingAnswerUncheckedCreateNestedManyWithoutUserInput
+  plans?: Prisma.PlanUncheckedCreateNestedManyWithoutUserInput
+  training_sessions?: Prisma.TrainingSessionUncheckedCreateNestedManyWithoutUserInput
+  meals?: Prisma.MealUncheckedCreateNestedManyWithoutUserInput
+  progress_logs?: Prisma.ProgressLogUncheckedCreateNestedManyWithoutUserInput
+  daily_logs?: Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutToken_usage_logsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutToken_usage_logsInput, Prisma.UserUncheckedCreateWithoutToken_usage_logsInput>
+}
+
+export type UserUpsertWithoutToken_usage_logsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutToken_usage_logsInput, Prisma.UserUncheckedUpdateWithoutToken_usage_logsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutToken_usage_logsInput, Prisma.UserUncheckedCreateWithoutToken_usage_logsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutToken_usage_logsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutToken_usage_logsInput, Prisma.UserUncheckedUpdateWithoutToken_usage_logsInput>
+}
+
+export type UserUpdateWithoutToken_usage_logsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  phone_verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  health_consent_given_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  health_consent_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  verification_codes?: Prisma.VerificationCodeUpdateManyWithoutUserNestedInput
+  password_reset_tokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  auth_sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
+  profile?: Prisma.ProfileUpdateOneWithoutUserNestedInput
+  lifestyle_profile?: Prisma.LifestyleProfileUpdateOneWithoutUserNestedInput
+  training_preferences?: Prisma.TrainingPreferencesUpdateOneWithoutUserNestedInput
+  health_conditions?: Prisma.HealthConditionUpdateManyWithoutUserNestedInput
+  nutrition_preferences?: Prisma.NutritionPreferencesUpdateOneWithoutUserNestedInput
+  food_restrictions?: Prisma.FoodRestrictionUpdateManyWithoutUserNestedInput
+  motivation_profile?: Prisma.MotivationProfileUpdateOneWithoutUserNestedInput
+  onboarding_answers?: Prisma.OnboardingAnswerUpdateManyWithoutUserNestedInput
+  plans?: Prisma.PlanUpdateManyWithoutUserNestedInput
+  training_sessions?: Prisma.TrainingSessionUpdateManyWithoutUserNestedInput
+  meals?: Prisma.MealUpdateManyWithoutUserNestedInput
+  progress_logs?: Prisma.ProgressLogUpdateManyWithoutUserNestedInput
+  daily_logs?: Prisma.DailyLogUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutToken_usage_logsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  email_verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  phone_verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  health_consent_given_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  health_consent_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  verification_codes?: Prisma.VerificationCodeUncheckedUpdateManyWithoutUserNestedInput
+  password_reset_tokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  auth_sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.ProfileUncheckedUpdateOneWithoutUserNestedInput
+  lifestyle_profile?: Prisma.LifestyleProfileUncheckedUpdateOneWithoutUserNestedInput
+  training_preferences?: Prisma.TrainingPreferencesUncheckedUpdateOneWithoutUserNestedInput
+  health_conditions?: Prisma.HealthConditionUncheckedUpdateManyWithoutUserNestedInput
+  nutrition_preferences?: Prisma.NutritionPreferencesUncheckedUpdateOneWithoutUserNestedInput
+  food_restrictions?: Prisma.FoodRestrictionUncheckedUpdateManyWithoutUserNestedInput
+  motivation_profile?: Prisma.MotivationProfileUncheckedUpdateOneWithoutUserNestedInput
+  onboarding_answers?: Prisma.OnboardingAnswerUncheckedUpdateManyWithoutUserNestedInput
+  plans?: Prisma.PlanUncheckedUpdateManyWithoutUserNestedInput
+  training_sessions?: Prisma.TrainingSessionUncheckedUpdateManyWithoutUserNestedInput
+  meals?: Prisma.MealUncheckedUpdateManyWithoutUserNestedInput
+  progress_logs?: Prisma.ProgressLogUncheckedUpdateManyWithoutUserNestedInput
+  daily_logs?: Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -2755,6 +3152,7 @@ export type UserCountOutputType = {
   meals: number
   progress_logs: number
   daily_logs: number
+  token_usage_logs: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2769,6 +3167,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   meals?: boolean | UserCountOutputTypeCountMealsArgs
   progress_logs?: boolean | UserCountOutputTypeCountProgress_logsArgs
   daily_logs?: boolean | UserCountOutputTypeCountDaily_logsArgs
+  token_usage_logs?: boolean | UserCountOutputTypeCountToken_usage_logsArgs
 }
 
 /**
@@ -2858,6 +3257,13 @@ export type UserCountOutputTypeCountDaily_logsArgs<ExtArgs extends runtime.Types
   where?: Prisma.DailyLogWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountToken_usage_logsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TokenUsageLogWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -2869,6 +3275,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   status?: boolean
   created_at?: boolean
   updated_at?: boolean
+  health_consent_given_at?: boolean
+  health_consent_version?: boolean
   verification_codes?: boolean | Prisma.User$verification_codesArgs<ExtArgs>
   password_reset_tokens?: boolean | Prisma.User$password_reset_tokensArgs<ExtArgs>
   auth_sessions?: boolean | Prisma.User$auth_sessionsArgs<ExtArgs>
@@ -2885,6 +3293,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   meals?: boolean | Prisma.User$mealsArgs<ExtArgs>
   progress_logs?: boolean | Prisma.User$progress_logsArgs<ExtArgs>
   daily_logs?: boolean | Prisma.User$daily_logsArgs<ExtArgs>
+  token_usage_logs?: boolean | Prisma.User$token_usage_logsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -2898,6 +3307,8 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   status?: boolean
   created_at?: boolean
   updated_at?: boolean
+  health_consent_given_at?: boolean
+  health_consent_version?: boolean
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -2910,6 +3321,8 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   status?: boolean
   created_at?: boolean
   updated_at?: boolean
+  health_consent_given_at?: boolean
+  health_consent_version?: boolean
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectScalar = {
@@ -2922,9 +3335,11 @@ export type UserSelectScalar = {
   status?: boolean
   created_at?: boolean
   updated_at?: boolean
+  health_consent_given_at?: boolean
+  health_consent_version?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "phone_number" | "password_hash" | "email_verified" | "phone_verified" | "status" | "created_at" | "updated_at", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "phone_number" | "password_hash" | "email_verified" | "phone_verified" | "status" | "created_at" | "updated_at" | "health_consent_given_at" | "health_consent_version", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   verification_codes?: boolean | Prisma.User$verification_codesArgs<ExtArgs>
   password_reset_tokens?: boolean | Prisma.User$password_reset_tokensArgs<ExtArgs>
@@ -2942,6 +3357,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   meals?: boolean | Prisma.User$mealsArgs<ExtArgs>
   progress_logs?: boolean | Prisma.User$progress_logsArgs<ExtArgs>
   daily_logs?: boolean | Prisma.User$daily_logsArgs<ExtArgs>
+  token_usage_logs?: boolean | Prisma.User$token_usage_logsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -2966,6 +3382,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     meals: Prisma.$MealPayload<ExtArgs>[]
     progress_logs: Prisma.$ProgressLogPayload<ExtArgs>[]
     daily_logs: Prisma.$DailyLogPayload<ExtArgs>[]
+    token_usage_logs: Prisma.$TokenUsageLogPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2977,6 +3394,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     status: $Enums.UserStatus
     created_at: Date
     updated_at: Date
+    health_consent_given_at: Date | null
+    health_consent_version: string | null
   }, ExtArgs["result"]["user"]>
   composites: {}
 }
@@ -3387,6 +3806,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   meals<T extends Prisma.User$mealsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$mealsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MealPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   progress_logs<T extends Prisma.User$progress_logsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$progress_logsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProgressLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   daily_logs<T extends Prisma.User$daily_logsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$daily_logsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DailyLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  token_usage_logs<T extends Prisma.User$token_usage_logsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$token_usage_logsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TokenUsageLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3425,6 +3845,8 @@ export interface UserFieldRefs {
   readonly status: Prisma.FieldRef<"User", 'UserStatus'>
   readonly created_at: Prisma.FieldRef<"User", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"User", 'DateTime'>
+  readonly health_consent_given_at: Prisma.FieldRef<"User", 'DateTime'>
+  readonly health_consent_version: Prisma.FieldRef<"User", 'String'>
 }
     
 
@@ -4174,6 +4596,30 @@ export type User$daily_logsArgs<ExtArgs extends runtime.Types.Extensions.Interna
   take?: number
   skip?: number
   distinct?: Prisma.DailyLogScalarFieldEnum | Prisma.DailyLogScalarFieldEnum[]
+}
+
+/**
+ * User.token_usage_logs
+ */
+export type User$token_usage_logsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TokenUsageLog
+   */
+  select?: Prisma.TokenUsageLogSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TokenUsageLog
+   */
+  omit?: Prisma.TokenUsageLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TokenUsageLogInclude<ExtArgs> | null
+  where?: Prisma.TokenUsageLogWhereInput
+  orderBy?: Prisma.TokenUsageLogOrderByWithRelationInput | Prisma.TokenUsageLogOrderByWithRelationInput[]
+  cursor?: Prisma.TokenUsageLogWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TokenUsageLogScalarFieldEnum | Prisma.TokenUsageLogScalarFieldEnum[]
 }
 
 /**

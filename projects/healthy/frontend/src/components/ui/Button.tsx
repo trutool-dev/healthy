@@ -48,14 +48,14 @@ const styles = StyleSheet.create({
   iconLeft:         { marginRight: 8 },
   iconRight:        { marginLeft: 8 },
   label:            { ...textStyles.bodyLarge, fontWeight: '600' },
-  primary:          { backgroundColor: colors.primary.green, ...shadows.button },
-  secondary:        { backgroundColor: 'transparent', borderWidth: 1.5, borderColor: colors.primary.green },
+  primary:          { backgroundColor: colors.primary.darkGreen, ...shadows.button }, // FE-12: #16A34A cumple WCAG AA
+  secondary:        { backgroundColor: 'transparent', borderWidth: 1.5, borderColor: colors.primary.darkGreen },
   ghost:            { backgroundColor: 'transparent' },
-  destructive:      { backgroundColor: colors.semantic.error },
+  destructive:      { backgroundColor: '#DC2626' }, // FE-12: contraste suficiente
   disabled:         { backgroundColor: colors.neutral.lightGray },
   primaryLabel:     { color: colors.neutral.white },
-  secondaryLabel:   { color: colors.primary.green },
-  ghostLabel:       { color: colors.primary.green },
+  secondaryLabel:   { color: colors.primary.darkGreen },
+  ghostLabel:       { color: colors.primary.darkGreen },
   destructiveLabel: { color: colors.neutral.white },
   disabledLabel:    { color: colors.neutral.midGray },
 });

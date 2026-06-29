@@ -79,7 +79,7 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
                   <Ionicons
                     name={isActive ? tab.iconFilled : tab.iconOutline}
                     size={iconSize.standard}
-                    color={isActive ? colors.primary.green : colors.neutral.midGray}
+                    color={isActive ? colors.primary.darkGreen : colors.neutral.midGray}
                   />
                 </Animated.View>
                 <Text style={[barStyles.label, isActive && barStyles.labelActive]}>
@@ -146,9 +146,9 @@ const barStyles = StyleSheet.create({
     fontSize: 10, fontWeight: '500', color: colors.neutral.midGray,
     marginTop: 1,
   },
-  labelActive: { color: colors.primary.green, fontWeight: '700' },
+  labelActive: { color: colors.primary.darkGreen, fontWeight: '700' },
   dot: {
     marginTop: 3, width: DOT_SIZE, height: DOT_SIZE,
-    borderRadius: DOT_SIZE / 2, backgroundColor: colors.primary.green,
+    borderRadius: DOT_SIZE / 2, backgroundColor: colors.primary.darkGreen,
   },
 });

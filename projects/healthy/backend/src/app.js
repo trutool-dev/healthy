@@ -11,33 +11,97 @@ const nutritionRoutes = require('./routes/nutrition.routes');
 const progressRoutes = require('./routes/progress.routes');
 const logsRoutes = require('./routes/logs.routes');
 const foodsRoutes = require('./routes/foods.routes');
+const userRoutes = require('./routes/user.routes');
 const errorHandler = require('./middleware/errorHandler.middleware');
+const { apiLimiter } = require('./middleware/rateLimiter.middleware');
+const prisma = require('./prisma/client');
+const redis = require('./services/redis.service');
 
 const app = express();
 
 // Seguridad y utilidades
-app.use(helmet());
-app.use(cors({ origin: process.env.FRONTEND_URL }));
+
+// Helmet con CSP explícita y X-Frame-Options DENY (RGPD / hardening)
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'", process.env.SUPABASE_URL || ''].filter(Boolean),
+      frameSrc: ["'none'"],
+      objectSrc: ["'none'"],
+    },
+  },
+  frameguard: { action: 'deny' },
+  hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
+}));
+
+// CORS sin fallback a '*': solo orígenes explícitamente permitidos
+// Permite requests sin origin (apps móviles, Postman en desarrollo)
+app.use(cors({
+  origin: (origin, callback) => {
+    const allowed = (process.env.FRONTEND_URL || '').split(',').filter(Boolean);
+    if (!origin || allowed.includes(origin)) return callback(null, true);
+    callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+}));
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Rutas
+// ─────────────────────────────────────────────────────────────
+// Health check (BE-10)
+// ─────────────────────────────────────────────────────────────
+
+app.get('/health', async (_req, res) => {
+  let dbStatus = 'connected';
+  let redisStatus = 'connected';
+
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+  } catch {
+    dbStatus = 'error';
+  }
+
+  try {
+    await redis.ping();
+  } catch {
+    redisStatus = 'error';
+  }
+
+  const healthy = dbStatus === 'connected' && redisStatus === 'connected';
+  return res.status(healthy ? 200 : 503).json({
+    success: healthy,
+    data: {
+      status: healthy ? 'ok' : 'degraded',
+      timestamp: new Date().toISOString(),
+      version: process.env.npm_package_version || '1.0.0',
+      db: dbStatus,
+      redis: redisStatus,
+    },
+    message: healthy ? 'Servidor operativo' : 'El servidor tiene problemas',
+  });
+});
+
+// ─────────────────────────────────────────────────────────────
+// Rutas de la API
+// ─────────────────────────────────────────────────────────────
+
+// Rate limiting global para todas las rutas autenticadas (SEC-06)
+app.use('/onboarding', apiLimiter);
+app.use('/plans', apiLimiter);
+app.use('/training', apiLimiter);
+app.use('/nutrition', apiLimiter);
+app.use('/progress', apiLimiter);
+app.use('/logs', apiLimiter);
+app.use('/foods', apiLimiter);
+app.use('/user', apiLimiter);
+
 app.use('/auth', authRoutes);
 app.use('/onboarding', onboardingRoutes);
 app.use('/plans', plansRoutes);
 app.use('/training', trainingRoutes);
-app.use('/nutrition', nutritionRoutes);
-app.use('/progress', progressRoutes);
-app.use('/logs', logsRoutes);
-app.use('/foods', foodsRoutes);
-
-// Health check
-app.get('/health', (_req, res) => {
-  res.json({ success: true, message: 'OK' });
-});
-
-// Manejo centralizado de errores
-app.use(errorHandler);
-
-module.exports = app;
+app.use('/nutrition', nutri

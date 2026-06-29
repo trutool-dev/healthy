@@ -495,10 +495,6 @@ export type EnumVerificationCodeTypeFieldUpdateOperationsInput = {
   set?: $Enums.VerificationCodeType
 }
 
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
-}
-
 export type IntFieldUpdateOperationsInput = {
   set?: number
   increment?: number

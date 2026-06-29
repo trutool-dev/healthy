@@ -21,7 +21,12 @@ export function MealCard({ meal, onToggle }: MealCardProps) {
   return (
     <View style={[styles.card, meal.completed && styles.cardDone]}>
       {/* Cabecera — siempre visible */}
-      <Pressable style={styles.header} onPress={() => setExpanded((v) => !v)}>
+      <Pressable
+        style={styles.header}
+        onPress={() => setExpanded((v) => !v)}
+        accessibilityLabel={`${meal.name}, ${totals.calories} kcal, ${meal.completed ? 'completada' : 'pendiente'}`}
+        accessibilityRole="button"
+      >
         <Text style={styles.icon}>{meal.icon}</Text>
 
         <View style={styles.headerText}>
@@ -57,6 +62,8 @@ export function MealCard({ meal, onToggle }: MealCardProps) {
           <Pressable
             style={[styles.doneBtn, meal.completed && styles.doneBtnDone]}
             onPress={() => onToggle?.(meal.id)}
+            accessibilityLabel={meal.completed ? `Desmarcar ${meal.name} como completada` : `Marcar ${meal.name} como completada`}
+            accessibilityRole="button"
           >
             <Text style={[styles.doneBtnText, meal.completed && styles.doneBtnTextDone]}>
               {meal.completed ? '✓ Completado' : 'Marcar como completado'}
@@ -126,14 +133,14 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     borderRadius:    borderRadius.button,
     borderWidth:     1.5,
-    borderColor:     colors.primary.green,
+    borderColor:     colors.primary.darkGreen,
     alignItems:      'center',
   },
   doneBtnDone: {
     backgroundColor: colors.primary.lightGreen,
     borderColor:     colors.primary.green,
   },
-  doneBtnText:     { ...textStyles.bodyNormal, color: colors.primary.green, fontWeight: '600' },
+  doneBtnText:     { ...textStyles.bodyNormal, color: colors.primary.darkGreen, fontWeight: '600' },
   doneBtnTextDone: { color: colors.primary.darkGreen },
 });
 

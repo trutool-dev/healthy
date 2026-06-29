@@ -146,3 +146,8 @@ export type ProgressLog = Prisma.ProgressLogModel
  * 
  */
 export type DailyLog = Prisma.DailyLogModel
+/**
+ * Model TokenUsageLog
+ * 
+ */
+export type TokenUsageLog = Prisma.TokenUsageLogModel

@@ -71,7 +71,8 @@ export const ModelName = {
   Food: 'Food',
   MealFood: 'MealFood',
   ProgressLog: 'ProgressLog',
-  DailyLog: 'DailyLog'
+  DailyLog: 'DailyLog',
+  TokenUsageLog: 'TokenUsageLog'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -99,7 +100,9 @@ export const UserScalarFieldEnum = {
   phone_verified: 'phone_verified',
   status: 'status',
   created_at: 'created_at',
-  updated_at: 'updated_at'
+  updated_at: 'updated_at',
+  health_consent_given_at: 'health_consent_given_at',
+  health_consent_version: 'health_consent_version'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -405,6 +408,22 @@ export const DailyLogScalarFieldEnum = {
 } as const
 
 export type DailyLogScalarFieldEnum = (typeof DailyLogScalarFieldEnum)[keyof typeof DailyLogScalarFieldEnum]
+
+
+export const TokenUsageLogScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  request_type: 'request_type',
+  input_tokens: 'input_tokens',
+  output_tokens: 'output_tokens',
+  cache_read_tokens: 'cache_read_tokens',
+  cache_write_tokens: 'cache_write_tokens',
+  model_version: 'model_version',
+  cost_usd: 'cost_usd',
+  created_at: 'created_at'
+} as const
+
+export type TokenUsageLogScalarFieldEnum = (typeof TokenUsageLogScalarFieldEnum)[keyof typeof TokenUsageLogScalarFieldEnum]
 
 
 export const SortOrder = {

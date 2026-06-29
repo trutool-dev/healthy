@@ -1,5 +1,7 @@
 /**
- * RootNavigator — decide entre Auth stack, Onboarding y App tabs
+ * RootNavigator — decide entre Auth stack, Onboarding y App tabs.
+ * Al autenticarse navega a Onboarding si el usuario no tiene plan todavía,
+ * o directamente a MainTabs si ya tiene un plan activo.
  */
 
 import React, { useEffect } from 'react';
@@ -56,7 +58,7 @@ export type RootStackParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export function RootNavigator() {
-  const { isAuthenticated, isLoading, loadStoredAuth } = useAuthStore();
+  const { isAuthenticated, isLoading, user, loadStoredAuth } = useAuthStore();
 
   useEffect(() => { loadStoredAuth(); }, []);
 
@@ -68,6 +70,9 @@ export function RootNavigator() {
     );
   }
 
+  // Decidir la pantalla inicial cuando está autenticado
+  const hasPlan = user?.has_plan ?? false;
+
   return (
     <NavigationContainer>
       <Stack.Navigator
@@ -78,27 +83,47 @@ export function RootNavigator() {
         }}
       >
         {isAuthenticated ? (
-          <Stack.Screen name="MainTabs" component={MainTabNavigator} />
+          hasPlan ? (
+            // Ya tiene plan activo → ir directo a la app
+            <>
+              <Stack.Screen name="MainTabs" component={MainTabNavigator} />
+              {/* Onboarding accesible por si se redirige desde SetPassword con plan nuevo */}
+              <Stack.Screen name="OnboardingWelcome"    component={OnboardingWelcome} />
+              <Stack.Screen name="OnboardingGoal"       component={OnboardingGoal} />
+              <Stack.Screen name="OnboardingProfile"    component={OnboardingProfile} />
+              <Stack.Screen name="OnboardingLifestyle"  component={OnboardingLifestyle} />
+              <Stack.Screen name="OnboardingTraining"   component={OnboardingTraining} />
+              <Stack.Screen name="OnboardingNutrition"  component={OnboardingNutrition} />
+              <Stack.Screen name="OnboardingHealth"     component={OnboardingHealth} />
+              <Stack.Screen name="OnboardingMotivation" component={OnboardingMotivation} />
+              <Stack.Screen name="OnboardingComplete"   component={OnboardingComplete}
+                options={{ gestureEnabled: false }} />
+            </>
+          ) : (
+            // Autenticado pero sin plan → onboarding
+            <>
+              <Stack.Screen name="OnboardingWelcome"    component={OnboardingWelcome} />
+              <Stack.Screen name="OnboardingGoal"       component={OnboardingGoal} />
+              <Stack.Screen name="OnboardingProfile"    component={OnboardingProfile} />
+              <Stack.Screen name="OnboardingLifestyle"  component={OnboardingLifestyle} />
+              <Stack.Screen name="OnboardingTraining"   component={OnboardingTraining} />
+              <Stack.Screen name="OnboardingNutrition"  component={OnboardingNutrition} />
+              <Stack.Screen name="OnboardingHealth"     component={OnboardingHealth} />
+              <Stack.Screen name="OnboardingMotivation" component={OnboardingMotivation} />
+              <Stack.Screen name="OnboardingComplete"   component={OnboardingComplete}
+                options={{ gestureEnabled: false }} />
+              <Stack.Screen name="MainTabs"             component={MainTabNavigator} />
+            </>
+          )
         ) : (
+          // No autenticado → auth flow
           <>
-            {/* Autenticación */}
             <Stack.Screen name="Welcome"        component={WelcomeScreen} />
             <Stack.Screen name="Register"       component={RegisterScreen} />
             <Stack.Screen name="VerifyEmail"    component={VerifyEmailScreen} />
             <Stack.Screen name="SetPassword"    component={SetPasswordScreen} />
             <Stack.Screen name="Login"          component={LoginScreen} />
             <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
-            {/* Onboarding */}
-            <Stack.Screen name="OnboardingWelcome"    component={OnboardingWelcome} />
-            <Stack.Screen name="OnboardingGoal"       component={OnboardingGoal} />
-            <Stack.Screen name="OnboardingProfile"    component={OnboardingProfile} />
-            <Stack.Screen name="OnboardingLifestyle"  component={OnboardingLifestyle} />
-            <Stack.Screen name="OnboardingTraining"   component={OnboardingTraining} />
-            <Stack.Screen name="OnboardingNutrition"  component={OnboardingNutrition} />
-            <Stack.Screen name="OnboardingHealth"     component={OnboardingHealth} />
-            <Stack.Screen name="OnboardingMotivation" component={OnboardingMotivation} />
-            <Stack.Screen name="OnboardingComplete"   component={OnboardingComplete}
-              options={{ gestureEnabled: false }} />
           </>
         )}
       </Stack.Navigator>

@@ -30,4 +30,5 @@ const sendError = (res, error = 'BAD_REQUEST', message = 'Ha ocurrido un error',
   });
 };
 
-module.exports = { sendSuccess, sendError };
+/**
+ * Respuesta 201 Created para recursos nu
