@@ -11,4 +11,4 @@ router.get('/:id', ctrl.getPlanById);
 router.post('/regenerate', planRegenerateLimiter, ctrl.regeneratePlan);
 router.put('/:id/pause', ctrl.pausePlan);
 
-module.exports 
+module.exports = router;

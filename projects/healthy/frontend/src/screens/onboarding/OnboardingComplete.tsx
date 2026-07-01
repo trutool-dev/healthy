@@ -181,4 +181,6 @@ const s = StyleSheet.create({
   highlights:    { width: '100%', backgroundColor: colors.neutral.offWhite, borderRadius: 20, padding: spacing.lg, gap: spacing.md },
   hlRow:  { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   hlIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primary.lightGreen, alignItems: 'center', justifyContent: 'center' },
-  hlLabel:{ ...textStyles.bodyNormal, fontWeight: '600', color: colors.neutral.darkGray }
+  hlLabel:{ ...textStyles.bodyNormal, fontWeight: '600', color: colors.neutral.darkGray },
+});
+export default OnboardingComplete;

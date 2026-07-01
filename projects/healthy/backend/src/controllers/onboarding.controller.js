@@ -296,4 +296,12 @@ const complete = async (req, res, next) => {
     }
 
     logger.info(`[onboarding] Completado para usuario ${userId}. Plan ${plan.id} creado.`);
-    return
+    return sendSuccess(res, {
+      plan: { id: plan.id, status: plan.status, start_date: plan.start_date, end_date: plan.end_date, generated_by_ai: plan.generated_by_ai },
+      generated_plan: generatedPlan,
+      metabolism,
+    }, 'Onboarding completado. Tu plan personalizado ha sido generado.', 201);
+  } catch (err) { next(err); }
+};
+
+module.exports = { start, saveProfile, saveLifestyle, saveTraining, saveNutrition, saveHealth, saveMotivation, complete };

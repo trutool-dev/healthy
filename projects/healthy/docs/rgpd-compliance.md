@@ -170,4 +170,79 @@ Los datos enviados a Anthropic para generación de planes no se usan para entren
 
 ### Minimización de datos
 
-- Solo se recopilan los datos estrictamente necesarios para la 
+- Solo se recopilan los datos estrictamente necesarios para la funcionalidad
+- Los prompts enviados a la API de Anthropic usan el `userId` interno, no el email ni el nombre real del usuario
+- Los códigos OTP tienen TTL de 15 minutos y se eliminan tras el uso o expiración
+- Los tokens de reset de contraseña tienen TTL de 24 horas
+
+### Retención de datos
+
+| Tipo de dato | Retención | Acción al vencer |
+|--------------|-----------|-----------------|
+| Datos de cuenta activa | Mientras la cuenta exista | El usuario la elimina con `DELETE /user/me` |
+| Códigos OTP | 15 minutos | Eliminación automática (campo `expires_at` en BD) |
+| Tokens de reset de contraseña | 24 horas | Eliminación automática + flag `used: true` al usarse |
+| Refresh tokens (sesiones) | 30 días de inactividad | Eliminación automática al expirar |
+| Logs de uso de tokens IA | 12 meses | Eliminación por batch job mensual (pendiente implementar) |
+| Logs de auditoría de eliminaciones | 90 días | Eliminación automática (pendiente implementar) |
+| Fotos de progreso | Mientras la cuenta exista | Eliminación en cascada con la cuenta |
+
+---
+
+## Registro de actividades de tratamiento (Art. 30)
+
+Resumen del registro formal requerido por el Art. 30 RGPD:
+
+| Campo | Valor |
+|-------|-------|
+| **Responsable del tratamiento** | Healthy App (razón social y datos de contacto pendientes de definir) |
+| **Categorías de interesados** | Usuarios mayores de 16 años que usan la aplicación |
+| **Categorías de datos** | Datos de identificación, datos de salud (categoría especial), datos de actividad física y nutricional |
+| **Finalidades** | Prestación del servicio de planes de salud personalizados; generación de planes de entrenamiento y nutrición mediante IA |
+| **Destinatarios** | Anthropic (generación de planes), Supabase (autenticación), AWS (infraestructura EU) |
+| **Transferencias internacionales** | Anthropic (EEUU) — base legal pendiente de documentar (cláusulas contractuales tipo) |
+| **Plazos de supresión** | Ver tabla de retención de datos |
+| **Medidas técnicas** | TLS en tránsito, AES-256 en reposo (RDS), bcrypt para contraseñas, rate limiting |
+
+> **Nota legal:** Este registro debe mantenerse actualizado y estar disponible para la Agencia Española de Protección de Datos (AEPD) si se requiere. Completar con asesor legal antes del lanzamiento.
+
+---
+
+## Transferencias internacionales (Art. 44-46)
+
+| Proveedor | País | Datos transferidos | Mecanismo legal |
+|-----------|------|--------------------|-----------------|
+| Anthropic (Claude API) | EEUU | Datos de salud anonimizados (userId + métricas de salud sin nombre/email) para generación de planes | Cláusulas Contractuales Tipo (SCCs) — pendiente de formalizar con Anthropic |
+| Supabase | EEUU / EU | Credenciales de autenticación (email, hash de contraseña, OTP) | Comprobar si el proyecto está en región EU; si no, SCCs necesarias |
+| AWS | EU (eu-west-1 — Irlanda) | Todos los datos de la aplicación | Sin transferencia internacional (datos en EU) |
+
+> **Acción pendiente (legal):** Verificar y formalizar las SCCs con Anthropic antes del lanzamiento. Confirmar la región de Supabase Auth.
+
+---
+
+## Notificación de brechas de seguridad (Art. 33-34)
+
+En caso de brecha de seguridad que afecte a datos personales:
+
+1. **Detección** → registrar en `security/INCIDENT_RESPONSE.md`
+2. **Evaluación de riesgo** → determinar si es probable que suponga un riesgo para los derechos y libertades
+3. **Notificación a la AEPD** → en un plazo máximo de 72 horas desde la detección (Art. 33)
+4. **Notificación a los afectados** → si la brecha supone un alto riesgo para sus derechos y libertades (Art. 34)
+5. **Documentación** → registrar la brecha, sus efectos y las medidas correctoras adoptadas
+
+El procedimiento detallado está en `security/INCIDENT_RESPONSE.md`.
+
+**Contacto AEPD:** [www.aepd.es](https://www.aepd.es) · Teléfono: 901 100 099
+
+---
+
+## Delegado de Protección de Datos (DPD/DPO)
+
+Las aplicaciones que tratan datos de salud a escala pueden estar obligadas a designar un DPD (Art. 37.1.c RGPD). En función del número de usuarios y el volumen de datos de salud tratados, consultar con asesor legal si la designación es obligatoria.
+
+Mientras no se designe formalmente, el punto de contacto para consultas sobre privacidad es: **privacy@healthy.app** (dirección pendiente de crear).
+
+---
+
+> Última actualización: 2026-06-15 — Docs Agent (PR-3)  
+> Revisión legal pendiente antes del lanzamiento v1.0.0.

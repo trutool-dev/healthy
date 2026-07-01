@@ -143,4 +143,17 @@ de migraciones pueda acceder a `DATABASE_URL`.
 - Imagen final basada en `node:20-alpine` (~180 MB)
 - Ejecuta como usuario sin privilegios (`appuser`)
 - `dumb-init` como PID 1 para manejo correcto de señales
-- Health check integrado ví
+- Health check integrado vía `/health`
+
+### `database/Dockerfile`
+- Extiende `postgres:16-alpine`
+- Copia scripts de `database/init/` para inicialización automática
+- Solo usado en desarrollo local; en staging/producción se usa el plugin PostgreSQL de Railway directamente
+
+---
+
+## Variables de entorno
+
+Ver `.env.example` en la raíz del proyecto para la lista completa.  
+En staging y producción las variables sensibles se configuran en el panel de Railway
+(Settings → Variables del servicio) y en los GitHub Environments para el pipeline de migraciones.

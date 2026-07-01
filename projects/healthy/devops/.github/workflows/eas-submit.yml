@@ -78,4 +78,14 @@ jobs:
 
       - name: Notify on success
         if: success()
-       
+        run: |
+          echo "Submit completado correctamente para la version ${{ github.ref_name }}"
+          echo "iOS: Disponible en TestFlight en unos minutos"
+          echo "Android: Disponible en Google Play Internal track en unos minutos"
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "ERROR: El submit fallo para la version ${{ github.ref_name }}"
+          echo "Revisar los logs del workflow para mas detalles"
+          exit 1

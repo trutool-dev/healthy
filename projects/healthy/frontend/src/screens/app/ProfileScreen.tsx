@@ -236,4 +236,75 @@ function Divider() {
 
 const styles = StyleSheet.create({
   safe:   { flex: 1, backgroundColor: colors.neutral.offWhite },
-  scro
+  scroll: { paddingHorizontal: spacing.lg, paddingTop: spacing.lg },
+
+  hero: { alignItems: 'center', marginBottom: spacing.xl },
+  avatar: {
+    width: 80, height: 80, borderRadius: 40,
+    backgroundColor: colors.primary.darkGreen,
+    alignItems: 'center', justifyContent: 'center',
+    marginBottom: spacing.md,
+    ...shadows.button,
+  },
+  avatarText: { ...textStyles.titleMedium, color: colors.neutral.white },
+  name:       { ...textStyles.titleSmall, color: colors.neutral.black },
+  email:      { ...textStyles.bodyNormal, color: colors.neutral.midGray, marginTop: 4 },
+  planBadge: {
+    marginTop: spacing.sm,
+    backgroundColor: colors.primary.lightGreen,
+    borderRadius: borderRadius.pill,
+    paddingHorizontal: spacing.md, paddingVertical: spacing.xs,
+  },
+  planBadgeText: { ...textStyles.caption, color: colors.primary.darkGreen, fontWeight: '700' },
+
+  statsRow: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.lg },
+  planCard: {
+    backgroundColor: colors.neutral.white, borderRadius: borderRadius.card,
+    padding: spacing.md, ...shadows.card, marginBottom: spacing.sm, gap: spacing.sm,
+  },
+  version: { ...textStyles.caption, color: colors.neutral.midGray, textAlign: 'center', marginVertical: spacing.lg },
+  logoutBtn: { marginBottom: spacing.md },
+});
+
+const sStyles = StyleSheet.create({
+  header: { ...textStyles.label, color: colors.neutral.midGray, marginTop: spacing.md, marginBottom: spacing.sm },
+
+  statBox: {
+    flex: 1, backgroundColor: colors.neutral.white, borderRadius: borderRadius.card,
+    padding: spacing.md, alignItems: 'center', gap: 4,
+    borderTopWidth: 3, ...shadows.card,
+  },
+  statIcon:  { fontSize: 22 },
+  statValue: { ...textStyles.titleSmall, fontWeight: '700' },
+  statLabel: { ...textStyles.caption, color: colors.neutral.midGray, textAlign: 'center' },
+
+  row: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingVertical: spacing.xs },
+  rowIcon:  { fontSize: 18, width: 28, textAlign: 'center' },
+  rowLabel: { ...textStyles.bodyNormal, color: colors.neutral.darkGray, flex: 1 },
+  rowValue: { ...textStyles.bodyNormal, color: colors.neutral.midGray, fontWeight: '600' },
+  chevron:  { fontSize: 22, color: colors.neutral.midGray },
+
+  soonBadge: {
+    ...textStyles.caption,
+    color: colors.neutral.midGray,
+    backgroundColor: colors.neutral.lightGray,
+    borderRadius: borderRadius.pill,
+    paddingHorizontal: 6, paddingVertical: 2,
+    overflow: 'hidden',
+  },
+
+  toggle: {
+    width: 44, height: 26, borderRadius: 13,
+    backgroundColor: colors.neutral.lightGray,
+    justifyContent: 'center', padding: 2,
+  },
+  toggleOn: { backgroundColor: colors.primary.darkGreen }, // FE-12: contraste
+  toggleThumb: {
+    width: 22, height: 22, borderRadius: 11,
+    backgroundColor: colors.neutral.white,
+    ...shadows.card,
+  },
+  toggleThumbOn: { alignSelf: 'flex-end' },
+});
+
+export default ProfileScreen;

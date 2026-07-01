@@ -106,4 +106,6 @@ const s = StyleSheet.create({
   link:   { ...textStyles.bodyNormal, color: colors.primary.darkGreen, fontWeight: '600' },
   cta:    {},
   footer: { flexDirection: 'row', justifyContent: 'center' },
-  footerText: { ...textStyles.bodyNormal, color: colors.neutral.mi
+  footerText: { ...textStyles.bodyNormal, color: colors.neutral.midGray },
+});
+export default LoginScreen;

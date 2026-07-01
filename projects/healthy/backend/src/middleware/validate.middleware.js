@@ -13,4 +13,15 @@ const validate = (req, res, next) => {
       field: e.path || e.param,
       message: e.msg,
     }));
-    return res.status(400).json({
+    return res.status(400).json({
+      success: false,
+      error: 'VALIDATION_ERROR',
+      message: 'Los datos enviados no son válidos',
+      details,
+    });
+  }
+
+  next();
+};
+
+module.exports = { validate };

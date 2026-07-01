@@ -82,4 +82,46 @@ Solo necesarios para el pipeline `deploy-landing.yml`. El backend usa Railway, n
 |---------|-------------|----------------------|
 | `AWS_ACCESS_KEY_ID` | IAM key para desplegar la landing a S3 | AWS Console → IAM → Users → ci-cd-user → Security credentials |
 | `AWS_SECRET_ACCESS_KEY` | Secret de la IAM key | Se obtiene una única vez al crear la access key |
-| `CLOUDFRONT_DISTRIBUTION_ID` | ID de CloudFront para invalidar cach
+| `CLOUDFRONT_DISTRIBUTION_ID` | ID de CloudFront para invalidar caché de la landing | AWS Console → CloudFront → la distribución de `healthy.app` → Distribution ID |
+
+> **Alcance:** estas tres credenciales AWS son **exclusivas de la landing**. No tienen acceso a ECS, RDS ni ningún otro servicio AWS. El backend en Railway no las usa.
+
+---
+
+## Secretos para Expo EAS (app móvil)
+
+Solo necesarios para publicar en App Store / Google Play (`eas-build.yml`, `eas-submit.yml`).
+
+| Secreto | Descripción | Cómo obtener |
+|---------|-------------|--------------|
+| `EXPO_TOKEN` | Token de Expo para builds en CI | expo.dev → Account Settings → Access Tokens |
+| `APPLE_APP_STORE_CONNECT_API_KEY_ID` | ID de la API key de App Store Connect | App Store Connect → Users and Access → Keys → Key ID |
+| `APPLE_APP_STORE_CONNECT_API_KEY_ISSUER_ID` | Issuer ID de Apple | App Store Connect → Users and Access → Keys → Issuer ID |
+| `APPLE_APP_STORE_CONNECT_API_KEY_CONTENT` | Contenido del archivo `.p8` en base64: `base64 < AuthKey_XXXXXXXX.p8` | App Store Connect → Users and Access → Keys → Download |
+| `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` | JSON completo de la cuenta de servicio Google Play | Google Play Console → Setup → API access → Create service account → Download JSON |
+
+> ⚠️ `APPLE_APP_STORE_CONNECT_API_KEY_CONTENT` se mapea a `EXPO_ASC_API_KEY_P8_CONTENT` en el workflow.
+> **No confundir** con `EXPO_APPLE_APP_SPECIFIC_PASSWORD` (password de Apple ID, método antiguo no recomendado).
+
+---
+
+## Resumen: qué configurar ahora vs. después
+
+| Cuándo | Secretos |
+|--------|----------|
+| **Ahora** (antes del primer deploy) | `RAILWAY_TOKEN`, `RAILWAY_PRODUCTION_SERVICE_ID`, `ANTHROPIC_API_KEY`, `JWT_SECRET` × 2, `JWT_REFRESH_SECRET` × 2, `SUPABASE_URL`, `SUPABASE_KEY`, `SUPABASE_SERVICE_ROLE_KEY` |
+| **Para backups DB** | `RAILWAY_STAGING_DATABASE_URL`, `RAILWAY_PRODUCTION_DATABASE_URL` |
+| **Para SMTP** | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `EMAIL_FROM` |
+| **Para landing CI/CD** | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `CLOUDFRONT_DISTRIBUTION_ID` |
+| **Para publicar en tiendas** | `EXPO_TOKEN`, `APPLE_APP_STORE_CONNECT_API_KEY_*` × 3, `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` |
+
+---
+
+## Notas de seguridad
+
+1. `JWT_SECRET` y `JWT_REFRESH_SECRET` ya están generados arriba — son seguros (512 bits, `openssl rand -base64 64`). Guárdalos también en un gestor de contraseñas.
+2. Habilitar **revisión requerida** en el environment `production`: Settings → Environments → production → Required reviewers.
+3. Rotar las claves JWT cada 90 días.
+4. El `RAILWAY_TOKEN` da acceso completo a tu cuenta Railway — no lo compartas ni lo subas al repositorio.
+5. `SUPABASE_SERVICE_ROLE_KEY` tiene permisos de administrador — nunca la expongas al frontend.
+6. `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` contiene credenciales de acceso completo a Google Play — rotar si se sospecha de compromiso.

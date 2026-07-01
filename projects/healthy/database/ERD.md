@@ -451,4 +451,22 @@ Los datos de onboarding se dividen en 5 modelos independientes
 
 `Exercise` y `Food` son entidades globales (no por usuario). Los usuarios
 los referencian desde `SessionExercise` y `MealFood`. Esto evita duplicación
-de datos y permite que e
+de datos y permite que el catálogo crezca de forma centralizada.
+
+### Tabla MealFood para relación N:M con cantidad
+
+La relación entre `Meal` y `Food` requiere saber la cantidad en gramos
+(`quantity_g`). Una tabla intermedia `MealFood` materializa esta relación
+con el atributo adicional, permitiendo calcular los macros exactos de
+cada comida.
+
+### Cascade delete en todas las relaciones
+
+Todas las relaciones con `User` tienen `onDelete: Cascade`. Si un usuario
+se elimina (derecho al olvido, RGPD), todos sus datos asociados se borran
+automáticamente sin necesidad de lógica adicional en la aplicación.
+
+---
+
+*Generado el: 2026-06-07 | Actualizado el: 2026-06-15 (PR-2 — TokenUsageLog + health_consent)*
+*Schema fuente: `projects/healthy/database/schema.prisma`*

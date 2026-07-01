@@ -125,4 +125,6 @@ const s = StyleSheet.create({
   cta:     { marginBottom: spacing.lg },
   resendRow: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center' },
   resendText:{ ...textStyles.bodyNormal, color: colors.neutral.midGray },
-  link:      { ...textStyles.bodyNormal, color: colors.primary.darkGreen, fontWeight: '600' 
+  link:      { ...textStyles.bodyNormal, color: colors.primary.darkGreen, fontWeight: '600' },
+});
+export default VerifyEmailScreen;

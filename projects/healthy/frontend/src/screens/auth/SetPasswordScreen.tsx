@@ -128,4 +128,6 @@ const s = StyleSheet.create({
   reqIconMet: { color: '#16A34A' },
   reqLabel: { ...textStyles.caption, color: colors.neutral.midGray },
   reqLabelMet: { color: colors.neutral.darkGray },
-  cta: {
+  cta: {},
+});
+export default SetPasswordScreen;

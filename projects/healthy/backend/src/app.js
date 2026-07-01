@@ -104,4 +104,22 @@ app.use('/auth', authRoutes);
 app.use('/onboarding', onboardingRoutes);
 app.use('/plans', plansRoutes);
 app.use('/training', trainingRoutes);
-app.use('/nutrition', nutri
+app.use('/nutrition', nutritionRoutes);
+app.use('/progress', progressRoutes);
+app.use('/logs', logsRoutes);
+app.use('/foods', foodsRoutes);
+app.use('/user', userRoutes);
+
+// Ruta no encontrada (404)
+app.use((_req, res) => {
+  res.status(404).json({
+    success: false,
+    error: 'NOT_FOUND',
+    message: `Ruta no encontrada`,
+  });
+});
+
+// Manejo centralizado de errores
+app.use(errorHandler);
+
+module.exports = app;

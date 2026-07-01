@@ -409,4 +409,23 @@ export function calcMealTotals(meal: Meal) {
       calories: acc.calories + f.calories,
       protein:  acc.protein  + f.protein,
       carbs:    acc.carbs    + f.carbs,
-      fat:      acc.
+      fat:      acc.fat      + f.fat,
+    }),
+    { calories: 0, protein: 0, carbs: 0, fat: 0 },
+  );
+}
+
+export function calcDayTotals(meals: Meal[]) {
+  return meals.reduce(
+    (acc, m) => {
+      const t = calcMealTotals(m);
+      return {
+        calories: acc.calories + t.calories,
+        protein:  acc.protein  + t.protein,
+        carbs:    acc.carbs    + t.carbs,
+        fat:      acc.fat      + t.fat,
+      };
+    },
+    { calories: 0, protein: 0, carbs: 0, fat: 0 },
+  );
+}

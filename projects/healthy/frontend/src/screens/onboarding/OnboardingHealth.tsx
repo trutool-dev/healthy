@@ -130,4 +130,20 @@ export function OnboardingHealth({ navigation }: Props) {
 }
 
 const s = StyleSheet.create({
-  badge:     { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, backgroundColor: colors.semantic.info+'18', borderRadius: borderRadius.inp
+  badge:     { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, backgroundColor: colors.semantic.info+'18', borderRadius: borderRadius.input, padding: spacing.md, marginBottom: spacing.lg },
+  badgeIcon: { fontSize: 18 },
+  badgeText: { ...textStyles.caption, color: colors.semantic.info, flex: 1, lineHeight: 17 },
+  sec:       { ...textStyles.label, color: colors.neutral.midGray, marginBottom: spacing.md },
+  chips:     { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  chip:          { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, paddingVertical: spacing.sm, paddingHorizontal: spacing.md, borderRadius: borderRadius.pill, borderWidth: 1.5, borderColor: colors.neutral.lightGray, backgroundColor: colors.neutral.offWhite, ...shadows.card },
+  chipSel:       { borderColor: colors.primary.green, backgroundColor: colors.primary.lightGreen },
+  chipLabel:     { ...textStyles.bodyNormal, color: colors.neutral.darkGray },
+  chipLabelSel:  { color: colors.primary.darkGreen, fontWeight: '600' },
+  consentRow:    { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.md, marginTop: spacing.xl, padding: spacing.md, borderRadius: borderRadius.input, borderWidth: 1.5, borderColor: colors.neutral.lightGray, backgroundColor: colors.neutral.offWhite },
+  checkbox:      { width: 22, height: 22, borderRadius: 6, borderWidth: 2, borderColor: colors.neutral.midGray, alignItems: 'center', justifyContent: 'center', marginTop: 1, flexShrink: 0 },
+  checkboxChecked: { borderColor: colors.primary.darkGreen, backgroundColor: colors.primary.darkGreen },
+  checkmark:     { color: colors.neutral.white, fontSize: 13, fontWeight: '700' },
+  consentText:   { ...textStyles.bodySmall, color: colors.neutral.darkGray, flex: 1, lineHeight: 20 },
+  consentBold:   { fontWeight: '700', color: colors.primary.darkGreen },
+});
+export default OnboardingHealth;

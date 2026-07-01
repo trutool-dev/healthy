@@ -76,4 +76,6 @@ const s = StyleSheet.create({
   footer:{ flexDirection: 'row', justifyContent: 'center' },
   footerText: { ...textStyles.bodyNormal, color: colors.neutral.midGray },
   link:  { ...textStyles.bodyNormal, color: colors.primary.darkGreen, fontWeight: '600' },
-  legal: { ...textStyles.caption, color: colors.neutral.midGray, textAlign: 'center', lineHeight: 
+  legal: { ...textStyles.caption, color: colors.neutral.midGray, textAlign: 'center', lineHeight: 18 },
+});
+export default RegisterScreen;
