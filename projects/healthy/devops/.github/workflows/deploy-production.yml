@@ -113,6 +113,7 @@ jobs:
     env:
       RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
       RAILWAY_PROJECT_ID: a01d9f3d-510b-4529-b75a-d9d7198cbcb5
+      RAILWAY_ENVIRONMENT_ID: 3cb3489e-beda-44bf-9396-bf2618b121f3
 
     steps:
       - uses: actions/checkout@v4
