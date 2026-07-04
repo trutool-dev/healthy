@@ -3,7 +3,7 @@
 // Generador: prisma-client-js
 
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../src/generated/prisma"
 }
 
