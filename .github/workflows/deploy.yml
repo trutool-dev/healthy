@@ -29,7 +29,6 @@ jobs:
         run: npm install -g @railway/cli
 
       - name: Deploy backend a Railway staging
-        working-directory: projects/healthy/backend
         env:
           RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
           RAILWAY_PROJECT_ID: a01d9f3d-510b-4529-b75a-d9d7198cbcb5
@@ -67,7 +66,6 @@ jobs:
         run: npm install -g @railway/cli
 
       - name: Deploy backend a Railway production
-        working-directory: projects/healthy/backend
         env:
           RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
           RAILWAY_PROJECT_ID: a01d9f3d-510b-4529-b75a-d9d7198cbcb5

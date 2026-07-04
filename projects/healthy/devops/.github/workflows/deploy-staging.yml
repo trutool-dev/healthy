@@ -93,7 +93,6 @@ jobs:
         run: npm install -g @railway/cli
 
       - name: Deploy backend to Railway
-        working-directory: projects/healthy/backend
         run: railway up --service ${{ env.RAILWAY_SERVICE_ID }} --detach
 
   # ── 3. Smoke test ───────────────────────────────────────────────────────────
