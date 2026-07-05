@@ -582,3 +582,411 @@ docs/LIGHTHOUSE_FINAL.md        (CREAR — resultados Lighthouse finales)
 > - PR-4 adopta express-validator como estrategia única de validación (Zod queda descartado para v1.0.0).
 > - `middleware/validate.js` (Zod) se elimina en PR-4 y no en PR-1 para mantener las PRs atómicas y reducir el riesgo de PR-1.
 > - PR-6 la ejecuta el orquestador (no un agente especializado) porque implica verificación cruzada de todos los dominios y la decisión final de go-live.
+
+---
+
+## Fase 6 — Deploy & Go-live
+
+> Generada por el orquestador el 2026-07-04.
+> Esta fase recoge las tareas operativas necesarias para completar el primer deploy a Railway staging y alcanzar el go-live v1.0.0.
+> Las tareas 6 y 7 son BLOQUEANTES: nada más puede avanzar hasta que estén resueltas.
+
+---
+
+### Orden de ejecución
+
+```
+TAREA-6 (devops — vars Railway)      TAREA-7 (devops — verificar URL)
+       │                                      │
+       └──────────────┬───────────────────────┘
+                      ▼
+          TAREA-2 (orquestador — verificar CI verde)
+                      │
+          ┌───────────┴────────────────────────┐
+          ▼                                    ▼
+  TAREA-4 (orquestador — commit bat)   TAREA-5 (orquestador — limpiar branch protection)
+          │                                    │
+          └────────────────┬──────────────────┘
+                           ▼
+                   TAREA-8 (devops — EAS builds móviles)
+                           │
+                           ▼
+                   TAREA-9 (orquestador — gate go-live v1.0.0)
+```
+
+TAREA-4 y TAREA-5 no se bloquean entre sí y pueden ejecutarse en paralelo una vez TAREA-2 esté verde.
+TAREA-8 requiere que el backend responda en staging (desbloqueado por TAREA-6 y TAREA-7).
+TAREA-9 es el gate final: solo se ejecuta cuando TAREA-2, TAREA-4, TAREA-5, TAREA-7 y TAREA-8 estén completas.
+
+---
+
+### TAREA-2 — Verificar deploy en GitHub Actions
+
+**Agente responsable:** orquestador (verificación; agente devops si se detecta fallo)
+**Prioridad:** INMEDIATA
+**Bloqueada por:** TAREA-6, TAREA-7 (el smoke test fallará si las vars no están o la URL es incorrecta)
+
+#### Pasos
+
+1. Abrir GitHub Actions → workflow "Deploy → Staging" → ejecución del commit `fa2bd8d`.
+2. Si el job `smoke-test` falló, identificar la causa exacta (vars Railway faltantes → TAREA-6; URL incorrecta → TAREA-7; error de código → agente backend).
+3. Una vez TAREA-6 y TAREA-7 resueltas, re-lanzar el workflow manualmente (`workflow_dispatch`) y confirmar que pasa verde de extremo a extremo.
+4. Documentar el resultado (URL del run, jobs, duración) en `devops/PIPELINE_STATUS.md`.
+
+#### Criterios de aceptación
+
+- [ ] Workflow "Deploy → Staging" verde (todos los jobs: test → build → deploy → smoke-test)
+- [ ] `GET https://<url-real>/health` devuelve `200 {"success": true}` desde el job smoke-test
+- [ ] Resultado documentado en `devops/PIPELINE_STATUS.md`
+
+#### Dependencias
+
+- **BLOQUEANTE entrada:** TAREA-6 (vars Railway) y TAREA-7 (URL correcta) deben estar resueltas primero
+- Desbloquea: TAREA-4, TAREA-5, TAREA-8
+
+---
+
+### TAREA-4 — Commit `git-push.bat`
+
+**Agente responsable:** orquestador
+**Prioridad:** MENOR — no bloqueante
+**Bloqueada por:** ninguna (puede ejecutarse en cualquier momento)
+
+#### Pasos
+
+1. Revisar el diff de `git-push.bat` para confirmar que no contiene credenciales ni tokens.
+2. Ejecutar desde la raíz del repo:
+   ```
+   git add git-push.bat
+   git commit -m "chore: update git-push helper"
+   git push origin develop
+   ```
+
+#### Criterios de aceptación
+
+- [ ] Commit `chore: update git-push helper` visible en `origin/develop`
+- [ ] `git status` muestra working tree clean para `git-push.bat`
+- [ ] El archivo no contiene credenciales ni tokens hardcodeados
+
+#### Dependencias
+
+- Ninguna como entrada
+- No bloquea ninguna otra tarea
+
+---
+
+### TAREA-5 — Eliminar check obsoleto ECR de branch protection
+
+**Agente responsable:** orquestador
+**Prioridad:** LIMPIEZA CI — no bloqueante para el deploy, pero genera ruido en PRs
+**Bloqueada por:** ninguna
+
+#### Pasos
+
+1. Ir a GitHub → repositorio → Settings → Branches → branch protection rules → regla de `main`.
+2. En la sección "Require status checks to pass before merging", localizar el check `Deploy/Build+Push ECR`.
+3. Eliminar ese check de la lista de requeridos (fue parte del pipeline AWS ECR/ECS, ya migrado a Railway).
+4. Guardar los cambios.
+5. Verificar que las PRs futuras ya no quedan bloqueadas por ese check inexistente.
+
+#### Criterios de aceptación
+
+- [ ] El check `Deploy/Build+Push ECR` no aparece en la branch protection rule de `main`
+- [ ] La branch protection rule de `main` solo lista checks que existen en los workflows actuales
+- [ ] Una PR de prueba (o la siguiente PR real) no queda bloqueada por el check eliminado
+
+#### Dependencias
+
+- Ninguna como entrada
+- No bloquea ninguna otra tarea
+
+---
+
+### TAREA-6 — Añadir variables de entorno en Railway
+
+**Agente responsable:** devops
+**Carpeta de trabajo:** `projects/healthy/devops/`
+**Prioridad:** CRITICA — BLOQUEANTE para el deploy
+**Bloqueada por:** ninguna (acción manual en Railway dashboard)
+
+#### Variables a configurar
+
+En el proyecto `healthy-staging`, servicio backend (ID `fa137c98-5210-4057-a531-f1c7fbf39743`), añadir las siguientes variables de entorno en el dashboard Railway:
+
+| Variable | Descripción | Dónde obtener el valor |
+|---|---|---|
+| `SUPABASE_URL` | URL del proyecto Supabase | Dashboard Supabase → Settings → API |
+| `SUPABASE_KEY` | Anon/service key de Supabase | Dashboard Supabase → Settings → API |
+| `SMTP_HOST` | Host del servidor SMTP | Proveedor de email (ej. smtp.sendgrid.net) |
+| `SMTP_PORT` | Puerto SMTP (ej. 587) | Proveedor de email |
+| `SMTP_USER` | Usuario SMTP | Proveedor de email |
+| `SMTP_PASS` | Contraseña SMTP | Proveedor de email |
+
+> Referencia de todas las variables necesarias: `projects/healthy/devops/ENV_VARS.md`
+
+#### Pasos
+
+1. Acceder a Railway dashboard → proyecto `healthy-staging` → servicio backend.
+2. Ir a la pestaña "Variables".
+3. Añadir cada variable de la tabla anterior con su valor real.
+4. Redeploy automático (Railway lo hace al guardar variables) — verificar que el servicio arranca sin errores.
+5. Documentar en `devops/RAILWAY_VARS_STATUS.md` qué variables están configuradas (sin valores — solo nombres).
+
+#### Criterios de aceptación
+
+- [ ] Las 6 variables (`SUPABASE_URL`, `SUPABASE_KEY`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`) están configuradas en Railway staging
+- [ ] El servicio Railway arranca sin crashloop (logs sin `Missing env var` o errores de conexión Supabase/SMTP)
+- [ ] `GET <url-staging>/health` devuelve `200` con `"db": "ok"` y `"redis": "ok"` (si Redis está configurado)
+- [ ] `devops/RAILWAY_VARS_STATUS.md` documenta el estado de configuración
+
+#### Dependencias
+
+- Ninguna como entrada
+- **Desbloquea:** TAREA-2, TAREA-7 (el smoke test de TAREA-2 depende del backend funcionando)
+
+---
+
+### TAREA-7 — Verificar URL real del servicio Railway
+
+**Agente responsable:** devops
+**Carpeta de trabajo:** `projects/healthy/devops/` y `.github/workflows/`
+**Prioridad:** CRITICA — BLOQUEANTE para el smoke test
+**Bloqueada por:** ninguna (verificación manual en Railway dashboard)
+
+#### Pasos
+
+1. Acceder a Railway dashboard → proyecto `healthy-staging` → servicio backend → pestaña "Settings" o "Deployments".
+2. Copiar la URL pública asignada al servicio (dominio `.up.railway.app`).
+3. Comparar con la URL hardcodeada en los workflows: `https://backend-staging-01ee.up.railway.app/health`.
+4. **Si la URL es diferente:** actualizar la variable `STAGING_URL` (o la URL hardcodeada) en todos los archivos de workflow que la referencien:
+   - `.github/workflows/deploy-staging.yml`
+   - Cualquier otro workflow que referencie la URL de staging
+5. Commitear los cambios con `fix(ci): actualizar URL staging Railway`.
+6. Documentar la URL real en `devops/RAILWAY_VARS_STATUS.md`.
+
+#### Criterios de aceptación
+
+- [ ] URL real del servicio Railway confirmada y documentada en `devops/RAILWAY_VARS_STATUS.md`
+- [ ] `curl <url-real>/health` devuelve `200` desde fuera de Railway (verificación pública)
+- [ ] Si la URL difería: workflows actualizados y commiteados en `develop`
+- [ ] El job `smoke-test` del workflow "Deploy → Staging" apunta a la URL correcta
+
+#### Dependencias
+
+- Ninguna como entrada (verificación manual)
+- **Desbloquea:** TAREA-2 (el smoke test usa esta URL)
+
+---
+
+### TAREA-8 — EAS Expo (builds móviles)
+
+**Agente responsable:** devops
+**Carpeta de trabajo:** `projects/healthy/devops/` y `projects/healthy/frontend/`
+**Prioridad:** ALTA — necesaria para go-live pero no bloquea el backend
+**Bloqueada por:** TAREA-2 (backend debe estar verde en staging antes de conectar la app móvil a staging)
+
+#### Pasos
+
+1. Ejecutar `eas login` con las credenciales del proyecto Expo (cuenta Expo asociada al proyecto Healthy).
+2. Ejecutar `eas credentials` para configurar:
+   - iOS: provisioning profile + distribution certificate (requiere Apple Developer account)
+   - Android: keystore (generado automáticamente por EAS si no existe)
+3. Primer build para perfil `preview` en ambas plataformas:
+   ```
+   eas build --profile preview --platform all
+   ```
+4. Esperar a que ambos builds completen en `expo.dev`. Documentar los IDs de build.
+5. Instalar la build de preview en un dispositivo real (o simulador) y verificar que la app arranca y se conecta a la URL de staging.
+6. Actualizar `devops/EAS_BUILD.md` con el resultado del primer build y los IDs de artefacto.
+7. Verificar que el workflow `devops/.github/workflows/eas-build.yml` puede dispararse automáticamente en el siguiente push a `develop`.
+
+#### Criterios de aceptación
+
+- [ ] `eas build --profile preview --platform all` completa sin errores (evidencia: IDs de build en expo.dev)
+- [ ] Build iOS instalable en TestFlight interno o dispositivo via AirDrop/URL directa
+- [ ] Build Android instalable como APK en dispositivo real o emulador
+- [ ] La app de preview se conecta al backend de staging y el flujo de login funciona
+- [ ] `devops/EAS_BUILD.md` actualizado con resultado y IDs de artefacto
+- [ ] Workflow `eas-build.yml` configurado y validado
+
+#### Dependencias
+
+- **Requiere:** TAREA-2 verde (backend staging accesible)
+- **Desbloquea:** TAREA-9 (criterio de TestFlight y Google Play Internal)
+
+---
+
+### TAREA-9 — Gate go-live v1.0.0
+
+**Agente responsable:** orquestador
+**Prioridad:** FINAL — ejecutar solo cuando todas las tareas anteriores estén completas
+**Bloqueada por:** TAREA-2, TAREA-4, TAREA-5, TAREA-7, TAREA-8
+
+#### Condición de entrada
+
+Esta tarea solo se ejecuta cuando TAREA-2, TAREA-4, TAREA-5, TAREA-7 y TAREA-8 están todas completadas y sus criterios de aceptación satisfechos.
+
+#### Criterios gate (todos obligatorios)
+
+| Criterio | Comando de verificación | Umbral |
+|---|---|---|
+| Cobertura de tests | `cd projects/healthy/backend && npx jest --coverage` | ≥ 80 % |
+| Rendimiento API | `node projects/healthy/tests/load/planGeneration.js` | p95 < 500 ms |
+| Lighthouse landing | Auditoría Lighthouse en URL de staging | ≥ 95 en Performance, Accessibility, Best Practices, SEO |
+| App iOS | Build disponible en TestFlight (internal testing) | Confirmado en App Store Connect |
+| App Android | Build disponible en Google Play Internal Testing | Confirmado en Google Play Console |
+| Sin vulnerabilidades críticas | Revisar `security/SECURITY_AUDIT.md` + `security/VULNERABILITIES.md` | 0 hallazgos CRITICAL o HIGH abiertos |
+
+#### Pasos si todos los criterios se superan
+
+1. Documentar resultados en:
+   - `docs/LOAD_TEST_FINAL.md` (resultado del load test con p95 medido)
+   - `docs/LIGHTHOUSE_FINAL.md` (captura/reporte del score Lighthouse)
+2. Actualizar `projects/healthy/tasks.md`: marcar todas las métricas de éxito como `[x]`.
+3. Actualizar `ORCHESTRATOR_STATUS.log`: reporte final de cierre con fecha, versión, métricas alcanzadas e issues para v1.1.0.
+4. Crear el tag de release:
+   ```
+   git tag v1.0.0
+   git push origin v1.0.0
+   ```
+5. Verificar que el workflow `eas-submit.yml` se dispara automáticamente con el tag `v1.0.0` y envía las apps a App Store y Google Play.
+
+#### Si algún criterio falla
+
+| Criterio que falla | Agente al que reportar | Acción |
+|---|---|---|
+| Cobertura < 80 % | tests | Añadir tests hasta alcanzar umbral; re-ejecutar gate |
+| p95 ≥ 500 ms | backend + devops | Optimizar endpoint más lento; re-ejecutar load test |
+| Lighthouse < 95 | frontend + design | Corregir issues de performance/a11y; re-auditar |
+| Vulnerabilidad CRITICAL/HIGH abierta | security | Parchear y cerrar hallazgo; re-auditar |
+| Build EAS falla | devops | Resolver errores de credenciales/configuración; re-build |
+
+#### Criterios de aceptación (del gate)
+
+- [ ] Cobertura de tests ≥ 80 % (evidencia en `docs/LOAD_TEST_FINAL.md`)
+- [ ] API p95 < 500 ms (evidencia en `docs/LOAD_TEST_FINAL.md`)
+- [ ] Landing Lighthouse ≥ 95 en los 4 indicadores (evidencia en `docs/LIGHTHOUSE_FINAL.md`)
+- [ ] App disponible en TestFlight (iOS)
+- [ ] App disponible en Google Play Internal Testing (Android)
+- [ ] Sin hallazgos CRITICAL o HIGH abiertos en security
+- [ ] Tag `v1.0.0` creado y visible en el repositorio
+- [ ] Workflow `eas-submit.yml` disparado y completado correctamente
+- [ ] `tasks.md` con todas las métricas de éxito marcadas `[x]`
+- [ ] `ORCHESTRATOR_STATUS.log` cerrado con reporte final
+
+#### Dependencias
+
+- **Requiere:** TAREA-2, TAREA-4, TAREA-5, TAREA-7, TAREA-8 completadas
+- Esta es la última tarea del proyecto v1.0.0
+
+---
+
+### Resumen Fase 6
+
+| Tarea | Título | Agente | Prioridad | Depende de |
+|---|---|---|---|---|
+| **TAREA-6** | Añadir vars Railway staging | devops | CRITICA — BLOQUEANTE | — |
+| **TAREA-7** | Verificar URL real Railway | devops | CRITICA — BLOQUEANTE | — |
+| **TAREA-2** | Verificar CI verde en GitHub Actions | orquestador / devops | INMEDIATA | TAREA-6, TAREA-7 |
+| **TAREA-4** | Commit git-push.bat | orquestador | MENOR | — |
+| **TAREA-5** | Eliminar check ECR de branch protection | orquestador | LIMPIEZA | — |
+| **TAREA-8** | EAS builds móviles (preview) | devops | ALTA | TAREA-2 |
+| **TAREA-9** | Gate go-live v1.0.0 | orquestador | FINAL | TAREA-2, TAREA-4, TAREA-5, TAREA-7, TAREA-8 |
+
+> **Decisión de orquestador:** TAREA-6 y TAREA-7 son las únicas tareas sin dependencias y son BLOQUEANTES para todo lo demás. Deben ejecutarse primero y en paralelo. TAREA-4 y TAREA-5 son independientes y pueden ejecutarse en cualquier momento sin riesgo.
+
+---
+
+## Fase 7 — Documentación de arquitectura e infraestructura
+
+> Solicitada el 2026-07-05. La documentación existe pero está desactualizada respecto a la infraestructura real.
+
+### DOC-ARCH-01 — Actualizar `architecture-web.md`
+
+**Agente responsable:** docs
+**Carpeta de trabajo:** `projects/healthy/docs/`
+**Prioridad:** ALTA — necesario antes del go-live
+
+#### Cambios pendientes en el documento actual
+
+| Sección | Problema | Fix |
+|---|---|---|
+| Diagrama Mermaid | Menciona "Railpack builder" | Actualizar a Dockerfile multi-stage |
+| Componentes | Service ID del backend (`ec2720da-...`) puede ser incorrecto | Verificar con Railway dashboard |
+| CI/CD | No refleja que `railway up` corre desde repo root (monorepo) | Actualizar descripción del paso deploy |
+| SMTP | Marcado como "Gmail SMTP configurado" | Indicar que SMTP está pendiente de configurar en staging |
+| Secrets table | Menciona `SUPABASE_ANON_KEY` | Corregir a `SUPABASE_KEY` (nombre real que usa el backend) |
+| Sin sección | No documenta la estructura del monorepo | Añadir sección "Estructura del repositorio" |
+
+#### Contenido a añadir
+
+1. **Sección: Estructura del repositorio (monorepo)**
+   ```
+   ai-studio/
+   ├── .github/workflows/       → CI/CD principal (deploy.yml, ci.yml, tests.yml)
+   ├── agents/                  → Definiciones de agentes reutilizables
+   ├── projects/healthy/
+   │   ├── backend/             → API Node.js (raíz del servicio Railway)
+   │   ├── frontend/            → App React Native + Expo
+   │   ├── database/            → Schema Prisma, migraciones, seed
+   │   ├── devops/              → Workflows adicionales, docs infra, EAS
+   │   ├── docs/                → Documentación técnica
+   │   ├── landing/             → Landing estática (S3 + CloudFront)
+   │   ├── security/            → Auditoría RGPD y seguridad
+   │   └── tests/               → Tests de carga y E2E
+   └── projects/healthy/backend/.github/workflows/  → Workflows del servicio backend
+   ```
+
+2. **Sección: Modelo de contenedor Docker**
+   - Dockerfile multi-stage (builder + runner)
+   - Etapa builder: `npm ci` (all deps) + `prisma generate` (genera cliente JS)
+   - Etapa runner: `npm ci --omit=dev` + copia cliente generado
+   - Prisma 7: driver adapter `@prisma/adapter-pg` para conexión a PostgreSQL
+   - `prisma migrate deploy` al arrancar el contenedor
+
+3. **Sección: Configuración Prisma 7**
+   - `prisma.config.ts` provee DATABASE_URL para migraciones
+   - `PrismaClient` usa `PrismaPg(Pool)` como adapter (Prisma 7 ya no acepta URL en schema)
+   - Schema: `provider = "prisma-client-js"`, sin `url` en datasource
+
+#### Criterios de aceptación
+
+- [ ] Diagrama Mermaid actualizado (Dockerfile, no Railpack)
+- [ ] Sección de estructura del monorepo añadida
+- [ ] Sección de modelo Docker añadida
+- [ ] Sección de Prisma 7 añadida
+- [ ] Nombres de variables corregidos (SUPABASE_KEY, etc.)
+- [ ] Estado SMTP reflejado correctamente (pendiente en staging)
+
+---
+
+### DOC-ARCH-02 — Actualizar `deployment-guide.md`
+
+**Agente responsable:** docs
+**Carpeta de trabajo:** `projects/healthy/docs/`
+**Prioridad:** MEDIA
+
+#### Cambios pendientes
+
+1. **Sección staging**: el paso de deploy ya no es `railway up` desde `backend/`, sino desde la raíz del repo
+2. **Prisma en local**: `prisma migrate dev` necesita `prisma.config.ts` (Prisma 7) — actualizar instrucciones
+3. **Variables**: confirmar que la lista de variables es correcta y completa (incluyendo `SUPABASE_SERVICE_ROLE_KEY`)
+4. **Docker local**: añadir instrucciones para levantar el backend con Docker Compose localmente
+
+#### Criterios de aceptación
+
+- [ ] Instrucciones de deploy staging actualizadas (railway up desde repo root)
+- [ ] Instrucciones Prisma 7 actualizadas (prisma.config.ts, adapter)
+- [ ] Lista de variables completa y correcta
+- [ ] Sección Docker local añadida (opcional pero recomendada)
+
+---
+
+### Resumen Fase 7
+
+| Tarea | Título | Agente | Prioridad | Depende de |
+|---|---|---|---|---|
+| **DOC-ARCH-01** | Actualizar architecture-web.md | docs | ALTA | TAREA-2 verde (para reflejar estado real) |
+| **DOC-ARCH-02** | Actualizar deployment-guide.md | docs | MEDIA | DOC-ARCH-01 |
+
+> **Decisión de orquestador:** Ejecutar Fase 7 después de confirmar el primer deploy verde (TAREA-2). La documentación debe reflejar la infraestructura real y funcionando, no la planificada.
