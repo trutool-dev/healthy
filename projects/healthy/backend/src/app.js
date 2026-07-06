@@ -72,7 +72,7 @@ app.get('/health', async (_req, res) => {
     redisStatus = 'error';
   }
 
-  const healthy = dbStatus === 'connected' && redisStatus === 'connected';
+  const healthy = dbStatus === 'connected'; // Redis es caché — no bloquea el healthcheck
   return res.status(healthy ? 200 : 503).json({
     success: healthy,
     data: {
