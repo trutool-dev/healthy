@@ -63,6 +63,8 @@ npx prisma migrate dev
 npx prisma studio
 ```
 
+> **Nota Prisma 7:** Este proyecto usa Prisma 7 con `prisma-client-js`. La URL de conexión se configura en `prisma.config.ts` (no en el schema). Asegúrate de que `DATABASE_URL` esté en tu `.env` antes de ejecutar migraciones.
+
 ### Paso 3: Redis
 
 ```bash
@@ -123,9 +125,10 @@ Staging refleja producción sobre Railway (backend + PostgreSQL + Redis gestiona
 | `JWT_SECRET` | Clave de firma de access tokens (staging) |
 | `JWT_REFRESH_SECRET` | Clave de firma de refresh tokens (staging) |
 | `SUPABASE_URL` | URL del proyecto Supabase de staging |
-| `SUPABASE_ANON_KEY` | Clave anon de Supabase (staging) |
-| `SMTP_USER` | Usuario SMTP para emails de verificación (`trutool@gmail.com`) |
-| `SMTP_PASS` | Contraseña de aplicación Gmail |
+| `SUPABASE_KEY` | Clave anon de Supabase (staging) — `process.env.SUPABASE_KEY` |
+| `SUPABASE_SERVICE_ROLE_KEY` | Clave de servicio Supabase (operaciones privilegiadas) |
+| `SMTP_USER` | Usuario SMTP para emails de verificación (`trutool@gmail.com`) *(pendiente en staging)* |
+| `SMTP_PASS` | Contraseña de aplicación Gmail *(pendiente en staging)* |
 | `ANTHROPIC_API_KEY` | API key de Anthropic |
 | `AWS_ACCESS_KEY_ID` | Credencial AWS (solo para deploy de la landing) |
 | `AWS_SECRET_ACCESS_KEY` | Secret AWS (solo para deploy de la landing) |
@@ -135,9 +138,11 @@ Staging refleja producción sobre Railway (backend + PostgreSQL + Redis gestiona
 
 ```bash
 git push origin develop
-# GitHub Actions dispara el workflow deploy.yml:
+# GitHub Actions dispara automáticamente el workflow deploy.yml:
 #   1. test      → npm test --coverage (cobertura ≥ 80 %)
-#   2. deploy    → railway up (Railpack build en Railway, rama develop → staging)
+#   2. deploy    → railway up (ejecutado desde la raíz del repositorio)
+#                  El CLI sube el repositorio completo; Railway navega a
+#                  projects/healthy/backend según la configuración del servicio.
 #   3. smoke-test → GET /health con 3 reintentos (espera 30 s entre intentos)
 ```
 
@@ -185,7 +190,7 @@ Producción corre en Railway (servicio `ai-studio`, proyecto `healthy-staging`).
 
 - **Service ID:** `ec2720da-2f41-436c-a5e2-e39f7b7d9a6e`
 - **Dominio:** `https://ai-studio-production-1835.up.railway.app`
-- **Builder:** Railpack (root: `projects/healthy/backend`)
+- **Builder:** Dockerfile multi-stage (root: `projects/healthy/backend`)
 - **BD / Redis:** servicios gestionados Railway (`${{Postgres.DATABASE_URL}}` / `${{Redis.REDIS_URL}}`)
 
 ### Prerrequisitos
@@ -204,7 +209,8 @@ Los mismos que staging (excepto las claves AWS de landing, que se gestionan por 
 | `JWT_SECRET` | Clave de firma de access tokens (producción) |
 | `JWT_REFRESH_SECRET` | Clave de firma de refresh tokens (producción) |
 | `SUPABASE_URL` | URL del proyecto Supabase de producción |
-| `SUPABASE_ANON_KEY` | Clave anon de Supabase (producción) |
+| `SUPABASE_KEY` | Clave anon de Supabase (producción) — `process.env.SUPABASE_KEY` |
+| `SUPABASE_SERVICE_ROLE_KEY` | Clave de servicio Supabase (operaciones privilegiadas) |
 | `SMTP_USER` | `trutool@gmail.com` |
 | `SMTP_PASS` | Contraseña de aplicación Gmail |
 | `ANTHROPIC_API_KEY` | API key de Anthropic |
@@ -216,7 +222,7 @@ Los mismos que staging (excepto las claves AWS de landing, que se gestionan por 
 2. Code review + merge
 3. GitHub Actions dispara el workflow deploy.yml:
    a. test      → npm test --coverage (cobertura ≥ 80 %)
-   b. deploy    → railway up --service ai-studio (Railpack build en Railway)
+   b. deploy    → railway up --service ai-studio (Dockerfile multi-stage build en Railway)
    c. smoke-test → GET /health con 3 reintentos (espera 30 s entre intentos)
 4. Verificar en https://ai-studio-production-1835.up.railway.app/health
 ```
@@ -276,14 +282,23 @@ railway logs --service ai-studio | grep ERROR
 |----------|-------|-------------------|----------------------|
 | `NODE_ENV` | `development` | `staging` | `production` |
 | `PORT` | `3000` | `3000` | `3000` |
-| `DATABASE_URL` | localhost PostgreSQL | `${{Postgres.DATABASE_URL}}` Railway | `${{Postgres.DATABASE_URL}}` Railway |
-| `REDIS_URL` | localhost Redis | `${{Redis.REDIS_URL}}` Railway | `${{Redis.REDIS_URL}}` Railway |
+| `DATABASE_URL` | localhost PostgreSQL | URL directa Railway Postgres | URL directa Railway Postgres |
+| `REDIS_URL` | localhost Redis | URL directa Railway Redis | URL directa Railway Redis |
 | `JWT_SECRET` | Valor local | Secret GitHub (staging) | Secret GitHub (production) |
+| `JWT_REFRESH_SECRET` | Valor local | Secret GitHub (staging) | Secret GitHub (production) |
+| `JWT_EXPIRES_IN` | `15m` | `15m` | `15m` |
+| `JWT_REFRESH_EXPIRES_IN` | `30d` | `30d` | `30d` |
 | `ANTHROPIC_API_KEY` | Tu key personal | Secret GitHub | Secret GitHub |
 | `SUPABASE_URL` | Proyecto Supabase dev | Proyecto Supabase staging | Proyecto Supabase prod |
-| `SMTP_HOST` | `smtp.gmail.com` | `smtp.gmail.com` | `smtp.gmail.com` |
-| `SMTP_PORT` | `587` | `587` | `587` |
-| `SMTP_USER` | tu cuenta Gmail | `trutool@gmail.com` | `trutool@gmail.com` |
+| `SUPABASE_KEY` | Clave anon dev | Secret GitHub (staging) | Secret GitHub (production) |
+| `SUPABASE_SERVICE_ROLE_KEY` | Clave servicio dev | Secret GitHub (staging) | Secret GitHub (production) |
+| `SMTP_HOST` | `smtp.gmail.com` | *(pendiente)* | `smtp.gmail.com` |
+| `SMTP_PORT` | `587` | *(pendiente)* | `587` |
+| `SMTP_USER` | tu cuenta Gmail | *(pendiente)* | `trutool@gmail.com` |
+| `SMTP_PASS` | contraseña app Gmail | *(pendiente)* | Secret GitHub (production) |
+| `FRONTEND_URL` | `http://localhost:3000` | URL staging frontend | URL producción frontend |
+
+> **Nota sobre DATABASE_URL y REDIS_URL en Railway:** Deben configurarse con la URL directa del servicio. Las referencias de template (`${{Postgres.DATABASE_URL}}`, `${{Redis.REDIS_URL}}`) solo funcionan si Railway las resuelve automáticamente en el entorno. Si no resuelven, usar la URL directa obtenida desde el dashboard del servicio correspondiente.
 
 ---
 
@@ -347,4 +362,4 @@ El proceso completo también se puede disparar creando un tag `v*.*.*` en el rep
 
 ---
 
-> Última actualización: 2026-06-29 — Docs Agent (migración AWS → Railway; actualización de URLs, secretos y flujos de deploy)
+> Última actualización: 2026-07-07 — Docs Agent
