@@ -595,28 +595,33 @@ docs/LIGHTHOUSE_FINAL.md        (CREAR — resultados Lighthouse finales)
 
 ### Orden de ejecución
 
+> Estado actualizado a 2026-07-07: TAREA-6, TAREA-7, TAREA-2 y TAREA-4 completadas. Staging verde.
+
 ```
-TAREA-6 (devops — vars Railway)      TAREA-7 (devops — verificar URL)
-       │                                      │
-       └──────────────┬───────────────────────┘
-                      ▼
-          TAREA-2 (orquestador — verificar CI verde)
-                      │
-          ┌───────────┴────────────────────────┐
-          ▼                                    ▼
-  TAREA-4 (orquestador — commit bat)   TAREA-5 (orquestador — limpiar branch protection)
-          │                                    │
-          └────────────────┬──────────────────┘
+[x] TAREA-6 (devops — vars Railway)   [x] TAREA-7 (devops — verificar URL)
+           │                                       │
+           └───────────────┬───────────────────────┘
                            ▼
-                   TAREA-8 (devops — EAS builds móviles)
+              [x] TAREA-2 (orquestador — CI verde confirmado)
                            │
-                           ▼
-                   TAREA-9 (orquestador — gate go-live v1.0.0)
+          ┌────────────────┼────────────────────────┐
+          ▼                ▼                         ▼
+[x] TAREA-4          TAREA-5                   TAREA-Redis
+(commit bat)    (limpiar ECR check)        (corregir Redis URL)
+   COMPLETADA    acción manual usuario      acción manual usuario
+                          │                         │
+                          └────────────┬────────────┘
+                                       ▼
+                              TAREA-8 (devops — EAS builds móviles)
+                              [ya desbloqueada — backend staging verde]
+                                       │
+                                       ▼
+                         TAREA-9 (orquestador — gate go-live v1.0.0)
 ```
 
-TAREA-4 y TAREA-5 no se bloquean entre sí y pueden ejecutarse en paralelo una vez TAREA-2 esté verde.
-TAREA-8 requiere que el backend responda en staging (desbloqueado por TAREA-6 y TAREA-7).
-TAREA-9 es el gate final: solo se ejecuta cuando TAREA-2, TAREA-4, TAREA-5, TAREA-7 y TAREA-8 estén completas.
+TAREA-5 y TAREA-Redis son acciones manuales del usuario en GitHub y Railway respectivamente; pueden ejecutarse en paralelo de forma inmediata.
+TAREA-8 ya está desbloqueada (TAREA-2 verde) y puede lanzarse ahora.
+TAREA-9 es el gate final: requiere TAREA-5, TAREA-Redis y TAREA-8 completadas.
 
 ---
 
@@ -778,6 +783,45 @@ En el proyecto `healthy-staging`, servicio backend (ID `fa137c98-5210-4057-a531-
 
 ---
 
+### TAREA-Redis — Corregir Redis en Railway staging
+
+**Agente responsable:** devops (acción manual del usuario en Railway dashboard)
+**Carpeta de trabajo:** `projects/healthy/devops/`
+**Prioridad:** ALTA — necesario antes del go-live (Redis es requerido para caché de planes IA y sesiones JWT)
+**Bloqueada por:** TAREA-6 completada (prerequisito: vars Railway configuradas)
+
+#### Contexto
+
+El healthcheck `GET /health` devuelve `200 {"success":true,"db":"connected"}` pero el campo `redis` responde `"error"`. Esto se debe a que la variable `REDIS_URL` en Railway fue configurada con el valor de referencia `${{Redis.REDIS_URL}}` pero dicha referencia no resuelve (comportamiento idéntico al que ocurrió con `DATABASE_URL` antes de ser corregida).
+
+Redis fue marcado como no-bloqueante en el healthcheck para no bloquear el deploy, pero es **necesario antes del go-live** porque:
+- El caché de planes IA generados por Claude depende de Redis (BE-09)
+- Las sesiones JWT (blacklist de tokens invalidados) se almacenan en Redis (BE-09, SEC-05)
+- La búsqueda de alimentos se cachea 6 h en Redis (BE-09)
+
+#### Pasos
+
+1. Ir a Railway dashboard → proyecto `healthy-staging` → servicio **Redis** (no el backend).
+2. En la pestaña "Connect", copiar la URL de conexión real (formato `redis://default:<password>@<host>:<port>`).
+3. Ir al servicio **backend** → pestaña "Variables".
+4. Editar la variable `REDIS_URL`: reemplazar `${{Redis.REDIS_URL}}` por la URL copiada en el paso 2.
+5. Railway ejecutará un redeploy automático al guardar.
+6. Verificar: `GET https://backend-staging-01ee.up.railway.app/health` debe responder con `"redis":"connected"` (o equivalente OK).
+7. Documentar el resultado en `devops/RAILWAY_VARS_STATUS.md`.
+
+#### Criterios de aceptación
+
+- [ ] `GET https://backend-staging-01ee.up.railway.app/health` devuelve `"redis":"connected"` (o `"ok"`)
+- [ ] El servicio backend arranca sin errores de Redis en los logs de Railway
+- [ ] `devops/RAILWAY_VARS_STATUS.md` actualizado con el estado de `REDIS_URL`
+
+#### Dependencias
+
+- **Requiere:** TAREA-6 completada (las vars base de Railway deben estar configuradas primero)
+- **Desbloquea:** TAREA-9 (criterio de sin vulnerabilidades y funcionalidad completa)
+
+---
+
 ### TAREA-8 — EAS Expo (builds móviles)
 
 **Agente responsable:** devops
@@ -820,7 +864,7 @@ En el proyecto `healthy-staging`, servicio backend (ID `fa137c98-5210-4057-a531-
 
 **Agente responsable:** orquestador
 **Prioridad:** FINAL — ejecutar solo cuando todas las tareas anteriores estén completas
-**Bloqueada por:** TAREA-2, TAREA-4, TAREA-5, TAREA-7, TAREA-8
+**Bloqueada por:** TAREA-2, TAREA-4, TAREA-5, TAREA-7, TAREA-Redis, TAREA-8
 
 #### Condición de entrada
 
@@ -876,24 +920,25 @@ Esta tarea solo se ejecuta cuando TAREA-2, TAREA-4, TAREA-5, TAREA-7 y TAREA-8 e
 
 #### Dependencias
 
-- **Requiere:** TAREA-2, TAREA-4, TAREA-5, TAREA-7, TAREA-8 completadas
+- **Requiere:** TAREA-2, TAREA-4, TAREA-5, TAREA-7, TAREA-Redis, TAREA-8 completadas
 - Esta es la última tarea del proyecto v1.0.0
 
 ---
 
 ### Resumen Fase 6
 
-| Tarea | Título | Agente | Prioridad | Depende de |
-|---|---|---|---|---|
-| **TAREA-6** | Añadir vars Railway staging | devops | CRITICA — BLOQUEANTE | — |
-| **TAREA-7** | Verificar URL real Railway | devops | CRITICA — BLOQUEANTE | — |
-| **TAREA-2** | Verificar CI verde en GitHub Actions | orquestador / devops | INMEDIATA | TAREA-6, TAREA-7 |
-| **TAREA-4** | Commit git-push.bat | orquestador | MENOR | — |
-| **TAREA-5** | Eliminar check ECR de branch protection | orquestador | LIMPIEZA | — |
-| **TAREA-8** | EAS builds móviles (preview) | devops | ALTA | TAREA-2 |
-| **TAREA-9** | Gate go-live v1.0.0 | orquestador | FINAL | TAREA-2, TAREA-4, TAREA-5, TAREA-7, TAREA-8 |
+| Tarea | Título | Agente | Prioridad | Depende de | Estado |
+|---|---|---|---|---|---|
+| **TAREA-6** | Añadir vars Railway staging | devops | CRITICA — BLOQUEANTE | — | [x] Completada 2026-07-07 |
+| **TAREA-7** | Verificar URL real Railway | devops | CRITICA — BLOQUEANTE | — | [x] Completada 2026-07-07 |
+| **TAREA-2** | Verificar CI verde en GitHub Actions | orquestador / devops | INMEDIATA | TAREA-6, TAREA-7 | [x] Completada 2026-07-07 |
+| **TAREA-4** | Commit git-push.bat | orquestador | MENOR | — | [x] Completada 2026-07-07 |
+| **TAREA-5** | Eliminar check ECR de branch protection | orquestador | LIMPIEZA | — | [ ] Pendiente — acción manual usuario |
+| **TAREA-Redis** | Corregir Redis en Railway staging | devops | ALTA | TAREA-6 | [ ] Pendiente — acción manual usuario |
+| **TAREA-8** | EAS builds móviles (preview) | devops | ALTA | TAREA-2 | [ ] Pendiente |
+| **TAREA-9** | Gate go-live v1.0.0 | orquestador | FINAL | TAREA-2, TAREA-4, TAREA-5, TAREA-Redis, TAREA-8 | [ ] Bloqueada |
 
-> **Decisión de orquestador:** TAREA-6 y TAREA-7 son las únicas tareas sin dependencias y son BLOQUEANTES para todo lo demás. Deben ejecutarse primero y en paralelo. TAREA-4 y TAREA-5 son independientes y pueden ejecutarse en cualquier momento sin riesgo.
+> **Decisión de orquestador:** TAREA-6, TAREA-7, TAREA-2 y TAREA-4 están completadas. El deploy staging está verde. TAREA-5 y TAREA-Redis son acciones manuales del usuario en GitHub y Railway respectivamente, y pueden ejecutarse en paralelo. TAREA-8 ya está desbloqueada (backend staging verde). TAREA-9 es el gate final, bloqueada hasta que TAREA-5, TAREA-Redis y TAREA-8 estén completas.
 
 ---
 
@@ -990,3 +1035,96 @@ Esta tarea solo se ejecuta cuando TAREA-2, TAREA-4, TAREA-5, TAREA-7 y TAREA-8 e
 | **DOC-ARCH-02** | Actualizar deployment-guide.md | docs | MEDIA | DOC-ARCH-01 |
 
 > **Decisión de orquestador:** Ejecutar Fase 7 después de confirmar el primer deploy verde (TAREA-2). La documentación debe reflejar la infraestructura real y funcionando, no la planificada.
+
+---
+
+## Plan de distribución — Estado a 2026-07-07
+
+> Generado por el orquestador. Staging VERDE. Backend responde en `https://backend-staging-01ee.up.railway.app/health`.
+
+### Estado de tareas Fase 6
+
+| Tarea | Estado | Fecha |
+|---|---|---|
+| TAREA-6 (vars Railway) | [x] COMPLETADA | 2026-07-07 |
+| TAREA-7 (URL Railway) | [x] COMPLETADA | 2026-07-07 |
+| TAREA-2 (CI verde) | [x] COMPLETADA | 2026-07-07 |
+| TAREA-4 (commit bat) | [x] COMPLETADA | 2026-07-07 |
+| TAREA-5 (limpiar ECR) | [ ] PENDIENTE | acción manual |
+| TAREA-Redis (corregir Redis URL) | [ ] PENDIENTE | acción manual |
+| TAREA-8 (EAS builds) | [ ] PENDIENTE | desbloqueada |
+| TAREA-9 (gate go-live) | [ ] BLOQUEADA | espera TAREA-5, TAREA-Redis, TAREA-8 |
+
+---
+
+### Ejecución inmediata (en paralelo)
+
+#### Bloque A — Acciones manuales del usuario (pueden hacerse ya, en paralelo)
+
+**TAREA-5** — Acción del usuario en GitHub
+- Dónde: GitHub → Settings → Branches → regla de `main`
+- Qué: eliminar el check `Deploy/Build+Push ECR` de los required status checks
+- Tiempo estimado: 2 minutos
+- Sin dependencias, sin riesgo
+
+**TAREA-Redis** — Acción del usuario en Railway
+- Dónde: Railway dashboard → proyecto `healthy-staging` → servicio Redis → Connect → copiar URL real → servicio backend → Variables → editar `REDIS_URL`
+- Qué: reemplazar `${{Redis.REDIS_URL}}` por la URL real de conexión Redis
+- Verificación: `GET /health` debe responder `"redis":"connected"`
+- Tiempo estimado: 5 minutos
+- Requiere: tener el dashboard de Railway abierto
+
+#### Bloque B — Agente devops (puede ejecutarse ya, en paralelo con Bloque A)
+
+**TAREA-8** — EAS Expo builds móviles
+- Agente: devops
+- Carpeta: `projects/healthy/devops/` y `projects/healthy/frontend/`
+- Ya desbloqueada: backend staging está verde
+- Pasos: `eas login` → `eas credentials` → `eas build --profile preview --platform all`
+- Documentación de referencia: `devops/EAS_BUILD.md` y `devops/EAS_SUBMIT.md`
+- Requiere: cuenta Expo activa, credenciales Apple Developer (iOS), keystore Android (EAS lo genera si no existe)
+
+#### Bloque C — Agente docs (puede ejecutarse ya, en paralelo con todo lo anterior)
+
+**DOC-ARCH-01** — Actualizar `docs/architecture-web.md`
+- Agente: docs
+- Carpeta: `projects/healthy/docs/`
+- Sin dependencias técnicas (la documentación refleja la arquitectura que ya existe)
+- Cambios detallados en Fase 7 de este archivo
+
+**DOC-ARCH-02** — Actualizar `docs/deployment-guide.md`
+- Agente: docs
+- Carpeta: `projects/healthy/docs/`
+- Requiere: DOC-ARCH-01 completada primero
+
+---
+
+### Ejecución diferida (bloqueada)
+
+**TAREA-9** — Gate go-live v1.0.0
+- Agente: orquestador
+- Bloqueada por: TAREA-5, TAREA-Redis y TAREA-8
+- Solo ejecutar cuando los tres bloques anteriores estén completados y verificados
+- Criterios gate: cobertura ≥80%, p95 <500ms, Lighthouse ≥95, TestFlight, Google Play, 0 vulnerabilidades críticas
+
+---
+
+### Árbol de dependencias actualizado
+
+```
+[x] TAREA-2 (staging verde)
+        │
+        ├──── TAREA-5 (usuario — GitHub)          ──── sin bloqueos descendientes
+        │
+        ├──── TAREA-Redis (usuario — Railway)     ──── necesario para TAREA-9
+        │
+        ├──── TAREA-8 (devops — EAS builds)       ──── necesario para TAREA-9
+        │
+        └──── DOC-ARCH-01 (docs)
+                   │
+                   └──── DOC-ARCH-02 (docs)       ──── documentación go-live
+                              │
+                              └──── TAREA-9 (orquestador — gate final)
+```
+
+> **Decisión de orquestador (2026-07-07):** Con el staging verde, el camino crítico hacia TAREA-9 depende de tres acciones no bloqueadas entre sí: TAREA-5 (2 min, usuario), TAREA-Redis (5 min, usuario) y TAREA-8 (build time EAS, devops). Se recomienda que el usuario ejecute TAREA-5 y TAREA-Redis de forma inmediata mientras el agente devops lanza TAREA-8 y el agente docs trabaja en DOC-ARCH-01.
