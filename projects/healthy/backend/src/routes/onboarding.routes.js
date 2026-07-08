@@ -66,13 +66,13 @@ router.put('/health',
   [
     body('conditions').optional().isArray().withMessage('conditions debe ser un array'),
     body('conditions.*.condition_name').if(body('conditions').exists()).notEmpty().withMessage('condition_name es obligatorio'),
-    body('conditions.*.condition_type').if(body('conditions').exists()).isIn(['injury', 'disease', 'medication']).withMessage('condition_type inválido'),
+    body('conditions.*.condition_type').optional().isString().withMessage('condition_type inválido'),
     body('conditions.*.affects_training').optional().isBoolean(),
     body('conditions.*.affects_nutrition').optional().isBoolean(),
     body('food_restrictions').optional().isArray().withMessage('food_restrictions debe ser un array'),
     body('food_restrictions.*.restriction_type').if(body('food_restrictions').exists()).isIn(['allergy', 'intolerance', 'dislike']).withMessage('restriction_type inválido'),
     body('food_restrictions.*.food_name').if(body('food_restrictions').exists()).notEmpty().withMessage('food_name es obligatorio'),
-    body('food_restrictions.*.severity').if(body('food_restrictions').exists()).isIn(['mild', 'moderate', 'severe']).withMessage('severity inválida'),
+    body('food_restrictions.*.severity').optional().isIn(['mild', 'moderate', 'severe']).withMessage('severity inválida'),
   ],
   validate, ctrl.saveHealth);
 

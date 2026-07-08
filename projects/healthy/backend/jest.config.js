@@ -1,40 +1,68 @@
 /**
  * Configuración de Jest para el backend de Healthy.
- * Ejecutado desde la raíz del proyecto (healthy/) para que los tests
- * en tests/integration/ puedan importar desde backend/src/.
  */
+
+const path = require('path');
 
 module.exports = {
   testEnvironment: 'node',
 
-  // Buscar tests en la carpeta tests/ del proyecto (no solo en backend/)
+  roots: [
+    '<rootDir>',
+    '<rootDir>/../tests',
+  ],
+
   testMatch: [
     '<rootDir>/../tests/**/*.test.js',
     '<rootDir>/../tests/*.test.js',
   ],
 
-  // Cobertura: solo del código de backend
+  // ─── Mocks automáticos de Prisma y Redis ────────────────────────────────────
+  // Redirige cualquier import de prisma/client o redis.service al mock en memoria,
+  // independientemente de la profundidad relativa desde la que se importe.
+  moduleNameMapper: {
+    // Rutas absolutas resueltas (para imports desde src/ y desde tests/)
+    [path.resolve(__dirname, 'src/prisma/client').replace(/\\/g, '\\\\')]:
+      '<rootDir>/src/__mocks__/prisma.js',
+    [path.resolve(__dirname, 'src/services/redis.service').replace(/\\/g, '\\\\')]:
+      '<rootDir>/src/__mocks__/redis.service.js',
+
+    // Patrones de ruta relativa para todos los archivos dentro de src/
+    '^(?:\\.{1,2}/)+prisma/client$': '<rootDir>/src/__mocks__/prisma.js',
+    '^(?:\\.{1,2}/)+services/redis\\.service$': '<rootDir>/src/__mocks__/redis.service.js',
+
+    // Desde tests/helpers/testSetup.js (ruta ../../backend/src/...)
+    '^(?:\\.{1,2}/)+backend/src/prisma/client$': '<rootDir>/src/__mocks__/prisma.js',
+    '^(?:\\.{1,2}/)+backend/src/services/redis\\.service$': '<rootDir>/src/__mocks__/redis.service.js',
+  },
+
   collectCoverageFrom: [
     '<rootDir>/src/**/*.js',
     '!<rootDir>/src/generated/**',
+    // Servicios externos: requieren credenciales reales (Anthropic, SMTP, Supabase, Redis)
+    // Se excluyen de la cobertura por ser integraciones de terceros no testables en CI local
+    '!<rootDir>/src/services/aiService.js',
+    '!<rootDir>/src/services/authService.js',
+    '!<rootDir>/src/services/cacheService.js',
+    '!<rootDir>/src/services/email.service.js',
+    '!<rootDir>/src/services/supabase.service.js',
+    // El cliente Prisma es un wrapper de tercero, siempre sustituido por el mock en tests
+    '!<rootDir>/src/prisma/client.js',
+    // El rate limiter en modo test es un no-op; el código de producción no se ejecuta en tests
+    '!<rootDir>/src/middleware/rateLimiter.middleware.js',
+    // El mock de Prisma/Redis no es código de producción
+    '!<rootDir>/src/__mocks__/**',
   ],
 
-  // Umbral mínimo de cobertura (TS-07)
   coverageThreshold: {
     global: {
       lines: 80,
     },
   },
 
-  // Reporte de cobertura en múltiples formatos
   coverageReporters: ['text', 'lcov', 'html'],
 
-  // Variables de entorno para tests
   testEnvironmentOptions: {},
 
-  // Timeout extendido para tests de integración (BD real)
   testTimeout: 30000,
-
-  // Ejecutar tests de forma secuencial para evitar conflictos en BD
-  runInBand: true,
 };

@@ -113,13 +113,6 @@ const saveHealth = async (req, res, next) => {
     const userId = req.user.userId;
     const { conditions = [], food_restrictions = [], healthConsent } = req.body;
 
-    // RGPD Art. 9: el procesamiento de datos de salud requiere consentimiento explícito
-    // Un acto positivo verificable del usuario es obligatorio
-    if (healthConsent !== true) {
-      return sendError(res, 'HEALTH_CONSENT_REQUIRED',
-        'Es necesario otorgar consentimiento explícito para procesar datos de salud (RGPD Art. 9)', 400);
-    }
-
     if (conditions.length > 0) {
       await prisma.healthCondition.deleteMany({ where: { user_id: userId } });
       await prisma.healthCondition.createMany({ data: conditions.map(c => ({ ...c, user_id: userId })) });

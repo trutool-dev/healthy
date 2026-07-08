@@ -36,7 +36,27 @@
       "Bash(ls \"/c/Program Files/Docker/Docker/\" 2>/dev/null | head -5 || echo \"Docker Desktop not found at default path\")",
       "Read(//c/Program Files/Docker/Docker//**)",
       "Bash(\"/c/Program Files/Docker/Docker/Docker Desktop.exe\")",
-      "Bash(openssl rand *)"
+      "Bash(openssl rand *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" https://backend-staging-01ee.up.railway.app/health --max-time 15)",
+      "Bash(curl -s https://backend-staging-01ee.up.railway.app/health --max-time 15)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(curl -s https://backend-staging-01ee.up.railway.app/health --max-time 20)",
+      "Bash(python3 -m json.tool)",
+      "Bash(git push *)",
+      "Bash(git -C \"c:/Users/Antonio/Documents/ai-studio\" add projects/healthy/backend/Dockerfile projects/healthy/backend/package.json projects/healthy/backend/package-lock.json projects/healthy/backend/prisma/schema.prisma)",
+      "Bash(git -C \"c:/Users/Antonio/Documents/ai-studio\" status --short)",
+      "Bash(git -C c:/Users/Antonio/Documents/ai-studio commit -m 'fix\\(docker\\): corregir 3 causas de healthcheck failure *)",
+      "Bash(git -C \"c:/Users/Antonio/Documents/ai-studio\" push origin develop)",
+      "Bash(git -C \"c:/Users/Antonio/Documents/ai-studio\" add projects/healthy/backend/prisma/schema.prisma projects/healthy/backend/package.json projects/healthy/backend/package-lock.json projects/healthy/backend/src/prisma/client.js)",
+      "Bash(git -C c:/Users/Antonio/Documents/ai-studio commit -m 'fix\\(prisma\\): usar driver adapter para Prisma 7 \\(pg + @prisma/adapter-pg\\) *)",
+      "Bash(git -C \"c:/Users/Antonio/Documents/ai-studio\" add projects/healthy/tasks.md)",
+      "Bash(git -C \"c:/Users/Antonio/Documents/ai-studio\" commit -m \"docs\\(tasks\\): añadir Fase 7 con tareas de actualización de documentación de arquitectura\")",
+      "Bash(git -C \"c:/Users/Antonio/Documents/ai-studio\" add projects/healthy/backend/railway.toml projects/healthy/backend/Dockerfile)",
+      "Bash(git -C c:/Users/Antonio/Documents/ai-studio commit -m 'fix\\(deploy\\): aumentar healthcheckTimeout a 120s y hacer migrate no-fatal *)",
+      "Bash(git -C \"c:/Users/Antonio/Documents/ai-studio\" add projects/healthy/backend/prisma.config.ts projects/healthy/backend/src/app.js)",
+      "Bash(git -C c:/Users/Antonio/Documents/ai-studio commit -m 'fix\\(deploy\\): corregir prisma.config.ts y healthcheck *)",
+      "Bash(git -C \"c:/Users/Antonio/Documents/ai-studio\" commit -m \"chore\\(tasks\\): orquestador marca Fase 6 completadas y añade TAREA-Redis y plan de distribucion\")"
     ]
   }
 }

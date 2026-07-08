@@ -933,7 +933,7 @@ Esta tarea solo se ejecuta cuando TAREA-2, TAREA-4, TAREA-5, TAREA-7 y TAREA-8 e
 | **TAREA-7** | Verificar URL real Railway | devops | CRITICA — BLOQUEANTE | — | [x] Completada 2026-07-07 |
 | **TAREA-2** | Verificar CI verde en GitHub Actions | orquestador / devops | INMEDIATA | TAREA-6, TAREA-7 | [x] Completada 2026-07-07 |
 | **TAREA-4** | Commit git-push.bat | orquestador | MENOR | — | [x] Completada 2026-07-07 |
-| **TAREA-5** | Eliminar check ECR de branch protection | orquestador | LIMPIEZA | — | [ ] Pendiente — acción manual usuario |
+| **TAREA-5** | Eliminar check ECR de branch protection | orquestador | LIMPIEZA | — | [x] Completada 2026-07-07 — no había reglas configuradas |
 | **TAREA-Redis** | Corregir Redis en Railway staging | devops | ALTA | TAREA-6 | [ ] Pendiente — acción manual usuario |
 | **TAREA-8** | EAS builds móviles (preview) | devops | ALTA | TAREA-2 | [ ] Pendiente |
 | **TAREA-9** | Gate go-live v1.0.0 | orquestador | FINAL | TAREA-2, TAREA-4, TAREA-5, TAREA-Redis, TAREA-8 | [ ] Bloqueada |
