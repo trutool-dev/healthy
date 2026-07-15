@@ -1,6 +1,7 @@
 {
   "cli": {
-    "version": ">= 7.0.0"
+    "version": ">= 7.0.0",
+    "appVersionSource": "remote"
   },
   "build": {
     "development": {
@@ -8,7 +9,7 @@
       "distribution": "internal",
       "env": {
         "APP_ENV": "development",
-        "API_URL": "http://localhost:3000"
+        "EXPO_PUBLIC_API_URL": "http://localhost:3000"
       }
     },
     "preview": {
@@ -18,14 +19,14 @@
       },
       "env": {
         "APP_ENV": "staging",
-        "API_URL": "https://api-staging.healthy.app"
+        "EXPO_PUBLIC_API_URL": "https://backend-staging-01ee.up.railway.app"
       }
     },
     "production": {
       "autoIncrement": true,
       "env": {
         "APP_ENV": "production",
-        "API_URL": "https://api.healthy.app"
+        "EXPO_PUBLIC_API_URL": "https://api.healthy.app"
       }
     }
   },
