@@ -21,7 +21,8 @@
       },
       "env": {
         "APP_ENV": "staging",
-        "EXPO_PUBLIC_API_URL": "https://backend-staging-01ee.up.railway.app"
+        "EXPO_PUBLIC_API_URL": "https://backend-staging-01ee.up.railway.app",
+        "EAS_BUILD_SKIP_LOCKFILE_CHECK": "1"
       }
     },
     "production": {
