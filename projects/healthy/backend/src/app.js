@@ -12,6 +12,7 @@ const progressRoutes = require('./routes/progress.routes');
 const logsRoutes = require('./routes/logs.routes');
 const foodsRoutes = require('./routes/foods.routes');
 const userRoutes = require('./routes/user.routes');
+const exercisesRoutes = require('./routes/exercises.routes');
 const errorHandler = require('./middleware/errorHandler.middleware');
 const { apiLimiter } = require('./middleware/rateLimiter.middleware');
 const prisma = require('./prisma/client');
@@ -99,6 +100,7 @@ app.use('/progress', apiLimiter);
 app.use('/logs', apiLimiter);
 app.use('/foods', apiLimiter);
 app.use('/user', apiLimiter);
+app.use('/exercises', apiLimiter);
 
 app.use('/auth', authRoutes);
 app.use('/onboarding', onboardingRoutes);
@@ -109,6 +111,7 @@ app.use('/progress', progressRoutes);
 app.use('/logs', logsRoutes);
 app.use('/foods', foodsRoutes);
 app.use('/user', userRoutes);
+app.use('/exercises', exercisesRoutes);
 
 // Ruta no encontrada (404)
 app.use((_req, res) => {

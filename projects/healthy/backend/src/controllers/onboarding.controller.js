@@ -7,6 +7,7 @@ const { sendSuccess, sendError } = require('../utils/response.util');
 const prisma = require('../prisma/client');
 const logger = require('../utils/logger.util');
 const aiService = require('../services/aiService');
+const exerciseSelector = require('../services/exerciseSelector.service');
 
 // Helper: calcular macros a partir de calorías objetivo y goal
 function calculateMacros(dailyCalories, goal) {
@@ -228,8 +229,23 @@ const complete = async (req, res, next) => {
       motivation: motivation || undefined,
     };
 
+    // Obtener ejercicios del catálogo real filtrados por perfil del usuario (BE-EX-02)
+    const exerciseProfile = {
+      equipment: training.home_equipment || 'none',
+      goal: profile.goal || 'general_health',
+      experience_level: training.experience_level || 'beginner',
+      injuries: training.injuries_or_limitations
+        ? training.injuries_or_limitations.split(',').map(s => s.trim().toLowerCase()).filter(Boolean)
+        : [],
+    };
+    const catalogExercises = await exerciseSelector.getExercisesForProfile(exerciseProfile, 80);
+    const exerciseCatalogContext = catalogExercises.length > 0
+      ? `## CATÁLOGO DE EJERCICIOS DISPONIBLES (${catalogExercises.length} ejercicios)\nUSA PREFERENTEMENTE estos ejercicios reales del catálogo al generar el plan. Incluye el nombre exacto del ejercicio.\n\n${exerciseSelector.formatExercisesForPrompt(catalogExercises)}`
+      : null;
+    logger.info(`[onboarding] Catálogo: ${catalogExercises.length} ejercicios para usuario ${userId}`);
+
     // Generar plan con IA (con fallback automático)
-    const generatedPlan = await aiService.generatePlan(userId, onboardingData);
+    const generatedPlan = await aiService.generatePlan(userId, onboardingData, 'plan_generation', exerciseCatalogContext);
 
     // Pausar planes activos previos
     await prisma.plan.updateMany({ where: { user_id: userId, status: 'active' }, data: { status: 'completed' } });

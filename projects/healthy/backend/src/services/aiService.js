@@ -437,8 +437,9 @@ async function generatePlan(userId, onboardingData, requestType = 'plan_generati
  * @param {object} onboardingData
  * @param {string} reason - 'weight_plateau'|'goal_change'|'injury'|'manual_request'
  * @param {Array} progressLogs
+ * @param {string|null} exerciseCatalogContext - Catálogo de ejercicios filtrado para incluir en el prompt
  */
-async function regeneratePlan(userId, onboardingData, reason, progressLogs = []) {
+async function regeneratePlan(userId, onboardingData, reason, progressLogs = [], exerciseCatalogContext = null) {
   const contextLines = ['REGENERACIÓN DE PLAN — Actualización solicitada por:'];
 
   switch (reason) {
@@ -454,6 +455,11 @@ async function regeneratePlan(userId, onboardingData, reason, progressLogs = [])
       break;
     default:
       contextLines.push('El usuario solicitó una actualización de su plan. Introduce variaciones para mantener la motivación.');
+  }
+
+  // Añadir catálogo de ejercicios al contexto si está disponible
+  if (exerciseCatalogContext) {
+    contextLines.push('', exerciseCatalogContext);
   }
 
   return generatePlan(userId, onboardingData, 'plan_regeneration', contextLines.join('\n'));
@@ -491,4 +497,7 @@ module.exports = {
   regeneratePlan,
   shouldRegeneratePlan,
   generateFallbackPlan,
+  // Exportadas para tests unitarios
+  buildUserContextPrompt,
+  formatExercisesForPrompt,
 };

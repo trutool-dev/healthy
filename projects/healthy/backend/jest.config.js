@@ -64,5 +64,11 @@ module.exports = {
 
   testEnvironmentOptions: {},
 
+  // Permite que tests en tests/unit/ y tests/integration/ resuelvan módulos
+  // instalados en backend/node_modules (pg, @anthropic-ai/sdk, @prisma/adapter-pg)
+  modulePaths: [
+    '<rootDir>/node_modules',
+  ],
+
   testTimeout: 30000,
 };

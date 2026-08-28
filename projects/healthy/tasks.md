@@ -138,7 +138,7 @@ El foco actual es conectar las piezas y llevarlo a producción.
 - [x] **TS-05** Añadir tests E2E con Supertest para el flujo crítico: registro → onboarding → ver plan → registrar medición — `tests/e2e/criticalFlow.test.js`
 - [x] **TS-06** Añadir tests de integración para endpoints de nutrición y progreso — `tests/integration/nutrition.test.js` + `tests/integration/progress.test.js`
 - [x] **TS-07** Configurar informe de cobertura en CI y fallar el pipeline si cae del 80 % — `.github/workflows/tests.yml` creado
-- [x] **TS-08** Tests de carga básicos en los endpoints más pesados (generación de plan IA) — `tests/load/planGeneration.js` + `tests/LOAD_TEST_REPORT.md`
+- [~] **TS-08** Tests de carga básicos en los endpoints más pesados (generación de plan IA) — `tests/load/planGeneration.js` + `tests/LOAD_TEST_REPORT.md` — **DIFERIDO por decisión del usuario (2026-07-14): requiere backend levantado localmente; se ejecutará en v1.1.0 post-release**
 
 **Dependencias:** BE-01..BE-09, AI-01..AI-07 (para tests de integración reales)
 
@@ -179,7 +179,15 @@ El foco actual es conectar las piezas y llevarlo a producción.
 - [x] **DO-12** Añadir job `deploy-landing` en el pipeline GitHub Actions: se dispara en push a `main` con cambios en `landing/`; ejecuta `aws s3 sync landing/ s3://healthy-landing-prod --delete` seguido de `aws cloudfront create-invalidation --paths "/*"`
 - [x] **DO-13** Configurar cabeceras de seguridad en CloudFront para la landing vía Lambda@Edge o CloudFront Functions: `Strict-Transport-Security`, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy`
 
-**Dependencias:** SEC-01 (variables de entorno auditadas antes de configurar CI); DO-09 antes de DO-10 antes de DO-11 antes de DO-12
+#### Google Cloud Run — Landing (alternativa serverless a S3+CloudFront)
+> Carpeta de trabajo: `projects/healthy/devops/cloudrun/`
+
+- [x] **DO-14** Crear `devops/cloudrun/Dockerfile` — imagen `nginx:alpine` que sirve los archivos estáticos de `landing/`. Puerto 8080 (estándar Cloud Run). Incluir `nginx.conf` con cabeceras de seguridad, compresión gzip y caché inmutable para assets con hash.
+- [x] **DO-15** Crear `devops/cloudrun/.dockerignore` — excluir `node_modules`, `.git`, `src/`, archivos de configuración de build (vite, postcss, tailwind) y credenciales (`.env`).
+- [x] **DO-16** Crear `devops/cloudrun/deploy.sh` — script con los comandos de Google Cloud: `gcloud builds submit` (construye y publica imagen en Container Registry) y `gcloud run deploy` (despliega el servicio con `--allow-unauthenticated`, `--port 8080`, `--memory 256Mi`, `--min-instances 0`). El script lee `PROJECT_ID` de la config de gcloud o de una variable de entorno exportada. Al finalizar imprime la URL pública del servicio.
+- [x] **DO-17** Crear `devops/cloudrun/README.md` — guía paso a paso para que Antonio pueda ejecutar el despliegue: prerrequisitos (gcloud CLI, Cloud Build API habilitada, facturación activa), configurar `PROJECT_ID`, ejecutar `./deploy.sh` y verificar la URL resultante. Incluir comandos de rollback y limpieza.
+
+**Dependencias:** SEC-01 (variables de entorno auditadas antes de configurar CI); DO-09 antes de DO-10 antes de DO-11 antes de DO-12; DO-14 antes de DO-15 antes de DO-16 antes de DO-17
 
 ---
 
@@ -244,12 +252,12 @@ Fase 5 — DevOps + Docs (en paralelo, dependen de Fase 3 y 4)
 
 ## Métricas de éxito
 
-- [ ] Cobertura de tests ≥ 80 %
-- [ ] Tiempo de respuesta API < 500 ms (p95)
+- [x] Cobertura de tests ≥ 80 % — 88.21 % (253/253 tests, verificado 2026-07-08)
+- [~] Tiempo de respuesta API < 500 ms (p95) — DIFERIDO (decisión del usuario, 2026-07-14): load tests excluidos del gate v1.0.0; se medirán en producción tras go-live
 - [ ] App publicada en TestFlight y Google Play Internal
-- [ ] Auditoría RGPD sin hallazgos críticos
-- [ ] Pipeline CI/CD verde en rama `develop`
-- [ ] Modo oscuro funcional en todas las pantallas
+- [x] Auditoría RGPD sin hallazgos críticos — verificado 2026-07-07: 0 CRÍTICOS, 0 ALTOS abiertos (VUL-2026-001/002/004 resueltos; VUL-006/007 aceptados documentados)
+- [x] Pipeline CI/CD verde en rama `develop` — RAILWAY_ENVIRONMENT_ID configurado en deploy.yml; staging green (2026-07-07)
+- [x] Modo oscuro funcional en todas las pantallas
 - [ ] Landing publicada en producción con SSL, dominio propio y score Lighthouse ≥ 95
 - [ ] Pipeline de despliegue de landing operativo (push a `main` → S3 → CloudFront invalidation < 60 s)
 
@@ -1050,10 +1058,13 @@ Esta tarea solo se ejecuta cuando TAREA-2, TAREA-4, TAREA-5, TAREA-7 y TAREA-8 e
 | TAREA-7 (URL Railway) | [x] COMPLETADA | 2026-07-07 |
 | TAREA-2 (CI verde) | [x] COMPLETADA | 2026-07-07 |
 | TAREA-4 (commit bat) | [x] COMPLETADA | 2026-07-07 |
-| TAREA-5 (limpiar ECR) | [ ] PENDIENTE | acción manual |
-| TAREA-Redis (corregir Redis URL) | [ ] PENDIENTE | acción manual |
+| TAREA-5 (limpiar ECR) | [x] COMPLETADA | 2026-07-07 — no había reglas configuradas |
+| TAREA-Redis (corregir Redis URL) | [x] COMPLETADA | 2026-07-07 — URL directa configurada |
+| DOC-ARCH-01 (architecture-web.md) | [x] COMPLETADA | 2026-07-07 |
+| DOC-ARCH-02 (deployment-guide.md) | [x] COMPLETADA | 2026-07-07 |
+| Tests ≥80% cobertura | [x] COMPLETADA | 2026-07-08 — 253/253 tests, 88.21% |
 | TAREA-8 (EAS builds) | [ ] PENDIENTE | desbloqueada |
-| TAREA-9 (gate go-live) | [ ] BLOQUEADA | espera TAREA-5, TAREA-Redis, TAREA-8 |
+| TAREA-9 (gate go-live) | [ ] BLOQUEADA | espera TAREA-8 |
 
 ---
 
@@ -1128,3 +1139,411 @@ Esta tarea solo se ejecuta cuando TAREA-2, TAREA-4, TAREA-5, TAREA-7 y TAREA-8 e
 ```
 
 > **Decisión de orquestador (2026-07-07):** Con el staging verde, el camino crítico hacia TAREA-9 depende de tres acciones no bloqueadas entre sí: TAREA-5 (2 min, usuario), TAREA-Redis (5 min, usuario) y TAREA-8 (build time EAS, devops). Se recomienda que el usuario ejecute TAREA-5 y TAREA-Redis de forma inmediata mientras el agente devops lanza TAREA-8 y el agente docs trabaja en DOC-ARCH-01.
+
+---
+
+## Fase 8 — Estado go-live a 2026-07-07
+
+> Actualizado por el orquestador el 2026-07-07.
+
+### Estado de criterios go-live (TAREA-9 / PR-6)
+
+| Criterio | Estado | Evidencia |
+|---|---|---|
+| **Deploy CI verde** | ⏳ EN PROGRESO | Fix RAILWAY_ENVIRONMENT_ID listo, pendiente push + confirmación |
+| **Cobertura tests ≥ 80%** | ⏳ PENDIENTE | Ejecutar `npx jest --coverage` en backend/ |
+| **Load test p95 < 500ms** | ⏳ PENDIENTE | Ejecutar `node tests/load/planGeneration.js` |
+| **Lighthouse landing ≥ 95** | ⏳ PENDIENTE | Requiere dominio `healthy.app` activo |
+| **Seguridad: 0 CRITICAL/HIGH abiertos** | ✅ PASA | Auditado 2026-07-07: VUL-001/002/004 RESUELTOS; VUL-006/007 ACEPTADOS documentados |
+| **Migración Prisma producción** | ✅ HECHO | Aplicada 2026-06-29 |
+| **Redis staging operativo** | ⏳ PENDIENTE | TAREA-Redis: reemplazar `${{Redis.REDIS_URL}}` por URL real |
+| **App TestFlight (iOS)** | ⏳ PENDIENTE | TAREA-8: `eas build --profile preview --platform ios` |
+| **App Google Play Internal** | ⏳ PENDIENTE | TAREA-8: `eas build --profile preview --platform android` |
+| **Tag v1.0.0** | ⏳ BLOQUEADO | Espera criterios anteriores |
+
+### Acciones manuales requeridas del usuario
+
+1. **Deploy CI** — ejecutar `.\git-push.bat` (fix RAILWAY_ENVIRONMENT_ID) y confirmar verde en GitHub Actions
+2. **Redis staging** — Railway dashboard → backend → Variables → editar `REDIS_URL` con URL real del servicio Redis
+3. **ECR check** — GitHub → Settings → Branches → main → eliminar `Deploy/Build+Push ECR` de required checks
+4. **EAS** — requiere cuenta Expo, credenciales Apple Developer y keystore Android
+
+---
+
+## Fase 10 — Integración dataset de ejercicios reales
+
+> Generada por el orquestador el 2026-08-28.
+> Objetivo: integrar un dataset de 1.324 ejercicios reales en la aplicación de forma que Claude genere planes
+> usando ejercicios REALES de la base de datos en lugar de inventarlos.
+> Dataset fuente: `https://github.com/hasaneyldrm/exercises-dataset`
+
+---
+
+### Contexto y diagnóstico previo al inicio de fase
+
+#### Tabla Exercise — estado actual (schema.prisma)
+
+La tabla `exercises` actual tiene una estructura mínima incompatible con el dataset:
+
+```
+model Exercise {
+  id               String          @id @default(uuid())   // UUID, no el ID numérico del dataset
+  name             String
+  muscle_group     String          // sustituir por category + bodyPart + target
+  equipment_needed String?
+  difficulty       ExperienceLevel // enum beginner/intermediate/advanced (no existe en dataset)
+  instructions     String?         // texto plano; el dataset tiene objeto multi-idioma {es, en, ...}
+  video_url        String?
+}
+```
+
+Campos del dataset **no cubiertos** por el schema actual:
+- `externalId` (ID numérico del dataset)
+- `category` (Arms / Back / Chest / Legs / Shoulders / Waist)
+- `bodyPart` (parte del cuerpo más específica)
+- `target` (músculo objetivo principal)
+- `secondaryMuscles` (array de músculos secundarios)
+- `instructions` como objeto JSON multi-idioma (incluye `es`)
+- `gifUrl` (GIF animado del ejercicio)
+- `thumbnailUrl` (imagen estática)
+
+#### Cómo genera planes el aiService.js actualmente
+
+El servicio `aiService.js` **NO pasa ejercicios de la base de datos a Claude**. Claude los inventa libremente:
+
+1. `buildUserContextPrompt()` construye el prompt con datos del usuario (físico, entrenamiento, nutrición, salud, motivación) pero **no incluye ningún catálogo de ejercicios**.
+2. El system prompt (`SYSTEM_PROMPT`) pide a Claude que genere ejercicios con campos `name`, `sets`, `reps`, `rest_seconds`, `equipment_needed`, `instructions` — sin restricción sobre qué ejercicios puede usar.
+3. El fallback plan (`generateFallbackPlan`) hardcodea 3 ejercicios inventados (Sentadillas, Flexiones, Plancha) para todos los usuarios.
+4. No existe ningún servicio de selección de ejercicios, ni consulta a la tabla `exercises` en ningún punto del flujo de generación de planes.
+
+**Consecuencia:** Los planes generados no están vinculados a la tabla `exercises` de la DB. Los `session_exercises` se crean sin `exercise_id` referenciado, lo que hace imposible vincular el ejercicio del plan con el catálogo real.
+
+---
+
+### Tareas por agente
+
+#### Database Agent
+> Carpeta: `projects/healthy/database/`
+
+- [ ] **DB-EX-01** — Actualizar modelo `Exercise` en `backend/prisma/schema.prisma` con los nuevos campos del dataset. Campos a añadir o modificar:
+  - `externalId Int? @unique` — ID numérico del dataset (permite hacer upsert por id del dataset)
+  - `name String` — mantener, ya existe
+  - `category String` — sustituye a `muscle_group` (guardar ambos durante la transición o renombrar)
+  - `bodyPart String?`
+  - `equipment String?` — renombrar `equipment_needed` a `equipment` o añadir `equipment` y deprecar `equipment_needed`
+  - `target String?` — músculo objetivo principal
+  - `secondaryMuscles String[]` — array de strings (PostgreSQL soporta arrays en Prisma)
+  - `instructions Json?` — objeto multi-idioma `{en: "...", es: "..."}` como tipo Json de Prisma
+  - `gifUrl String?`
+  - `thumbnailUrl String?`
+  - Campos a **conservar** para compatibilidad con `SessionExercise`: `id`, `session_exercises` relación
+  - Campos a **deprecar** (marcar como opcionales, no eliminar en esta migración para no romper seeds existentes): `muscle_group`, `equipment_needed`, `difficulty`, `video_url`
+  - Añadir índices: `@@index([category])`, `@@index([equipment])`, `@@index([target])`, `@@index([bodyPart])`
+
+- [ ] **DB-EX-02** — Generar migración Prisma:
+  - Desde `projects/healthy/backend/`: `npx prisma migrate dev --name add_exercise_dataset_fields`
+  - Verificar con `npx prisma validate`
+  - Documentar en `database/MIGRATION_LOG.md` con procedimiento de rollback
+
+- [ ] **DB-EX-03** — Crear/actualizar seed script `database/seed-exercises.ts` (archivo separado para no romper el seed principal):
+  1. Hacer `fetch` a `https://raw.githubusercontent.com/hasaneyldrm/exercises-dataset/main/data/exercises.json`
+  2. Mapear cada ejercicio del dataset a los campos del schema actualizado:
+     ```
+     {
+       externalId: ex.id,
+       name:       ex.name,
+       category:   ex.category,
+       bodyPart:   ex.bodyPart,
+       equipment:  ex.equipment,
+       target:     ex.target,
+       secondaryMuscles: ex.secondaryMuscles,
+       instructions: ex.instructions,  // objeto JSON completo
+       gifUrl:     ex.gifUrl,
+       thumbnailUrl: ex.thumbnailUrl,
+     }
+     ```
+  3. Usar `prisma.exercise.createMany({ data: exercises, skipDuplicates: true })` para inserción masiva
+  4. Si `createMany` no soporta `skipDuplicates` con `externalId` como campo único, usar `upsert` en bucle con batches de 100
+  5. Loguear progreso: `console.log(\`Ejercicios insertados: X de 1.324\`)`
+  6. Manejar errores de red con retry (máx 3 intentos con backoff de 1s)
+  7. El script debe poder ejecutarse de forma autónoma: `npx ts-node database/seed-exercises.ts`
+
+**Complejidad:** MEDIA — la migración es straightforward pero hay que tener cuidado con el renombrado de campos para no romper `SessionExercise` ni los seeds existentes.
+
+**Dependencias:** ninguna — puede iniciar inmediatamente.
+
+---
+
+#### Backend Agent
+> Carpeta: `projects/healthy/backend/`
+
+- [ ] **BE-EX-01** — Crear `backend/src/services/exerciseSelector.service.js`:
+
+  El servicio debe recibir un objeto de preferencias del usuario y devolver un array de ejercicios de la DB (máx 50) adecuados para el perfil:
+
+  ```js
+  /**
+   * Selecciona ejercicios apropiados para el perfil del usuario.
+   * @param {{ equipment, categories, targetMuscles, excludedMuscles, experienceLevel, limit }} filters
+   * @returns {Promise<Exercise[]>}
+   */
+  async function selectExercises(filters) { ... }
+  ```
+
+  Lógica de filtrado (en orden de prioridad):
+  1. **Equipamiento:** filtrar por `equipment` basado en `training.home_equipment` y `training.has_gym_access`:
+     - `none` → solo `Body Weight`
+     - `dumbbells` → `Body Weight`, `Dumbbell`
+     - `bands` → `Body Weight`, `Band`
+     - `machines` → añadir `Machine`, `Cable`
+     - `full` o `has_gym_access: true` → todos los tipos de equipamiento
+  2. **Lesiones/limitaciones:** excluir ejercicios cuyo `bodyPart` o `target` coincida con las zonas mencionadas en `training.injuries_or_limitations` (parsing simple de palabras clave: espalda→back/spine, rodilla→legs/knee, hombro→shoulders, etc.)
+  3. **Distribución por categorías:** asegurar variedad — si el plan tiene múltiples grupos musculares, distribuir los 50 ejercicios entre las categorías relevantes
+  4. **Límite:** devolver máx 50 ejercicios para no saturar el contexto de Claude
+  5. Si la consulta devuelve < 10 ejercicios (filtros muy restrictivos), relajar el filtro de equipamiento y loguear un warning
+
+  **Formato de salida** (objeto simplificado para el prompt, sin instrucciones completas):
+  ```js
+  { id, name, category, equipment, target, bodyPart }
+  ```
+
+- [ ] **BE-EX-02** — Actualizar `POST /onboarding/complete` en `backend/src/controllers/onboarding.controller.js`:
+  1. Antes de llamar a `aiService.generatePlan()`, llamar a `exerciseSelector.selectExercises(trainingPreferences)`
+  2. Pasar el resultado como nuevo parámetro a `aiService.generatePlan()` (añadir parámetro `availableExercises`)
+  3. Mantener compatibilidad con el flujo actual — si `exerciseSelector` falla, continuar sin ejercicios (warning en log)
+
+- [ ] **BE-EX-03** — Actualizar `POST /plans/regenerate` en `backend/src/controllers/plans.controller.js`:
+  - Misma lógica que BE-EX-02: llamar a `exerciseSelector` antes de llamar a `aiService.regeneratePlan()`
+  - Invalidar caché Redis del plan anterior antes de regenerar
+
+- [ ] **BE-EX-04** — Añadir endpoint `GET /exercises` en una nueva ruta `backend/src/routes/exercises.routes.js`:
+  - Query params de filtro: `?equipment=Dumbbell&category=Arms&target=biceps&bodyPart=upper+arm&limit=50&offset=0`
+  - Respuesta paginada con formato estándar `{ success, data: { exercises, total, limit, offset } }`
+  - Registrar la ruta en `backend/src/app.js` bajo `/exercises`
+  - Todos los params son opcionales; sin params devuelve todos con paginación por defecto (limit=20)
+
+**Complejidad BE-EX-01:** MEDIA — la lógica de filtrado por lesiones requiere parsing de texto libre.
+**Complejidad BE-EX-02/03:** BAJA — añadir una llamada antes de las existentes.
+**Complejidad BE-EX-04:** BAJA — endpoint CRUD estándar.
+
+**Dependencias:** DB-EX-01 y DB-EX-02 deben estar completadas (schema actualizado y migración aplicada).
+
+---
+
+#### AI Agent
+> Carpeta: `projects/healthy/backend/src/services/` (aiService.js)
+
+- [ ] **AI-EX-01** — Actualizar el system prompt `SYSTEM_PROMPT` en `backend/src/services/aiService.js`:
+
+  Añadir al inicio de la sección `## REGLAS ESTRICTAS` la siguiente instrucción (antes de las reglas numéricas existentes):
+
+  ```
+  REGLA PRIORITARIA — CATÁLOGO DE EJERCICIOS:
+  Usa ÚNICAMENTE los ejercicios del catálogo proporcionado en el mensaje del usuario.
+  No inventes ni añadas ejercicios que no estén en esa lista.
+  Si el catálogo no tiene suficientes ejercicios para completar el plan, reutiliza ejercicios
+  del catálogo variando series, repeticiones o intensidad.
+  ```
+
+  Esta regla debe ser la primera del system prompt para que tenga máxima prioridad.
+
+- [ ] **AI-EX-02** — Actualizar `buildUserContextPrompt()` en `backend/src/services/aiService.js`:
+
+  Añadir un nuevo parámetro `availableExercises` (array de ejercicios del DB) y construir una sección de catálogo compacta en el prompt:
+
+  ```
+  ## CATÁLOGO DE EJERCICIOS DISPONIBLES
+  Usa SOLO estos ejercicios. Formato: ID | Nombre | Equipamiento | Músculo objetivo | Parte del cuerpo
+
+  1 | Push-Up | Body Weight | pectorals | upper body
+  2 | Dumbbell Curl | Dumbbell | biceps | upper arm
+  ...
+  ```
+
+  Formato compacto (sin instrucciones completas) para minimizar tokens. El campo `id` del dataset se incluye en el prompt para que Claude pueda referenciar el ejercicio de forma unívoca (y el backend puede luego buscar el `exercise_id` en DB por nombre o externalId).
+
+  Actualizar la firma de `generatePlan()` para aceptar `availableExercises`:
+  ```js
+  async function generatePlan(userId, onboardingData, requestType, extraContext, availableExercises)
+  ```
+
+  Si `availableExercises` es null o vacío, el prompt no incluye la sección de catálogo (compatibilidad hacia atrás).
+
+  Actualizar igualmente `regeneratePlan()` para pasar `availableExercises`.
+
+  Actualizar el fallback `generateFallbackPlan()` para que, si se le pasan ejercicios disponibles, use los primeros 3 del catálogo en lugar de los hardcodeados (Sentadillas, Flexiones, Plancha).
+
+**Complejidad AI-EX-01:** BAJA — modificar texto del system prompt.
+**Complejidad AI-EX-02:** MEDIA — modificar firmas de funciones y añadir lógica de formateo del catálogo; cuidar compatibilidad con caché Redis (la clave de caché debe incluir un hash del catálogo o invalidarse cuando cambien los ejercicios seleccionados).
+
+**Dependencias:** BE-EX-01 debe existir para que el catálogo llegue a esta función.
+
+---
+
+#### Tests Agent
+> Carpeta: `projects/healthy/tests/`
+
+- [ ] **TEST-EX-01** — Tests unitarios para `exerciseSelector.service.js`:
+  - Test: usuario sin equipamiento → devuelve SOLO ejercicios `Body Weight`
+  - Test: usuario con gimnasio → devuelve ejercicios de todos los equipamientos
+  - Test: usuario con lesión de rodilla → no incluye ejercicios de `Legs`
+  - Test: filtros muy restrictivos → devuelve al menos 1 ejercicio (no array vacío) y loguea warning
+  - Test: resultado no supera 50 ejercicios independientemente del total en DB
+  - Mock: usar `jest.mock('../prisma/client')` para no depender de DB real
+
+- [ ] **TEST-EX-02** — Tests de integración para `GET /exercises`:
+  - Test: sin params → devuelve 20 ejercicios paginados con `total`
+  - Test: `?equipment=Dumbbell` → todos los resultados tienen `equipment = "Dumbbell"`
+  - Test: `?category=Arms&limit=5` → máx 5 resultados, todos de categoría Arms
+  - Test: `?offset=1000` → devuelve array vacío con `total` correcto (no error 500)
+  - Mock: Prisma mock de `__mocks__/prisma.js` ya existente en el proyecto
+
+- [ ] **TEST-EX-03** — Test de smoke: verificar que tras `POST /onboarding/complete` el plan contiene ejercicios que existen en la DB:
+  - Setup: insertar en DB de test 10 ejercicios con `externalId` conocidos
+  - Ejecutar `POST /onboarding/complete` con perfil completo
+  - Parsear el `generated_plan.training_plan.weekly_schedule[].exercises[].name`
+  - Verificar que al menos el 80% de los nombres de ejercicio del plan coinciden con nombres del catálogo en DB
+  - Este test debe marcarse como `integration` y excluirse del gate de cobertura si Claude API no está disponible (usar flag `SKIP_AI_TESTS=true`)
+
+**Complejidad:** MEDIA — TEST-EX-03 requiere coordinación con el flujo de onboarding completo y puede ser frágil si Claude varía las respuestas.
+
+**Dependencias:** DB-EX-01/02/03 (datos en DB), BE-EX-01/02/03 (endpoints), AI-EX-01/02 (prompt actualizado).
+
+---
+
+### Orden de ejecución
+
+```
+DB-EX-01 (actualizar schema Exercise)
+    │
+    ▼
+DB-EX-02 (migración Prisma)
+    │
+    ├──────────────────────────────────────────┐
+    ▼                                          ▼
+DB-EX-03 (seed 1.324 ejercicios)         BE-EX-01 (exerciseSelector.service.js)
+                                               │
+                                    ┌──────────┴──────────┐
+                                    ▼                     ▼
+                              BE-EX-02               AI-EX-01
+                        (onboarding/complete    (actualizar SYSTEM_PROMPT)
+                         llama al selector)
+                              │                     │
+                              ▼                     ▼
+                         BE-EX-03              AI-EX-02
+                    (plans/regenerate      (buildUserContextPrompt
+                     llama al selector)    con catálogo compacto)
+                                    │
+                                    ▼
+                              BE-EX-04
+                         (GET /exercises)
+                                    │
+                                    ▼
+                    TEST-EX-01 + TEST-EX-02 + TEST-EX-03
+```
+
+**Agente que debe ejecutarse primero:** Database Agent (DB-EX-01 → DB-EX-02 → DB-EX-03).
+Sin el schema actualizado y la migración aplicada, ningún otro agente puede avanzar.
+
+---
+
+### Estimación de complejidad por tarea
+
+| Tarea | Agente | Complejidad | Estimación |
+|---|---|---|---|
+| DB-EX-01 | database | MEDIA | 30-45 min — renombrar campos con cuidado de no romper SessionExercise |
+| DB-EX-02 | database | BAJA | 10 min — `prisma migrate dev` + validar |
+| DB-EX-03 | database | MEDIA | 45-60 min — fetch + mapeo + seed masivo con manejo de errores |
+| BE-EX-01 | backend | MEDIA | 45-60 min — lógica de filtrado por equipamiento + lesiones |
+| BE-EX-02 | backend | BAJA | 15 min — añadir llamada al selector en onboarding |
+| BE-EX-03 | backend | BAJA | 15 min — añadir llamada al selector en regenerate |
+| BE-EX-04 | backend | BAJA | 20 min — endpoint GET con filtros y paginación |
+| AI-EX-01 | ai | BAJA | 10 min — editar texto del system prompt |
+| AI-EX-02 | ai | MEDIA | 30-45 min — nuevo parámetro en generatePlan + formateo del catálogo |
+| TEST-EX-01 | tests | MEDIA | 30 min — 5 tests unitarios con mock Prisma |
+| TEST-EX-02 | tests | BAJA | 20 min — 4 tests integración endpoint |
+| TEST-EX-03 | tests | ALTA | 45-60 min — smoke test con flujo completo |
+
+**Total estimado:** ~5-6 horas de trabajo de agentes en secuencia, ~3 horas en paralelo óptimo.
+
+---
+
+### Notas de implementación importantes
+
+1. **Imágenes para MVP:** guardar `gifUrl` y `thumbnailUrl` tal como vienen del dataset (URLs de GitHub raw). Migración a S3 → tarea futura, NO en este sprint.
+2. **Caché Redis:** la clave actual `plan:${userId}:${today}` no distingue si el catálogo de ejercicios cambió. Añadir hash del catálogo seleccionado a la clave o simplemente no cachear si `availableExercises` está presente (dejar la decisión al AI Agent en AI-EX-02).
+3. **Prisma 7 — `createMany` con `skipDuplicates`:** verificar que el adapter `@prisma/adapter-pg` soporta `skipDuplicates`. Si no, usar upsert en batches.
+4. **Schema — `difficulty` vs dataset:** el dataset no tiene campo `difficulty`. El campo `ExperienceLevel` existente en el schema puede conservarse como `null` para los ejercicios del dataset (se inferirá del nivel del usuario, no del ejercicio).
+5. **Compatibilidad SessionExercise:** la relación `session_exercises` referencia `exercise_id`. Tras la migración, los planes futuros deben guardar el `exercise_id` real de la DB al crear `SessionExercise`. Esto requiere que el AI Agent devuelva el `externalId` o `name` del ejercicio en el JSON de Claude, y el backend haga un lookup antes de insertar en `session_exercises`.
+
+---
+
+### Resumen Fase 10
+
+| Tarea | Agente | Prioridad | Estado |
+|---|---|---|---|
+| DB-EX-01 | database | CRITICA — BLOQUEANTE | [ ] Pendiente |
+| DB-EX-02 | database | CRITICA — BLOQUEANTE | [ ] Pendiente |
+| DB-EX-03 | database | ALTA | [ ] Pendiente |
+| BE-EX-01 | backend | ALTA | [ ] Pendiente |
+| BE-EX-02 | backend | ALTA | [ ] Pendiente |
+| BE-EX-03 | backend | MEDIA | [ ] Pendiente |
+| BE-EX-04 | backend | MEDIA | [ ] Pendiente |
+| AI-EX-01 | ai | ALTA | [ ] Pendiente |
+| AI-EX-02 | ai | ALTA | [ ] Pendiente |
+| TEST-EX-01 | tests | MEDIA | [ ] Pendiente |
+| TEST-EX-02 | tests | BAJA | [ ] Pendiente |
+| TEST-EX-03 | tests | MEDIA | [ ] Pendiente |
+
+> **Decisión de orquestador (2026-08-28):** Lanzar Database Agent primero (DB-EX-01 → DB-EX-02 → DB-EX-03). En paralelo con DB-EX-03, Backend Agent puede comenzar BE-EX-01 (no necesita datos en DB, solo el schema). Una vez BE-EX-01 completado, BE-EX-02 y AI-EX-01/02 pueden ejecutarse en paralelo. Tests al final cuando todo el stack esté integrado.
+
+---
+
+## Fase 9 — Estado orquestador a 2026-07-14
+
+> Actualizado por el orquestador el 2026-07-14.
+
+### Decisiones tomadas
+
+| Decisión | Detalle |
+|---|---|
+| **Load tests diferidos** | TS-08 excluido del gate v1.0.0 por decisión del usuario. Se ejecutarán post-release en producción real (v1.1.0). |
+| **Lighthouse pendiente** | Dominio `healthy.app` no responde aún (CloudFront/DNS no activo). Lighthouse v13 + Chrome disponibles localmente; el check se ejecuta en cuanto el dominio esté activo. |
+| **EAS documentado** | `devops/EAS_CHECKLIST.md` creado con prerrequisitos exactos, comandos paso a paso y tabla de errores frecuentes para iOS y Android. Requiere acción del usuario (cuentas Apple/Google). |
+| **Go-live gate documentado** | `devops/GO_LIVE_CHECKLIST.md` creado con todos los criterios, comandos de verificación y pasos post-tag. |
+
+### Estado de criterios go-live actualizado (2026-07-14)
+
+| Criterio | Estado | Evidencia / Próximo paso |
+|---|---|---|
+| **Deploy CI verde** | ✅ COMPLETADO | Staging verde desde 2026-07-07 |
+| **Cobertura tests ≥ 80%** | ✅ COMPLETADO | 88.21%, 253/253 tests (2026-07-08) |
+| **Load test p95 < 500ms** | [~] DIFERIDO | Decisión del usuario — post-release v1.1.0 |
+| **Lighthouse landing ≥ 95** | ⏳ PENDIENTE | Dominio `healthy.app` inactivo; instrucciones en `tests/LIGHTHOUSE_PENDING.md` |
+| **Seguridad: 0 CRITICAL/HIGH abiertos** | ✅ PASA | Auditado 2026-07-07 |
+| **Migración Prisma producción** | ✅ HECHO | Aplicada 2026-06-29 |
+| **Redis staging operativo** | ⏳ PENDIENTE | Acción manual usuario en Railway dashboard |
+| **App TestFlight (iOS)** | ⏳ PENDIENTE | TAREA-8 — ver `devops/EAS_CHECKLIST.md` |
+| **App Google Play Internal** | ⏳ PENDIENTE | TAREA-8 — ver `devops/EAS_CHECKLIST.md` |
+| **Tag v1.0.0** | ⏳ BLOQUEADO | Espera: Lighthouse, Redis, TAREA-8 |
+
+### Archivos generados por el orquestador en esta sesión
+
+| Archivo | Propósito |
+|---|---|
+| `tests/LIGHTHOUSE_PENDING.md` | Instrucciones exactas para ejecutar Lighthouse cuando `healthy.app` esté activo |
+| `devops/EAS_CHECKLIST.md` | Prerrequisitos, comandos y tabla de errores para builds iOS/Android |
+| `devops/GO_LIVE_CHECKLIST.md` | Checklist completo de criterios, pasos de tag y monitorización post-lanzamiento |
+
+### Próximas acciones del usuario (en orden)
+
+1. **Redis staging** (5 min) — Railway dashboard → servicio backend → Variables → editar `REDIS_URL`
+   Verificación: `curl https://backend-staging-01ee.up.railway.app/health` → `"redis":"connected"`
+
+2. **TAREA-8 EAS** — seguir `devops/EAS_CHECKLIST.md`:
+   - Crear cuentas Apple Developer y Google Play si no existen
+   - `eas login` → `eas credentials` → `eas build --platform all --profile preview`
+
+3. **Lighthouse** — cuando `healthy.app` esté activo, ejecutar el comando en `tests/LIGHTHOUSE_PENDING.md`
+
+4. **Tag v1.0.0** — cuando criterios 1-3 pasen, seguir `devops/GO_LIVE_CHECKLIST.md` paso a paso

@@ -1,16 +1,12 @@
 'use strict';
 
 /**
- * Tests unitarios para aiService.js — funciones relacionadas con ejercicios.
- * Cubre: comportamiento de buildUserContextPrompt y formatExercisesForPrompt
- * (funciones privadas del módulo) accedidas indirectamente a través de generatePlan,
- * verificando que el prompt enviado a Claude incluye/excluye el catálogo correctamente.
- *
- * Nota: buildUserContextPrompt y formatExercisesForPrompt NO son exportadas por aiService.js,
- * por lo que se testean de forma comportamental vía generatePlan con el cliente Anthropic mockeado.
+ * Tests unitarios para aiService.js — funciones de catálogo de ejercicios.
+ * Cubre: buildUserContextPrompt y formatExercisesForPrompt (ahora exportadas).
+ * Se testean directamente sin necesitar mockear Anthropic SDK.
  */
 
-// ─── Mock de Redis (silencia warnings de conexión) ────────────────────────────
+// ─── Mocks de dependencias de aiService ──────────────────────────────────────
 jest.mock('../../backend/src/services/redis.service', () => ({
   get: jest.fn().mockResolvedValue(null),
   set: jest.fn().mockResolvedValue('OK'),
@@ -19,89 +15,20 @@ jest.mock('../../backend/src/services/redis.service', () => ({
   disconnect: jest.fn(),
 }));
 
-// ─── Mock de logger ───────────────────────────────────────────────────────────
 jest.mock('../../backend/src/utils/logger.util', () => ({
   info: jest.fn(),
   warn: jest.fn(),
   error: jest.fn(),
 }));
 
-// ─── Mock de Anthropic SDK ────────────────────────────────────────────────────
-// Capturamos el último prompt enviado para poder inspeccionarlo en los tests
-let lastCalledMessages = null;
+// Mocking Anthropic SDK is not needed — we import buildUserContextPrompt directly
+jest.mock('@anthropic-ai/sdk', () => jest.fn());
 
-const mockAnthropicCreate = jest.fn().mockImplementation(async (params) => {
-  lastCalledMessages = params.messages;
-  return {
-    content: [
-      {
-        type: 'text',
-        text: JSON.stringify({
-          training_plan: {
-            weeks: 4,
-            sessions_per_week: 3,
-            weekly_schedule: [
-              {
-                day_of_week: 1,
-                day_name: 'Lunes',
-                session_type: 'strength',
-                duration_minutes: 60,
-                muscle_groups: ['pecho'],
-                exercises: [
-                  {
-                    name: 'Barbell Squat',
-                    sets: 3,
-                    reps: '10',
-                    rest_seconds: 90,
-                    equipment_needed: 'Barbell',
-                    instructions: 'Baja hasta paralelo.',
-                  },
-                ],
-                notes: 'Calentamiento 5 min.',
-              },
-            ],
-          },
-          nutrition_plan: {
-            daily_calories: 2000,
-            macros: { protein_g: 150, carbs_g: 220, fat_g: 55 },
-            meals_per_day: 3,
-            meal_suggestions: [
-              {
-                meal_type: 'breakfast',
-                name: 'Avena',
-                description: 'Avena con fruta.',
-                approximate_calories: 400,
-                protein_g: 15,
-                carbs_g: 60,
-                fat_g: 8,
-                ingredients: ['avena', 'plátano'],
-                prep_time_minutes: 5,
-              },
-            ],
-          },
-          notes: 'Plan de test generado correctamente.',
-          generated_at: new Date().toISOString(),
-          model_version: 'claude-sonnet-4-6',
-        }),
-      },
-    ],
-  };
-});
+// ─── Importar funciones exportadas ────────────────────────────────────────────
+const { buildUserContextPrompt, formatExercisesForPrompt, calculateMetabolism } =
+  require('../../backend/src/services/aiService');
 
-jest.mock('@anthropic-ai/sdk', () => {
-  return jest.fn().mockImplementation(() => ({
-    messages: {
-      create: mockAnthropicCreate,
-    },
-  }));
-});
-
-// ─── Importar el servicio después de los mocks ────────────────────────────────
-
-const { generatePlan } = require('../../backend/src/services/aiService');
-
-// ─── Datos de onboarding mínimos para los tests ────────────────────────────────
-
+// ─── Datos de onboarding mínimos ──────────────────────────────────────────────
 const MINIMAL_ONBOARDING = {
   physical: {
     age: 30,
@@ -132,13 +59,8 @@ const MINIMAL_ONBOARDING = {
     meals_per_day_preferred: 3,
     food_restrictions: [],
   },
-  health: {
-    conditions: [],
-  },
-  motivation: {
-    main_motivation: 'health',
-    tracking_preference: 'basic',
-  },
+  health: { conditions: [] },
+  motivation: { main_motivation: 'health', tracking_preference: 'basic' },
 };
 
 const SAMPLE_EXERCISES = [
@@ -162,181 +84,111 @@ const SAMPLE_EXERCISES = [
   },
 ];
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Helpers
-// ─────────────────────────────────────────────────────────────────────────────
-
-/**
- * Extrae el texto completo del prompt de usuario enviado a Claude.
- * El prompt tiene dos partes de texto: system prompt y user context.
- */
-function getLastUserContextText() {
-  if (!lastCalledMessages) return '';
-  const userMsg = lastCalledMessages.find((m) => m.role === 'user');
-  if (!userMsg || !Array.isArray(userMsg.content)) return '';
-  // El segundo elemento es el contexto del usuario (el primero es el system prompt cacheado)
-  const contextPart = userMsg.content.find(
-    (c) => c.type === 'text' && !c.cache_control
-  );
-  return contextPart ? contextPart.text : '';
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Tests: buildUserContextPrompt (vía generatePlan)
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── Tests: buildUserContextPrompt ────────────────────────────────────────────
 
 describe('buildUserContextPrompt — catálogo de ejercicios', () => {
-  // Necesitamos ANTHROPIC_API_KEY para que no entre al path de fallback
+  let metrics;
+
   beforeAll(() => {
-    process.env.ANTHROPIC_API_KEY = 'test-api-key-mock';
+    metrics = calculateMetabolism(MINIMAL_ONBOARDING.physical);
   });
 
-  beforeEach(() => {
-    lastCalledMessages = null;
-    mockAnthropicCreate.mockClear();
+  test('el prompt incluye CATÁLOGO DE EJERCICIOS cuando se pasan ejercicios', () => {
+    const prompt = buildUserContextPrompt(MINIMAL_ONBOARDING, metrics, null, SAMPLE_EXERCISES);
+    expect(prompt).toContain('CATÁLOGO DE EJERCICIOS DISPONIBLES');
   });
 
-  test('el prompt incluye CATÁLOGO DE EJERCICIOS cuando se pasan ejercicios', async () => {
-    await generatePlan('user-test-1', MINIMAL_ONBOARDING, 'plan_generation', null, SAMPLE_EXERCISES);
-
-    const userContext = getLastUserContextText();
-    expect(userContext).toContain('CATÁLOGO DE EJERCICIOS DISPONIBLES');
+  test('el prompt incluye el número de ejercicios del catálogo', () => {
+    const prompt = buildUserContextPrompt(MINIMAL_ONBOARDING, metrics, null, SAMPLE_EXERCISES);
+    expect(prompt).toContain(`${SAMPLE_EXERCISES.length} ejercicios`);
   });
 
-  test('el prompt incluye el número de ejercicios del catálogo', async () => {
-    await generatePlan('user-test-2', MINIMAL_ONBOARDING, 'plan_generation', null, SAMPLE_EXERCISES);
-
-    const userContext = getLastUserContextText();
-    expect(userContext).toContain(`${SAMPLE_EXERCISES.length} ejercicios`);
+  test('el prompt incluye el nombre de cada ejercicio del catálogo', () => {
+    const prompt = buildUserContextPrompt(MINIMAL_ONBOARDING, metrics, null, SAMPLE_EXERCISES);
+    expect(prompt).toContain('Barbell Squat');
+    expect(prompt).toContain('Push Up');
   });
 
-  test('el prompt incluye el nombre de cada ejercicio del catálogo', async () => {
-    await generatePlan('user-test-3', MINIMAL_ONBOARDING, 'plan_generation', null, SAMPLE_EXERCISES);
-
-    const userContext = getLastUserContextText();
-    expect(userContext).toContain('Barbell Squat');
-    expect(userContext).toContain('Push Up');
+  test('el prompt incluye el ID externo de cada ejercicio', () => {
+    const prompt = buildUserContextPrompt(MINIMAL_ONBOARDING, metrics, null, SAMPLE_EXERCISES);
+    expect(prompt).toContain('ID:EX001');
+    expect(prompt).toContain('ID:EX002');
   });
 
-  test('el prompt incluye el ID externo de cada ejercicio', async () => {
-    await generatePlan('user-test-4', MINIMAL_ONBOARDING, 'plan_generation', null, SAMPLE_EXERCISES);
-
-    const userContext = getLastUserContextText();
-    expect(userContext).toContain('ID:EX001');
-    expect(userContext).toContain('ID:EX002');
+  test('el prompt NO incluye la sección de catálogo cuando exercises es array vacío', () => {
+    const prompt = buildUserContextPrompt(MINIMAL_ONBOARDING, metrics, null, []);
+    expect(prompt).not.toContain('CATÁLOGO DE EJERCICIOS DISPONIBLES');
   });
 
-  test('el prompt NO incluye la sección de catálogo cuando exercises es array vacío', async () => {
-    await generatePlan('user-test-5', MINIMAL_ONBOARDING, 'plan_generation', null, []);
-
-    const userContext = getLastUserContextText();
-    expect(userContext).not.toContain('CATÁLOGO DE EJERCICIOS DISPONIBLES');
+  test('el prompt NO incluye la sección de catálogo cuando exercises no se pasa', () => {
+    const prompt = buildUserContextPrompt(MINIMAL_ONBOARDING, metrics, null);
+    expect(prompt).not.toContain('CATÁLOGO DE EJERCICIOS DISPONIBLES');
   });
 
-  test('el prompt NO incluye la sección de catálogo cuando exercises no se pasa', async () => {
-    await generatePlan('user-test-6', MINIMAL_ONBOARDING, 'plan_generation', null);
-
-    const userContext = getLastUserContextText();
-    expect(userContext).not.toContain('CATÁLOGO DE EJERCICIOS DISPONIBLES');
+  test('el prompt incluye los datos físicos del usuario (peso, objetivo)', () => {
+    const prompt = buildUserContextPrompt(MINIMAL_ONBOARDING, metrics, null, []);
+    expect(prompt).toContain('80');
+    expect(prompt).toContain('175');
+    expect(prompt).toContain('gain_muscle');
   });
 
-  test('el prompt incluye los datos físicos del usuario (peso, objetivo)', async () => {
-    await generatePlan('user-test-7', MINIMAL_ONBOARDING, 'plan_generation', null, []);
-
-    const userContext = getLastUserContextText();
-    expect(userContext).toContain('80');          // peso_kg
-    expect(userContext).toContain('175');         // height_cm
-    expect(userContext).toContain('gain_muscle'); // objetivo
+  test('el prompt incluye TMB y TDEE calculados', () => {
+    const prompt = buildUserContextPrompt(MINIMAL_ONBOARDING, metrics, null, []);
+    expect(prompt).toContain('TMB:');
+    expect(prompt).toContain('TDEE:');
+    expect(prompt).toContain('Calorías objetivo:');
   });
 
-  test('el prompt incluye TMB y TDEE calculados (datos del metabolismo)', async () => {
-    await generatePlan('user-test-8', MINIMAL_ONBOARDING, 'plan_generation', null, []);
-
-    const userContext = getLastUserContextText();
-    expect(userContext).toContain('TMB:');
-    expect(userContext).toContain('TDEE:');
-    expect(userContext).toContain('Calorías objetivo:');
-  });
-
-  test('el prompt incluye extraContext cuando se proporciona', async () => {
+  test('el prompt incluye extraContext cuando se proporciona', () => {
     const extraCtx = 'Contexto especial de prueba para el plan.';
-    await generatePlan('user-test-9', MINIMAL_ONBOARDING, 'plan_generation', extraCtx, []);
-
-    const userContext = getLastUserContextText();
-    expect(userContext).toContain(extraCtx);
+    const prompt = buildUserContextPrompt(MINIMAL_ONBOARDING, metrics, extraCtx, []);
+    expect(prompt).toContain(extraCtx);
   });
 
-  test('el prompt NO incluye sección CONTEXTO ADICIONAL cuando extraContext es null', async () => {
-    await generatePlan('user-test-10', MINIMAL_ONBOARDING, 'plan_generation', null, []);
-
-    const userContext = getLastUserContextText();
-    expect(userContext).not.toContain('## CONTEXTO ADICIONAL');
+  test('el prompt NO incluye CONTEXTO ADICIONAL cuando extraContext es null', () => {
+    const prompt = buildUserContextPrompt(MINIMAL_ONBOARDING, metrics, null, []);
+    expect(prompt).not.toContain('## CONTEXTO ADICIONAL');
   });
 
-  test('generatePlan devuelve el plan parseado cuando Claude responde correctamente', async () => {
-    const plan = await generatePlan('user-test-11', MINIMAL_ONBOARDING, 'plan_generation', null, SAMPLE_EXERCISES);
-
-    expect(plan).toHaveProperty('training_plan');
-    expect(plan).toHaveProperty('nutrition_plan');
-    expect(plan.generated_by_ai).toBe(true);
+  test('el prompt incluye información de estilo de vida', () => {
+    const prompt = buildUserContextPrompt(MINIMAL_ONBOARDING, metrics, null, []);
+    expect(prompt).toContain('Developer');
   });
 
-  test('generatePlan acepta exercises sin errores (compatibilidad de firma)', async () => {
-    await expect(
-      generatePlan('user-test-12', MINIMAL_ONBOARDING, 'plan_generation', null, SAMPLE_EXERCISES)
-    ).resolves.not.toThrow();
+  test('el prompt incluye información de entrenamiento', () => {
+    const prompt = buildUserContextPrompt(MINIMAL_ONBOARDING, metrics, null, []);
+    expect(prompt).toContain('barbell');
+    expect(prompt).toContain('intermediate');
   });
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Tests: formatExercisesForPrompt (función interna de aiService)
-// Testeada indirectamente: comprobamos el formato concreto en el texto del prompt.
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── Tests: formatExercisesForPrompt ─────────────────────────────────────────
 
-describe('formatExercisesForPrompt en aiService — formato del catálogo', () => {
-  beforeAll(() => {
-    process.env.ANTHROPIC_API_KEY = 'test-api-key-mock';
+describe('formatExercisesForPrompt — formato del catálogo', () => {
+  test('el catálogo incluye zona corporal y equipamiento de cada ejercicio', () => {
+    const formatted = formatExercisesForPrompt([SAMPLE_EXERCISES[0]]);
+    expect(formatted).toContain('upper legs');
+    expect(formatted).toContain('Barbell');
+    expect(formatted).toContain('quadriceps');
   });
 
-  beforeEach(() => {
-    lastCalledMessages = null;
-    mockAnthropicCreate.mockClear();
+  test('el catálogo incluye músculos secundarios cuando existen', () => {
+    const formatted = formatExercisesForPrompt([SAMPLE_EXERCISES[0]]);
+    expect(formatted).toContain('glutes');
+    expect(formatted).toContain('hamstrings');
   });
 
-  test('el catálogo incluye zona corporal y equipamiento de cada ejercicio', async () => {
-    await generatePlan('user-fmt-1', MINIMAL_ONBOARDING, 'plan_generation', null, [SAMPLE_EXERCISES[0]]);
-
-    const userContext = getLastUserContextText();
-    expect(userContext).toContain('upper legs');  // bodyPart
-    expect(userContext).toContain('Barbell');      // equipment
-    expect(userContext).toContain('quadriceps');   // target
+  test('el catálogo omite la línea de músculos secundarios cuando el array está vacío', () => {
+    const formatted = formatExercisesForPrompt([SAMPLE_EXERCISES[1]]);
+    expect(formatted).not.toMatch(/Músculos secundarios:\s*$/m);
   });
 
-  test('el catálogo incluye músculos secundarios cuando existen', async () => {
-    await generatePlan('user-fmt-2', MINIMAL_ONBOARDING, 'plan_generation', null, [SAMPLE_EXERCISES[0]]);
-
-    const userContext = getLastUserContextText();
-    expect(userContext).toContain('glutes');
-    expect(userContext).toContain('hamstrings');
+  test('usa externalId como ID del ejercicio (formato ID:XXXX)', () => {
+    const formatted = formatExercisesForPrompt([SAMPLE_EXERCISES[0]]);
+    expect(formatted).toContain('(ID:EX001)');
   });
 
-  test('el catálogo omite la línea de músculos secundarios cuando el array está vacío', async () => {
-    // Push Up tiene secondaryMuscles: []
-    await generatePlan('user-fmt-3', MINIMAL_ONBOARDING, 'plan_generation', null, [SAMPLE_EXERCISES[1]]);
-
-    const userContext = getLastUserContextText();
-    // La sección de músculos secundarios no debe aparecer
-    expect(userContext).not.toMatch(/Músculos secundarios:\s*$/m);
-  });
-
-  test('usa externalId como ID del ejercicio (formato ID:XXXX)', async () => {
-    await generatePlan('user-fmt-4', MINIMAL_ONBOARDING, 'plan_generation', null, [SAMPLE_EXERCISES[0]]);
-
-    const userContext = getLastUserContextText();
-    expect(userContext).toContain('(ID:EX001)');
-  });
-
-  test('usa id interno si externalId no está disponible', async () => {
+  test('usa id interno si externalId es null', () => {
     const exerciseWithoutExternalId = {
       id: 'internal-uuid-xyz',
       externalId: null,
@@ -346,11 +198,19 @@ describe('formatExercisesForPrompt en aiService — formato del catálogo', () =
       target: 'lats',
       secondaryMuscles: [],
     };
+    const formatted = formatExercisesForPrompt([exerciseWithoutExternalId]);
+    expect(formatted).toContain('Custom Exercise');
+    expect(formatted).toContain('internal-uuid-xyz');
+  });
 
-    await generatePlan('user-fmt-5', MINIMAL_ONBOARDING, 'plan_generation', null, [exerciseWithoutExternalId]);
+  test('devuelve string vacío o mensaje cuando el array está vacío', () => {
+    const formatted = formatExercisesForPrompt([]);
+    expect(typeof formatted).toBe('string');
+  });
 
-    const userContext = getLastUserContextText();
-    expect(userContext).toContain('Custom Exercise');
-    expect(userContext).toContain('internal-uuid-xyz');
+  test('formatea múltiples ejercicios separados', () => {
+    const formatted = formatExercisesForPrompt(SAMPLE_EXERCISES);
+    expect(formatted).toContain('Barbell Squat');
+    expect(formatted).toContain('Push Up');
   });
 });

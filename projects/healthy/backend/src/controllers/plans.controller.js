@@ -6,6 +6,7 @@ const { sendSuccess, sendError } = require('../utils/response.util');
 const prisma = require('../prisma/client');
 const logger = require('../utils/logger.util');
 const aiService = require('../services/aiService');
+const exerciseSelector = require('../services/exerciseSelector.service');
 
 /** GET /plans — Plan activo del usuario */
 const getActivePlan = async (req, res, next) => {
@@ -80,7 +81,22 @@ const regeneratePlan = async (req, res, next) => {
       motivation: motivation || undefined,
     };
 
-    const newPlan = await aiService.regeneratePlan(userId, onboardingData, reason, progressLogs.map(l => ({ log_date: l.log_date.toISOString(), weight_kg: l.weight_kg ? parseFloat(l.weight_kg) : null })));
+    // Obtener ejercicios del catálogo real filtrados por perfil del usuario (BE-EX-03)
+    const exerciseProfile = {
+      equipment: training.home_equipment || 'none',
+      goal: profile.goal || 'general_health',
+      experience_level: training.experience_level || 'beginner',
+      injuries: training.injuries_or_limitations
+        ? training.injuries_or_limitations.split(',').map(s => s.trim().toLowerCase()).filter(Boolean)
+        : [],
+    };
+    const catalogExercises = await exerciseSelector.getExercisesForProfile(exerciseProfile, 80);
+    const exerciseCatalogContext = catalogExercises.length > 0
+      ? `## CATÁLOGO DE EJERCICIOS DISPONIBLES (${catalogExercises.length} ejercicios)\nUSA PREFERENTEMENTE estos ejercicios reales del catálogo al generar el plan. Incluye el nombre exacto del ejercicio.\n\n${exerciseSelector.formatExercisesForPrompt(catalogExercises)}`
+      : null;
+    logger.info(`[plans] Catálogo: ${catalogExercises.length} ejercicios para usuario ${userId} (regeneración)`);
+
+    const newPlan = await aiService.regeneratePlan(userId, onboardingData, reason, progressLogs.map(l => ({ log_date: l.log_date.toISOString(), weight_kg: l.weight_kg ? parseFloat(l.weight_kg) : null })), exerciseCatalogContext);
 
     await prisma.plan.updateMany({ where: { user_id: userId, status: 'active' }, data: { status: 'paused' } });
 
