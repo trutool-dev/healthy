@@ -448,18 +448,32 @@ enum SessionStatus {
 }
 
 model Exercise {
-  id             String          @id @default(uuid())
-  name           String
-  muscle_group   String
+  id               String          @id @default(uuid())
+  externalId       Int?            @unique  // ID del dataset hasaneyldrm/exercises-dataset
+  name             String
+  category         String?         // Arms, Back, Chest, Legs, Shoulders, Waist
+  bodyPart         String?         // Upper Arms, Upper Legs, etc.
+  equipment        String?         // Body Weight, Dumbbell, Barbell, Cable, Machine, Kettlebell, Band, etc.
+  target           String?         // músculo objetivo principal
+  secondaryMuscles String[]        // músculos secundarios (array)
+  instructionsEs   String?         // instrucciones en español
+  instructionsEn   String?         // instrucciones en inglés
+  gifUrl           String?         // URL del GIF animado
+  thumbnailUrl     String?         // URL de la miniatura 180x180
+  difficulty       ExperienceLevel @default(beginner)
+  // Campos legacy (mantener compatibilidad)
+  muscle_group     String?
   equipment_needed String?
-  difficulty     ExperienceLevel
-  instructions   String?
-  video_url      String?
+  instructions     String?
+  video_url        String?
+  createdAt        DateTime        @default(now())
 
   session_exercises SessionExercise[]
 
   @@index([muscle_group])
   @@index([difficulty])
+  @@index([category])
+  @@index([target])
   @@map("exercises")
 }
 

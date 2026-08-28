@@ -2,6 +2,9 @@
  * Seed script para poblar la base de datos con datos realistas de desarrollo.
  * Ejecutar con: npx ts-node seed.ts (desde projects/healthy/database/)
  * O desde backend: npx ts-node ../database/seed.ts
+ *
+ * Para importar el catálogo de ejercicios, ejecutar:
+ * node projects/healthy/database/seedExercises.js
  */
 
 import { PrismaClient } from '@prisma/client';
