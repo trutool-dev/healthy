@@ -134,13 +134,44 @@ Tu tarea es generar un plan COMPLETO y PERSONALIZADO de entrenamiento y nutrici�
 - Basa las calorías en el TDEE calculado proporcionado
 - Distribuye los días de entrenamiento para optimizar la recuperación
 - Incluye al menos 1-2 días de descanso por semana
-- Proporciona al menos una sugerencia por tipo de comida del día`;
+- Proporciona al menos una sugerencia por tipo de comida del día
+
+## CATÁLOGO DE EJERCICIOS
+Recibirás un catálogo de ejercicios reales en el mensaje del usuario.
+DEBES usar ÚNICAMENTE los ejercicios de ese catálogo.
+NO inventes ejercicios. NO añadas ejercicios que no estén en el catálogo.
+Si el catálogo no tiene suficientes ejercicios para un día, usa menos ejercicios ese día.
+Cada ejercicio del plan DEBE incluir su ID exacto del catálogo (campo ID:XXXX).`;
 
 // ─────────────────────────────────────────────────────────────
 // CONSTRUCCIÓN DEL PROMPT DE USUARIO
 // ─────────────────────────────────────────────────────────────
 
-function buildUserContextPrompt(onboardingData, metrics, extraContext) {
+/**
+ * Formatea el catálogo de ejercicios reales para incluirlo en el prompt.
+ * @param {Array} exercises - Lista de ejercicios del catálogo real
+ * @returns {string}
+ */
+function formatExercisesForPrompt(exercises) {
+  return exercises.map(ex => {
+    const parts = [
+      `- ${ex.name} (ID:${ex.externalId || ex.id})`,
+      `  Zona: ${ex.bodyPart || ''} | Equipo: ${ex.equipment || ''} | Músculo: ${ex.target || ''}`,
+    ];
+    if (ex.secondaryMuscles && ex.secondaryMuscles.length > 0) {
+      parts.push(`  Músculos secundarios: ${ex.secondaryMuscles.slice(0, 3).join(', ')}`);
+    }
+    return parts.join('\n');
+  }).join('\n');
+}
+
+/**
+ * @param {object} onboardingData
+ * @param {object} metrics
+ * @param {string|null} extraContext
+ * @param {Array} exercises - Catálogo de ejercicios reales para el plan
+ */
+function buildUserContextPrompt(onboardingData, metrics, extraContext, exercises = []) {
   const { physical, lifestyle, training, nutrition, health, motivation } = onboardingData;
   const lines = [
     '## DATOS DEL USUARIO',
@@ -209,7 +240,16 @@ function buildUserContextPrompt(onboardingData, metrics, extraContext) {
   lines.push('', '## INSTRUCCIÓN FINAL');
   lines.push('Genera el plan siguiendo EXACTAMENTE el formato JSON del system prompt. Usa las calorías objetivo calculadas.');
 
-  return lines.join('\n');
+  let exerciseCatalog = '';
+  if (exercises && exercises.length > 0) {
+    exerciseCatalog = `\n\n=== CATÁLOGO DE EJERCICIOS DISPONIBLES (${exercises.length} ejercicios) ===\n`;
+    exerciseCatalog += 'Usa ÚNICAMENTE estos ejercicios en el plan. Incluye el ID de cada ejercicio:\n\n';
+    exerciseCatalog += formatExercisesForPrompt(exercises);
+    exerciseCatalog += '\n=== FIN DEL CATÁLOGO ===\n';
+    exerciseCatalog += '\nIMPORTANTE: Solo puedes incluir ejercicios de la lista anterior. Cada ejercicio del plan debe tener su ID:XXXX.';
+  }
+
+  return lines.join('\n') + exerciseCatalog;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -312,7 +352,7 @@ function extractJson(text) {
  * @param {string} requestType
  * @param {string|null} extraContext
  */
-async function generatePlan(userId, onboardingData, requestType = 'plan_generation', extraContext = null) {
+async function generatePlan(userId, onboardingData, requestType = 'plan_generation', extraContext = null, exercises = []) {
   const today = new Date().toISOString().split('T')[0];
   const cacheKey = `plan:${userId}:${today}`;
 
@@ -337,7 +377,7 @@ async function generatePlan(userId, onboardingData, requestType = 'plan_generati
     }
 
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-    const userContextPrompt = buildUserContextPrompt(onboardingData, metrics, extraContext);
+    const userContextPrompt = buildUserContextPrompt(onboardingData, metrics, extraContext, exercises);
 
     // Llamada con prompt caching en el system prompt (AI-05)
     const response = await client.messages.create({
