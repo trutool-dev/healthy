@@ -306,3 +306,74 @@ Sin prompt caching (comparación):
 | `ai/fallbackPlan.ts` | Plan generado por reglas cuando Claude no está disponible |
 | `ai/tokenLogger.ts` | Log de tokens y estimación de costes USD |
 | `database/redis.ts` | `cacheAiPlan()`, `getCachedAiPlan()` — caché de planes |
+| `backend/src/services/exerciseSelector.service.js` | `getExercisesForProfile()`, `formatExercisesForPrompt()` — selección de ejercicios reales (Fase 10) |
+| `backend/src/services/aiService.js` | SYSTEM_PROMPT, `buildUserContextPrompt()` con catálogo de ejercicios (Fase 10) |
+
+---
+
+## Integración del catálogo de ejercicios reales (Fase 10 — 2026-08-28)
+
+### Motivación
+
+Antes de la Fase 10, Claude inventaba los ejercicios de los planes de entrenamiento. Esto generaba ejercicios que no existían en la tabla `exercises` de la base de datos, imposibilitando el vínculo entre el plan generado y el catálogo real.
+
+### Flujo actualizado con catálogo
+
+```
+POST /onboarding/complete
+        |
+        v
+exerciseSelector.getExercisesForProfile(profile, limit=80)
+  - Filtra por equipamiento (EQUIPMENT_MAP)
+  - Filtra por objetivo (GOAL_TO_CATEGORIES)
+  - Filtra por dificultad (DIFFICULTY_MAP)
+  - Excluye zonas lesionadas (INJURY_ZONES)
+        |
+        v (hasta 80 ejercicios del dataset real)
+aiService.buildUserContextPrompt(onboardingData, metrics, extraContext, exercises)
+  - Genera sección "=== CATÁLOGO DE EJERCICIOS DISPONIBLES ===" cuando exercises.length > 0
+        |
+        v
+Anthropic API — SYSTEM_PROMPT instruye a Claude:
+  "Usa ÚNICAMENTE los ejercicios del catálogo proporcionado"
+```
+
+### Cambios en SYSTEM_PROMPT
+
+Se añadió la sección `## CATÁLOGO DE EJERCICIOS` con la siguiente instrucción prioritaria:
+
+```
+REGLA PRIORITARIA — CATÁLOGO DE EJERCICIOS:
+Usa ÚNICAMENTE los ejercicios del catálogo proporcionado en el mensaje del usuario.
+No inventes ni añadas ejercicios que no estén en esa lista.
+Si el catálogo no tiene suficientes ejercicios para completar el plan, reutiliza ejercicios
+del catálogo variando series, repeticiones o intensidad.
+```
+
+### Cambios en buildUserContextPrompt()
+
+Nueva firma:
+```js
+buildUserContextPrompt(onboardingData, metrics, extraContext, exercises = [])
+```
+
+Cuando `exercises.length > 0`, se añade al final del prompt de usuario la sección de catálogo en formato compacto:
+
+```
+=== CATÁLOGO DE EJERCICIOS DISPONIBLES ===
+Usa SOLO estos ejercicios.
+
+- Nombre (ID:externalId)
+  Categoría: X | Zona: Y | Equipo: Z
+  Músculo objetivo: W
+  Músculos secundarios: A, B
+  Instrucciones: primeros 150 caracteres...
+```
+
+Si `exercises` está vacío o es nulo, la sección no se incluye (compatibilidad hacia atrás con el flujo de fallback).
+
+### Impacto en costes de tokens
+
+El catálogo de hasta 80 ejercicios añade aproximadamente 3.000–4.000 tokens al prompt de usuario. Esta sección NO se cachea (forma parte del mensaje del usuario, no del system prompt). El aumento de coste estimado por generación de plan es de ~$0.009–$0.012 (input a $3/MTok).
+
+Para más detalles de la implementación, ver `docs/EXERCISE_INTEGRATION.md`.

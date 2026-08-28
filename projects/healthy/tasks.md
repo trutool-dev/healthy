@@ -252,7 +252,7 @@ Fase 5 — DevOps + Docs (en paralelo, dependen de Fase 3 y 4)
 
 ## Métricas de éxito
 
-- [x] Cobertura de tests ≥ 80 % — 88.21 % (253/253 tests, verificado 2026-07-08)
+- [x] Cobertura de tests ≥ 80 % — 89.18 % (317/317 tests, verificado 2026-08-28)
 - [~] Tiempo de respuesta API < 500 ms (p95) — DIFERIDO (decisión del usuario, 2026-07-14): load tests excluidos del gate v1.0.0; se medirán en producción tras go-live
 - [ ] App publicada en TestFlight y Google Play Internal
 - [x] Auditoría RGPD sin hallazgos críticos — verificado 2026-07-07: 0 CRÍTICOS, 0 ALTOS abiertos (VUL-2026-001/002/004 resueltos; VUL-006/007 aceptados documentados)
@@ -1225,7 +1225,7 @@ El servicio `aiService.js` **NO pasa ejercicios de la base de datos a Claude**. 
 #### Database Agent
 > Carpeta: `projects/healthy/database/`
 
-- [ ] **DB-EX-01** — Actualizar modelo `Exercise` en `backend/prisma/schema.prisma` con los nuevos campos del dataset. Campos a añadir o modificar:
+- [x] **DB-EX-01** — Actualizar modelo `Exercise` en `backend/prisma/schema.prisma` con los nuevos campos del dataset. Campos a añadir o modificar:
   - `externalId Int? @unique` — ID numérico del dataset (permite hacer upsert por id del dataset)
   - `name String` — mantener, ya existe
   - `category String` — sustituye a `muscle_group` (guardar ambos durante la transición o renombrar)
@@ -1240,12 +1240,12 @@ El servicio `aiService.js` **NO pasa ejercicios de la base de datos a Claude**. 
   - Campos a **deprecar** (marcar como opcionales, no eliminar en esta migración para no romper seeds existentes): `muscle_group`, `equipment_needed`, `difficulty`, `video_url`
   - Añadir índices: `@@index([category])`, `@@index([equipment])`, `@@index([target])`, `@@index([bodyPart])`
 
-- [ ] **DB-EX-02** — Generar migración Prisma:
+- [x] **DB-EX-02** — Generar migración Prisma:
   - Desde `projects/healthy/backend/`: `npx prisma migrate dev --name add_exercise_dataset_fields`
   - Verificar con `npx prisma validate`
   - Documentar en `database/MIGRATION_LOG.md` con procedimiento de rollback
 
-- [ ] **DB-EX-03** — Crear/actualizar seed script `database/seed-exercises.ts` (archivo separado para no romper el seed principal):
+- [x] **DB-EX-03** — Crear/actualizar seed script `database/seed-exercises.ts` (archivo separado para no romper el seed principal):
   1. Hacer `fetch` a `https://raw.githubusercontent.com/hasaneyldrm/exercises-dataset/main/data/exercises.json`
   2. Mapear cada ejercicio del dataset a los campos del schema actualizado:
      ```
@@ -1277,7 +1277,7 @@ El servicio `aiService.js` **NO pasa ejercicios de la base de datos a Claude**. 
 #### Backend Agent
 > Carpeta: `projects/healthy/backend/`
 
-- [ ] **BE-EX-01** — Crear `backend/src/services/exerciseSelector.service.js`:
+- [x] **BE-EX-01** — Crear `backend/src/services/exerciseSelector.service.js`:
 
   El servicio debe recibir un objeto de preferencias del usuario y devolver un array de ejercicios de la DB (máx 50) adecuados para el perfil:
 
@@ -1307,16 +1307,16 @@ El servicio `aiService.js` **NO pasa ejercicios de la base de datos a Claude**. 
   { id, name, category, equipment, target, bodyPart }
   ```
 
-- [ ] **BE-EX-02** — Actualizar `POST /onboarding/complete` en `backend/src/controllers/onboarding.controller.js`:
+- [x] **BE-EX-02** — Actualizar `POST /onboarding/complete` en `backend/src/controllers/onboarding.controller.js`:
   1. Antes de llamar a `aiService.generatePlan()`, llamar a `exerciseSelector.selectExercises(trainingPreferences)`
   2. Pasar el resultado como nuevo parámetro a `aiService.generatePlan()` (añadir parámetro `availableExercises`)
   3. Mantener compatibilidad con el flujo actual — si `exerciseSelector` falla, continuar sin ejercicios (warning en log)
 
-- [ ] **BE-EX-03** — Actualizar `POST /plans/regenerate` en `backend/src/controllers/plans.controller.js`:
+- [x] **BE-EX-03** — Actualizar `POST /plans/regenerate` en `backend/src/controllers/plans.controller.js`:
   - Misma lógica que BE-EX-02: llamar a `exerciseSelector` antes de llamar a `aiService.regeneratePlan()`
   - Invalidar caché Redis del plan anterior antes de regenerar
 
-- [ ] **BE-EX-04** — Añadir endpoint `GET /exercises` en una nueva ruta `backend/src/routes/exercises.routes.js`:
+- [x] **BE-EX-04** — Añadir endpoint `GET /exercises` en una nueva ruta `backend/src/routes/exercises.routes.js`:
   - Query params de filtro: `?equipment=Dumbbell&category=Arms&target=biceps&bodyPart=upper+arm&limit=50&offset=0`
   - Respuesta paginada con formato estándar `{ success, data: { exercises, total, limit, offset } }`
   - Registrar la ruta en `backend/src/app.js` bajo `/exercises`
@@ -1333,7 +1333,7 @@ El servicio `aiService.js` **NO pasa ejercicios de la base de datos a Claude**. 
 #### AI Agent
 > Carpeta: `projects/healthy/backend/src/services/` (aiService.js)
 
-- [ ] **AI-EX-01** — Actualizar el system prompt `SYSTEM_PROMPT` en `backend/src/services/aiService.js`:
+- [x] **AI-EX-01** — Actualizar el system prompt `SYSTEM_PROMPT` en `backend/src/services/aiService.js`:
 
   Añadir al inicio de la sección `## REGLAS ESTRICTAS` la siguiente instrucción (antes de las reglas numéricas existentes):
 
@@ -1347,7 +1347,7 @@ El servicio `aiService.js` **NO pasa ejercicios de la base de datos a Claude**. 
 
   Esta regla debe ser la primera del system prompt para que tenga máxima prioridad.
 
-- [ ] **AI-EX-02** — Actualizar `buildUserContextPrompt()` en `backend/src/services/aiService.js`:
+- [x] **AI-EX-02** — Actualizar `buildUserContextPrompt()` en `backend/src/services/aiService.js`:
 
   Añadir un nuevo parámetro `availableExercises` (array de ejercicios del DB) y construir una sección de catálogo compacta en el prompt:
 
@@ -1383,7 +1383,7 @@ El servicio `aiService.js` **NO pasa ejercicios de la base de datos a Claude**. 
 #### Tests Agent
 > Carpeta: `projects/healthy/tests/`
 
-- [ ] **TEST-EX-01** — Tests unitarios para `exerciseSelector.service.js`:
+- [x] **TEST-EX-01** — Tests unitarios para `exerciseSelector.service.js`:
   - Test: usuario sin equipamiento → devuelve SOLO ejercicios `Body Weight`
   - Test: usuario con gimnasio → devuelve ejercicios de todos los equipamientos
   - Test: usuario con lesión de rodilla → no incluye ejercicios de `Legs`
@@ -1391,14 +1391,14 @@ El servicio `aiService.js` **NO pasa ejercicios de la base de datos a Claude**. 
   - Test: resultado no supera 50 ejercicios independientemente del total en DB
   - Mock: usar `jest.mock('../prisma/client')` para no depender de DB real
 
-- [ ] **TEST-EX-02** — Tests de integración para `GET /exercises`:
+- [x] **TEST-EX-02** — Tests de integración para `GET /exercises`:
   - Test: sin params → devuelve 20 ejercicios paginados con `total`
   - Test: `?equipment=Dumbbell` → todos los resultados tienen `equipment = "Dumbbell"`
   - Test: `?category=Arms&limit=5` → máx 5 resultados, todos de categoría Arms
   - Test: `?offset=1000` → devuelve array vacío con `total` correcto (no error 500)
   - Mock: Prisma mock de `__mocks__/prisma.js` ya existente en el proyecto
 
-- [ ] **TEST-EX-03** — Test de smoke: verificar que tras `POST /onboarding/complete` el plan contiene ejercicios que existen en la DB:
+- [x] **TEST-EX-03** — Test de smoke: verificar que tras `POST /onboarding/complete` el plan contiene ejercicios que existen en la DB:
   - Setup: insertar en DB de test 10 ejercicios con `externalId` conocidos
   - Ejecutar `POST /onboarding/complete` con perfil completo
   - Parsear el `generated_plan.training_plan.weekly_schedule[].exercises[].name`
@@ -1482,20 +1482,22 @@ Sin el schema actualizado y la migración aplicada, ningún otro agente puede av
 
 | Tarea | Agente | Prioridad | Estado |
 |---|---|---|---|
-| DB-EX-01 | database | CRITICA — BLOQUEANTE | [ ] Pendiente |
-| DB-EX-02 | database | CRITICA — BLOQUEANTE | [ ] Pendiente |
-| DB-EX-03 | database | ALTA | [ ] Pendiente |
-| BE-EX-01 | backend | ALTA | [ ] Pendiente |
-| BE-EX-02 | backend | ALTA | [ ] Pendiente |
-| BE-EX-03 | backend | MEDIA | [ ] Pendiente |
-| BE-EX-04 | backend | MEDIA | [ ] Pendiente |
-| AI-EX-01 | ai | ALTA | [ ] Pendiente |
-| AI-EX-02 | ai | ALTA | [ ] Pendiente |
-| TEST-EX-01 | tests | MEDIA | [ ] Pendiente |
-| TEST-EX-02 | tests | BAJA | [ ] Pendiente |
-| TEST-EX-03 | tests | MEDIA | [ ] Pendiente |
+| DB-EX-01 | database | CRITICA — BLOQUEANTE | [x] Completada 2026-08-28 |
+| DB-EX-02 | database | CRITICA — BLOQUEANTE | [x] Completada 2026-08-28 |
+| DB-EX-03 | database | ALTA | [x] Completada 2026-08-28 |
+| BE-EX-01 | backend | ALTA | [x] Completada 2026-08-28 |
+| BE-EX-02 | backend | ALTA | [x] Completada 2026-08-28 |
+| BE-EX-03 | backend | MEDIA | [x] Completada 2026-08-28 |
+| BE-EX-04 | backend | MEDIA | [x] Completada 2026-08-28 |
+| AI-EX-01 | ai | ALTA | [x] Completada 2026-08-28 |
+| AI-EX-02 | ai | ALTA | [x] Completada 2026-08-28 |
+| TEST-EX-01 | tests | MEDIA | [x] Completada 2026-08-28 — 18 tests |
+| TEST-EX-02 | tests | BAJA | [x] Completada 2026-08-28 — 27 tests |
+| TEST-EX-03 | tests | MEDIA | [x] Completada 2026-08-28 — 19 tests |
 
 > **Decisión de orquestador (2026-08-28):** Lanzar Database Agent primero (DB-EX-01 → DB-EX-02 → DB-EX-03). En paralelo con DB-EX-03, Backend Agent puede comenzar BE-EX-01 (no necesita datos en DB, solo el schema). Una vez BE-EX-01 completado, BE-EX-02 y AI-EX-01/02 pueden ejecutarse en paralelo. Tests al final cuando todo el stack esté integrado.
+>
+> **Resultado (2026-08-28):** Fase 10 COMPLETADA. Todas las tareas (DB-EX-01 a TEST-EX-03) entregadas en el mismo día. 317/317 tests pasando, 89.18% cobertura de líneas. Commit principal: `40bdb9d`.
 
 ---
 

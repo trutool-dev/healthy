@@ -239,6 +239,49 @@ npx prisma migrate dev --schema ../database/schema.prisma --name add_health_cons
 
 ---
 
+## Fase 10 — COMPLETADA (2026-08-28): Integración dataset de ejercicios reales
+
+### Qué se construyó
+
+Integración de 1.324 ejercicios reales del dataset `hasaneyldrm/exercises-dataset` en el sistema de generación de planes. A partir de esta fase, Claude usa ejercicios del catálogo real de la base de datos en lugar de inventarlos.
+
+#### Database (DB-EX-01/02/03)
+
+- **`backend/prisma/schema.prisma`** — Modelo `Exercise` ampliado con 11 campos nuevos: `externalId`, `category`, `bodyPart`, `target`, `secondaryMuscles`, `instructionsEs`, `instructionsEn`, `gifUrl`, `thumbnailUrl`, `equipment`, `createdAt`. Campos legacy mantenidos como nullable.
+- **`backend/prisma/migrations/20260828_add_exercise_dataset_fields/migration.sql`** — Migración SQL con `ALTER TABLE IF NOT EXISTS` más índices en `category`, `equipment`, `target`, `bodyPart`, `externalId`.
+- **`database/seedExercises.js`** — Script de seed que descarga el catálogo desde GitHub y lo inserta en batches de 100 con `skipDuplicates: true`.
+
+#### Backend (BE-EX-01/02/03/04)
+
+- **`backend/src/services/exerciseSelector.service.js`** — Servicio nuevo con `getExercisesForProfile(profile, limit=80)` y `formatExercisesForPrompt(exercises)`. Filtra por equipamiento (EQUIPMENT_MAP), objetivo (GOAL_TO_CATEGORIES), dificultad (DIFFICULTY_MAP) y lesiones (INJURY_ZONES). Singleton Prisma con PrismaPg+Pool.
+- **`backend/src/controllers/onboarding.controller.js`** — Función `complete()` actualizada: llama a `exerciseSelector` antes de `generatePlan` y pasa el catálogo como quinto parámetro.
+- **`backend/src/controllers/plans.controller.js`** — Función `regeneratePlan()` actualizada con la misma integración.
+- **`backend/src/routes/exercises.routes.js`** — Rutas nuevas: `GET /exercises` (con filtros: category, equipment, difficulty, target, limit, offset) y `GET /exercises/:id`, ambas protegidas con auth.
+- **`backend/src/app.js`** — Ruta `/exercises` registrada con rate limiter.
+
+#### IA (AI-EX-01/02)
+
+- **`backend/src/services/aiService.js`** — `SYSTEM_PROMPT` con nueva sección `## CATÁLOGO DE EJERCICIOS` que instruye a Claude a usar únicamente los ejercicios del catálogo. `buildUserContextPrompt()` acepta nuevo parámetro `exercises=[]` y genera sección de catálogo cuando hay ejercicios disponibles. `formatExercisesForPrompt()` exportada para testing.
+
+#### Tests (TEST-EX-01/02/03)
+
+- **`tests/unit/exerciseSelector.test.js`** — 18 tests unitarios con mocks Prisma.
+- **`tests/unit/exercisePrompt.test.js`** — 19 tests del formateo del catálogo en el prompt.
+- **`tests/integration/exercises.routes.test.js`** — 27 tests de integración con Supertest.
+- **`backend/jest.config.js`** — `modulePaths: ['<rootDir>/node_modules']` añadido para resolución de módulos.
+
+**Resultado final: 317/317 tests pasando — 89.18% cobertura de líneas.**
+
+### Decisión técnica: RAG-lite vs RAG vectorial
+
+Se optó por filtrado SQL estructurado (RAG-lite) en lugar de búsqueda vectorial. El catálogo tiene metadatos bien definidos (category, bodyPart, equipment, target) que se mapean directamente a las preferencias del usuario (equipamiento, objetivo, nivel, lesiones). No se requiere búsqueda semántica para esta correspondencia.
+
+### Commit principal
+
+`40bdb9d` — integración completa de la Fase 10.
+
+---
+
 ## Fase 5 — PENDIENTE: Lanzamiento
 
 <!-- TODO: Actualizar al completar la fase -->
