@@ -76,13 +76,16 @@ const deleteAccount = async (req, res, next) => {
     // 10. Eliminar usuario principal
     await prisma.user.delete({ where: { id: userId } });
 
-    // 11. Invalidar todas las sesiones en caché Redis
-    const sessionId = req.user?.sessionId;
-    if (sessionId) {
-      await redis.del(`session:${sessionId}`);
+    // 11. Invalidar todas las sesiones en caché Redis (no-fatal si Redis no disponible)
+    try {
+      const sessionId = req.user?.sessionId;
+      if (sessionId) {
+        await redis.del(`session:${sessionId}`);
+      }
+      await redis.del(`user:${userId}`);
+    } catch (redisErr) {
+      logger.warn(`[user] Redis no disponible al eliminar cuenta: ${redisErr.message}`);
     }
-    // Invalidar caché de usuario
-    await redis.del(`user:${userId}`);
 
     logger.info(`[user] Cuenta eliminada permanentemente: ${userId}`);
     return res.status(200).json({ success: true, message: 'Account deleted permanently' });

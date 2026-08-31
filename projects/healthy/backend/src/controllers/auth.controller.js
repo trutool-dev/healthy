@@ -171,7 +171,12 @@ const login = async (req, res, next) => {
     });
 
     const accessToken = generateAccessToken(user.id, user.email, session.id);
-    await redis.set(`session:${session.id}`, JSON.stringify({ user_id: user.id, email: user.email }), 'EX', 2592000);
+    // Redis es caché — si no está disponible (ej. en tests locales), el login sigue funcionando
+    try {
+      await redis.set(`session:${session.id}`, JSON.stringify({ user_id: user.id, email: user.email }), 'EX', 2592000);
+    } catch (redisErr) {
+      logger.warn(`[auth] Redis no disponible, sesión no cacheada: ${redisErr.message}`);
+    }
 
     logger.info(`[auth] Login exitoso: ${user.id}`);
     return sendSuccess(res, {
@@ -256,7 +261,11 @@ const logout = async (req, res, next) => {
     const sessionId = req.user?.sessionId;
     if (sessionId) {
       await prisma.authSession.deleteMany({ where: { id: sessionId } });
-      await redis.del(`session:${sessionId}`);
+      try {
+        await redis.del(`session:${sessionId}`);
+      } catch (redisErr) {
+        logger.warn(`[auth] Redis no disponible en logout: ${redisErr.message}`);
+      }
     }
     return sendSuccess(res, {}, 'Sesión cerrada');
   } catch (err) {

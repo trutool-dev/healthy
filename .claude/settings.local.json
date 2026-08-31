@@ -56,7 +56,18 @@
       "Bash(git -C c:/Users/Antonio/Documents/ai-studio commit -m 'fix\\(deploy\\): aumentar healthcheckTimeout a 120s y hacer migrate no-fatal *)",
       "Bash(git -C \"c:/Users/Antonio/Documents/ai-studio\" add projects/healthy/backend/prisma.config.ts projects/healthy/backend/src/app.js)",
       "Bash(git -C c:/Users/Antonio/Documents/ai-studio commit -m 'fix\\(deploy\\): corregir prisma.config.ts y healthcheck *)",
-      "Bash(git -C \"c:/Users/Antonio/Documents/ai-studio\" commit -m \"chore\\(tasks\\): orquestador marca Fase 6 completadas y añade TAREA-Redis y plan de distribucion\")"
+      "Bash(git -C \"c:/Users/Antonio/Documents/ai-studio\" commit -m \"chore\\(tasks\\): orquestador marca Fase 6 completadas y añade TAREA-Redis y plan de distribucion\")",
+      "Bash(npm run *)",
+      "Bash(Select-String -Pattern \"\\(PASS|FAIL|●|Tests:|Test Suites:|Coverage|✓|✗|×|FAILED|ERROR|SyntaxError|TypeError|Cannot|expect|received|Statements|Branches|Functions|Lines\\)\")",
+      "Bash(Out-String)",
+      "Bash(npx lighthouse *)",
+      "Bash(echo \"lighthouse_exit:$?\")",
+      "Read(//c/Program Files/Google/Chrome/Application//**)",
+      "Read(//c/Program Files \\(x86\\)/Google/Chrome/**)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" https://healthy.app)",
+      "Bash(eas build:list --limit 3 --platform android)",
+      "Bash(eas build:list --limit 5 --platform android)",
+      "Bash(eas build:view a8d5e220-0673-4466-b875-868e78d2b5b8)"
     ]
   }
 }

@@ -148,3 +148,125 @@ Database Agent: Ready in projects/healthy/database/
 Design Agent: Ready in projects/healthy/design/
 
 Next milestone check: When DB-01 or DS-03 completes (30 min elapsed max)
+
+=============================================================================
+SESIÓN 2026-08-28 — PUNTO DE SITUACIÓN + TRABAJO EN PROGRESO
+=============================================================================
+
+## Resumen ejecutivo
+
+Proyecto Healthy en fase final pre-lanzamiento. Infraestructura completamente
+desplegada en Railway (staging + producción). CI verde. 5 de 9 criterios de
+go-live completados.
+
+## Estado de criterios go-live (actualizado 2026-08-28)
+
+| # | Criterio | Estado |
+|---|----------|--------|
+| 1 | Cobertura tests ≥ 80 % | ✅ COMPLETADO — 88.21 % (253/253 tests, 2026-07-08) |
+| 2 | API p95 < 500 ms | [~] DIFERIDO — decisión del usuario, post-release v1.1.0 |
+| 3 | Lighthouse landing ≥ 95 | ⏳ PENDIENTE — healthy.app inactivo (DNS/CloudFront sin activar) |
+| 4 | Seguridad: 0 CRITICAL/HIGH | ✅ COMPLETADO — auditado 2026-07-07 |
+| 5 | Migración Prisma producción | ✅ COMPLETADO — aplicada 2026-06-29 |
+| 6 | Redis staging operativo | ⏳ PENDIENTE — acción manual en Railway dashboard |
+| 7 | App TestFlight (iOS) | ⏳ PENDIENTE — requiere Apple Developer + EAS (ver devops/EAS_CHECKLIST.md) |
+| 8 | App Google Play Internal | ⏳ PENDIENTE — requiere Google Play + EAS (ver devops/EAS_CHECKLIST.md) |
+| 9 | Tag v1.0.0 | ⏳ BLOQUEADO — espera criterios 3, 6, 7, 8 |
+
+## Trabajo realizado en esta sesión (2026-08-28)
+
+### RGPD Art. 9 — Consentimiento explícito datos de salud
+
+Implementado acto positivo verificable del usuario para procesar datos de salud:
+
+**Frontend (OnboardingHealth.tsx):**
+- Añadido estado `healthConsent` (boolean, false por defecto)
+- Checkbox accesible (accessibilityRole="checkbox") con texto legal:
+  "Acepto que Healthy procese mis datos de salud para personalizar mi plan
+  (Art. 9 RGPD). Puedo retirar este consentimiento en cualquier momento
+  desde mi perfil."
+- Botón Continuar bloqueado hasta checkbox marcado (canContinue incluye && healthConsent)
+- Petición envía healthConsent: true solo si checkbox está activo
+- Estilos coherentes con el sistema de diseño existente (colores darkGreen)
+- Accesibilidad WCAG AA: accessibilityRole, accessibilityState, accessibilityLabel
+
+**Backend (onboarding.controller.js):**
+- Destructurado healthConsent del body en saveHealth
+- Log auditable al registrar consentimiento: logger.info([onboarding] Consentimiento Art. 9)
+- health_consent_given_at registrado solo en la primera vez (inmutable)
+
+## Bloqueos y acciones requeridas del usuario
+
+1. **Redis staging** (5 min) — Railway dashboard:
+   → proyecto healthy-staging → servicio backend → Variables
+   → Verificar que REDIS_URL apunta al servicio Redis del mismo proyecto
+   → Tras guardar: redeploy automático → verificar /health devuelve "redis":"connected"
+
+2. **Lighthouse** — Pendiente activación de healthy.app (DNS + CloudFront)
+   → Instrucciones exactas en: tests/LIGHTHOUSE_PENDING.md
+   → Alternativamente: se puede ejecutar contra staging Railway cuando esté activo
+
+3. **TestFlight + Google Play** — Secuencia:
+   → Seguir devops/EAS_CHECKLIST.md paso a paso
+   → Requiere: cuenta Expo, Apple Developer ($99/año), Google Play Dev ($25)
+   → Tiempo estimado: 1-2 días (activación Apple puede tardar 24-48h)
+
+4. **Tag v1.0.0** — Una vez criterios 3, 6, 7, 8 completados:
+   → git tag v1.0.0 && git push origin v1.0.0
+   → Dispara eas-submit.yml automáticamente
+
+=============================================================================
+
+-----------------------------------------------------------------------------
+ACTUALIZACIÓN 2026-08-28 (tarde) — DIAGNÓSTICO DE INFRAESTRUCTURA
+-----------------------------------------------------------------------------
+
+## Hallazgo crítico: Railway suspendido por inactividad
+
+Verificado vía Chrome: staging, producción y healthy.app devuelven 404 de
+Railway ("The train has not arrived at the station"). Han pasado ~60 días
+desde el último deploy (2026-06-29). El plan gratuito suspende servicios
+por inactividad.
+
+URLs afectadas:
+- https://backend-staging-01ee.up.railway.app → 404
+- https://ai-studio-production-1835.up.railway.app → 404
+- https://healthy.app → 404 (dominio apunta a Railway, no a S3/CloudFront)
+
+## Acción requerida (usuario) para desbloquear go-live
+
+1. Entrar en railway.app con la cuenta de trutool@gmail.com
+2. Proyecto healthy-staging: redeploy de backend + PostgreSQL + Redis
+3. Proyecto healthy-prod: redeploy de backend + PostgreSQL + Redis
+4. Verificar /health → {"success":true,"data":{"db":"connected","redis":"connected"}}
+
+Una vez online, el agente puede:
+- Ejecutar Lighthouse contra healthy.app (criterio 3)
+- Verificar Redis staging (criterio 6)
+- Preparar EAS build para TestFlight/Google Play (criterios 7+8)
+- Crear tag v1.0.0 (criterio 9)
+
+## Estado de criterios go-live (2026-08-28 — estado final de sesión)
+
+| # | Criterio                      | Estado                                    |
+|---|-------------------------------|-------------------------------------------|
+| 1 | Tests ≥ 80 %                  | ✅ 88.21 % (2026-07-08)                   |
+| 2 | API p95 < 500 ms              | [~] Diferido — post-release v1.1.0        |
+| 3 | Lighthouse ≥ 95               | 🔴 Bloqueado — Railway caído              |
+| 4 | Seguridad 0 críticos          | ✅ Auditado (2026-07-07)                  |
+| 5 | Migración Prisma producción   | ✅ Aplicada (2026-06-29)                  |
+| 6 | Redis staging                 | 🔴 Bloqueado — Railway caído              |
+| 7 | App TestFlight (iOS)          | ⏳ Pendiente — ver devops/EAS_CHECKLIST.md|
+| 8 | App Google Play Internal      | ⏳ Pendiente — ver devops/EAS_CHECKLIST.md|
+| 9 | Tag v1.0.0                    | 🔴 Bloqueado por criterios 3, 6, 7, 8    |
+
+## Trabajo realizado en esta sesión (2026-08-28)
+
+- RGPD Art. 9: checkbox explícito en OnboardingHealth.tsx (frontend)
+- Backend saveHealth: healthConsent destructurado del body + log auditable
+- tasks.md: CI/CD pipeline marcado [x] (RAILWAY_ENVIRONMENT_ID ya configurado)
+- CLAUDE.project.md: añadida sección "Memoria del proyecto" con protocolo
+  de lectura/escritura del ORCHESTRATOR_STATUS.log al inicio/fin de sesión
+- ORCHESTRATOR_STATUS.log actualizado con status completo
+
+=============================================================================

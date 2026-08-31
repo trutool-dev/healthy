@@ -21,10 +21,14 @@ const searchFoods = async (req, res, next) => {
     const query = q.trim().toLowerCase();
     const cacheKey = `foods:search:${query}`;
 
-    // Verificar caché (BE-09)
-    const cached = await redis.get(cacheKey);
-    if (cached) {
-      return sendSuccess(res, { foods: JSON.parse(cached), from_cache: true }, 'Alimentos encontrados');
+    // Verificar caché (BE-09) — Redis es opcional: si no está disponible, se consulta BD directamente
+    try {
+      const cached = await redis.get(cacheKey);
+      if (cached) {
+        return sendSuccess(res, { foods: JSON.parse(cached), from_cache: true }, 'Alimentos encontrados');
+      }
+    } catch (redisErr) {
+      logger.warn(`[foods] Redis no disponible, consultando BD directamente: ${redisErr.message}`);
     }
 
     const foods = await prisma.food.findMany({
@@ -33,7 +37,11 @@ const searchFoods = async (req, res, next) => {
       orderBy: [{ verified: 'desc' }, { name: 'asc' }],
     });
 
-    await redis.set(cacheKey, JSON.stringify(foods), 'EX', FOOD_SEARCH_TTL);
+    try {
+      await redis.set(cacheKey, JSON.stringify(foods), 'EX', FOOD_SEARCH_TTL);
+    } catch (redisErr) {
+      logger.warn(`[foods] Redis no disponible, resultado no cacheado: ${redisErr.message}`);
+    }
     return sendSuccess(res, { foods, total: foods.length, from_cache: false }, 'Alimentos encontrados');
   } catch (err) { next(err); }
 };

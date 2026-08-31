@@ -160,12 +160,12 @@ const ONBOARDING_PROFILE = {
 
 const ONBOARDING_LIFESTYLE = {
   profession: 'Developer',
-  work_type: 'sedentary',
+  work_type: 'office',
   work_hours_per_day: 8,
   stress_level: 3,
   sleep_hours_usual: 7,
   sleep_quality: 'good',
-  alcohol_consumption: 'rarely',
+  alcohol_consumption: 'occasional',
   smoker: false,
   daily_water_glasses: 8,
 };
@@ -182,14 +182,14 @@ const ONBOARDING_NUTRITION = {
   diet_type: 'omnivore',
   meals_per_day_preferred: 3,
   cooks_at_home: true,
-  eats_out_frequency: 'rarely',
-  monthly_food_budget_range: '200-400',
+  eats_out_frequency: 'sometimes',
+  monthly_food_budget_range: 'medium',
 };
 
 const ONBOARDING_MOTIVATION = {
   main_motivation: 'health',
   previous_attempts: false,
-  tracking_preference: 'app',
+  tracking_preference: 'basic',
   has_support_network: true,
 };
 

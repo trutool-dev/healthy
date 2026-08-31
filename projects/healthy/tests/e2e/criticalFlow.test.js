@@ -286,7 +286,7 @@ describe('Flujo crítico E2E: registro → verificación → contraseña → onb
     const res = await request(app)
       .put('/onboarding/health')
       .set('Authorization', `Bearer ${accessToken}`)
-      .send({ conditions: [], food_restrictions: [] });
+      .send({ conditions: [], food_restrictions: [], healthConsent: true });
 
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
