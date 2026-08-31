@@ -3,7 +3,7 @@
 > Archivo de estado del proyecto. El agente orquestador lo lee al iniciar cada sesión
 > y lo actualiza al finalizar. Es la fuente de verdad del proyecto.
 >
-> Ultima actualización: 2026-08-28 | Sesión: 1f88c3c9
+> Ultima actualización: 2026-08-31 | Sesión: 1f88c3c9
 
 ---
 
@@ -11,11 +11,11 @@
 
 | Campo | Valor |
 |-------|-------|
-| Fase actual | Fase 10 completada — pendiente deploy PRO |
-| Rama activa | develop (6 commits ahead of origin) |
-| Backend staging | CAIDO — Railway trial expirado |
-| Tests | 317/317 pasando — lineas 89.18% / branches 69.57% |
-| Siguiente accion inmediata | Reactivar Railway (M-1) + verificar build Android (M-2) |
+| Fase actual | Fase 10 completada — preparando release v1.0.0 |
+| Rama activa | develop (sincronizada con origin) |
+| Backend staging | ACTIVO — Railway Hobby ($5/mes) |
+| Tests | 454/454 pasando — lineas 96.78% / branches 85.01% |
+| Siguiente accion inmediata | M-2 verificar build Android + M-4 seed ejercicios + M-12 merge a main |
 
 ---
 
@@ -23,9 +23,9 @@
 
 | Componente | Solucion | Estado |
 |------------|----------|--------|
-| Backend Node.js | Railway healthy-staging | CAIDO (trial expirado — upgrade a Hobby $5/mes) |
-| PostgreSQL | Railway PostgreSQL plugin | CAIDO |
-| Redis | Railway Redis plugin | CAIDO |
+| Backend Node.js | Railway healthy-staging | ACTIVO — Plan Hobby |
+| PostgreSQL | Railway PostgreSQL plugin | ACTIVO |
+| Redis | Railway Redis plugin | ACTIVO |
 | Landing page | AWS S3 + CloudFront | OK — produccion |
 | CI/CD backend | GitHub Actions → Railway CLI | OK |
 | App Android | EAS Build (Expo) | Build pendiente de verificar |
@@ -45,7 +45,7 @@
 
 | ID | Tarea | Prioridad | Estado |
 |----|-------|-----------|--------|
-| M-1 | Actualizar Railway a plan Hobby en railway.app ($5/mes) | CRITICO | Pendiente |
+| M-1 | Actualizar Railway a plan Hobby en railway.app ($5/mes) | CRITICO | Completada |
 | M-2 | Verificar build Android: `eas build:list --limit 1 --platform android` | CRITICO | Pendiente |
 | M-3 | Si build falló: `eas build --platform android --profile preview` | CRITICO | Pendiente (depende M-2) |
 | M-4 | Ejecutar seed de ejercicios: `node projects/healthy/database/seedExercises.js` | IMPORTANTE | Pendiente (depende M-1) |
@@ -63,11 +63,11 @@
 
 | ID | Tarea | Agente | Estado | Depende de |
 |----|-------|--------|--------|------------|
-| A-1 | Mejorar branch coverage de 69.57% a 80%+ | Tests Agent | Pendiente | Nada |
+| A-1 | Mejorar branch coverage de 69.57% a 80%+ | Tests Agent | Completada — 85.01% / 454 tests | Nada |
 | A-2 | Build iOS en EAS: `eas build --platform ios --profile preview` | DevOps Agent | Pendiente | M-5, M-6 |
 | A-3 | Subir a TestFlight: `eas submit --platform ios` | DevOps Agent | Pendiente | A-2 |
 | A-4 | Deploy a Railway tras merge a main | CI/CD GitHub Actions | Pendiente | M-12 |
-| A-5 | Generar documentacion API (Swagger/OpenAPI) con endpoint /exercises | Docs Agent | Pendiente | Nada |
+| A-5 | Generar documentacion API (Swagger/OpenAPI) con endpoint /exercises | Docs Agent | Completada — swagger.yaml 40 endpoints | Nada |
 
 ---
 
@@ -75,13 +75,13 @@
 
 | Criterio | Objetivo | Estado |
 |----------|----------|--------|
-| Tests lineas | >= 80% | OK — 89.18% |
-| Tests branches | >= 80% | PENDIENTE — 69.57% |
+| Tests lineas | >= 80% | OK — 96.78% |
+| Tests branches | >= 80% | OK — 85.01% |
 | Lighthouse landing | >= 95 | PENDIENTE |
 | App Android Google Play Internal | Publicada | PENDIENTE |
 | App iOS TestFlight | Publicada | PENDIENTE |
-| Backend staging operativo | Activo | PENDIENTE — Railway caido |
-| Seed 1.324 ejercicios ejecutado | Completo | PENDIENTE |
+| Backend staging operativo | Activo | OK — Railway Hobby activo |
+| Seed 1.324 ejercicios ejecutado | Completo | PENDIENTE — ejecutar M-4 |
 | Tag v1.0.0 | Creado | PENDIENTE |
 
 ---
