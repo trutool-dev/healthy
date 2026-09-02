@@ -50,6 +50,7 @@ router.post('/refresh',
 
 // Debug — solo staging/dev (el controlador lo bloquea en NODE_ENV=production)
 router.get('/dev/code', ctrl.getDevCode);
+router.post('/dev/auto-verify', [body('email').isEmail()], validate, ctrl.devAutoVerify);
 
 // Rutas protegidas
 router.post('/logout', authenticate, ctrl.logout);

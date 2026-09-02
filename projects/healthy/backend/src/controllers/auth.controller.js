@@ -343,4 +343,39 @@ const getDevCode = async (req, res, next) => {
   }
 };
 
-module.exports = { register, verifyEmail, resendCode, setPassword, login, forgotPassword, resetPassword, logout, refresh, me, getDevCode };
+/**
+ * POST /auth/dev/auto-verify — verifica email y crea contraseña en un solo paso.
+ * Solo funciona en NODE_ENV !== production.
+ */
+const devAutoVerify = async (req, res, next) => {
+  if (process.env.NODE_ENV === 'production') {
+    return res.status(404).json({ success: false });
+  }
+  try {
+    const { email, password = 'EvalTest2026!' } = req.body;
+    if (!email) return sendError(res, 'VALIDATION_ERROR', 'email requerido', 400);
+
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) return sendError(res, 'NOT_FOUND', 'Usuario no encontrado', 404);
+
+    // Invalidar códigos anteriores
+    await prisma.verificationCode.updateMany({
+      where: { user_id: user.id, type: 'email_verification', used_at: null },
+      data: { used_at: new Date() },
+    });
+
+    // Establecer contraseña y marcar email como verificado en un solo update
+    const password_hash = await hashPassword(password);
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { email_verified: true, password_hash, status: 'active' },
+    });
+
+    logger.info(`[auth/dev] Auto-verificación: ${user.id}`);
+    return sendSuccess(res, { user_id: user.id, email }, 'Usuario verificado y contraseña establecida (solo staging/dev)');
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { register, verifyEmail, resendCode, setPassword, login, forgotPassword, resetPassword, logout, refresh, me, getDevCode, devAutoVerify };
