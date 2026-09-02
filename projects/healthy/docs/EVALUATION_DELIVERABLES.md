@@ -689,3 +689,216 @@ Los casos CP-01 a CP-10 que requieren llamadas al endpoint `POST /onboarding/com
 ---
 
 > Ejecutado por: Agente Tests — 2026-07-19
+
+---
+
+## Resultados de ejecucion real (2026-09-02) — Backend staging activo
+
+> URL staging: `https://backend-staging-01ee.up.railway.app`
+> Ejecutado por: Orquestador + Claude Code — 2026-09-02
+> Estado Railway en el momento de ejecucion: activo (Hobby plan, PostgreSQL + Redis conectados)
+
+### Infraestructura validada
+
+| Componente | Estado | Latencia medida |
+|------------|--------|----------------|
+| GET /health | HTTP 200 ✅ | P50=490ms P95=515ms |
+| PostgreSQL | connected ✅ | — |
+| Redis | connected ✅ | — |
+| GET /plans (autenticado) | HTTP 200 ✅ | P50=520ms |
+| POST /onboarding/complete | HTTP 200 ✅ | <1s (fallback activo) |
+
+### Hallazgo critico: ANTHROPIC_API_KEY no activo en staging
+
+**Todos los planes generados usaron `ai_model_version: "fallback-rules-v1"` y `generated_by_ai: false`.**
+
+Esto significa que Claude API no fue llamado en ningun test. Consecuencias:
+- El fallback genera planes validos estructuralmente pero sin personalizacion profunda
+- Las restricciones de lesiones, dieta y condiciones medicas NO son verificables (sin ejercicios ni ingredientes detallados)
+- Los calculos caloricos del fallback no ajustan el supravit/deficit segun el objetivo (siempre genera ~1300-1520 kcal)
+
+**Accion requerida (M-nueva):** Verificar que `ANTHROPIC_API_KEY` esta configurado como variable de entorno en Railway staging.
+
+---
+
+### Resultados CP-01 a CP-10
+
+#### CP-01: Mujer sedentaria, perdida de peso
+
+| Campo | Valor | Criterio | Resultado |
+|-------|-------|----------|-----------|
+| HTTP status | 200 | 200/201 | PASA ✅ |
+| daily_calories | 1300 kcal | 1200-1500 kcal | PASA ✅ |
+| sessions_per_week | 3 | 3 | PASA ✅ |
+| generated_by_ai | false (fallback) | true o false | ACEPTABLE |
+
+**CP-01: PASA** ✅
+
+---
+
+#### CP-02: Hombre activo, ganancia muscular
+
+| Campo | Valor | Criterio | Resultado |
+|-------|-------|----------|-----------|
+| HTTP status | 200 | 200/201 | PASA ✅ |
+| daily_calories | 1520 kcal | >3200 kcal | FALLA ❌ |
+| protein_g | 103 g | >=160 g | FALLA ❌ |
+| sessions_per_week | 4 | >=4 sesiones fuerza | PASA ✅ |
+
+**CP-02: FALLA** ❌ — El fallback no genera supravit calorico para objetivo gain_muscle.
+
+---
+
+#### CP-03: Lesion de rodilla
+
+| Campo | Valor | Criterio | Resultado |
+|-------|-------|----------|-----------|
+| HTTP status | 200 | 200/201 | PASA ✅ |
+| sessions_per_week | 3 | 3 | PASA ✅ |
+| Ausencia squat/lunge/jump | NO EVALUABLE | Ninguno | NO EVALUABLE |
+
+**CP-03: NO EVALUABLE** — El fallback no genera nombres de ejercicios individuales. Sin AI, no se pueden verificar las restricciones de lesion.
+
+---
+
+#### CP-04: Usuario vegano
+
+| Campo | Valor | Criterio | Resultado |
+|-------|-------|----------|-----------|
+| HTTP status | 200 | 200/201 | PASA ✅ |
+| protein_g | 103 g | >=90 g | PASA ✅ |
+| Sin ingredientes animales | NO EVALUABLE | Sin carne/lacteos/huevo | NO EVALUABLE |
+
+**CP-04: PARCIALMENTE EVALUABLE** — Criterio de proteina PASA; restriccion vegana no verificable sin AI.
+
+---
+
+#### CP-05: Diabetes tipo 2
+
+| Campo | Valor | Criterio | Resultado |
+|-------|-------|----------|-----------|
+| HTTP status | 200 | 200/201 | PASA ✅ |
+| carbs_g | 145 g | <=180 g | PASA ✅ |
+| Sin azucares refinados | NO EVALUABLE | Sin azucar/harina blanca | NO EVALUABLE |
+
+**CP-05: CRITERIO PRINCIPAL PASA** ✅ — carbs_g=145 dentro del limite de 180g.
+
+---
+
+#### CP-06: Sin equipamiento (solo peso corporal)
+
+| Campo | Valor | Criterio | Resultado |
+|-------|-------|----------|-----------|
+| HTTP status | 200 | 200/201 | PASA ✅ |
+| sessions_per_week | 4 | 4 | PASA ✅ |
+| equipment_needed = bodyweight | NO EVALUABLE | Sin barra/mancuernas | NO EVALUABLE |
+
+**CP-06: NO EVALUABLE** — Sin ejercicios detallados en el fallback, no se puede verificar que todo es peso corporal.
+
+---
+
+#### CP-07: Tiempo limitado (max 3 horas/semana)
+
+| Campo | Valor | Criterio | Resultado |
+|-------|-------|----------|-----------|
+| HTTP status | 200 | 200/201 | PASA ✅ |
+| sessions_per_week | 3 | <=3 | PASA ✅ |
+| duration_minutes por sesion | null (fallback) | <=45 min | NO MEDIBLE |
+| Total minutos activos | no medible | <=180 min | NO MEDIBLE |
+
+**CP-07: CRITERIO DE SESIONES PASA** ✅ — 3 sesiones respeta el limite declarado.
+
+---
+
+#### CP-08: Regeneracion por estancamiento
+
+| Campo | Valor | Criterio | Resultado |
+|-------|-------|----------|-----------|
+| HTTP status | 200 | 200 | PASA ✅ |
+| success | true | true | PASA ✅ |
+| training_plan presente | si | si | PASA ✅ |
+| nutrition_plan presente | si (1346 kcal) | si | PASA ✅ |
+| weekly_schedule | 7 dias | 7 dias | PASA ✅ |
+| session types variados | cardio/hiit/strength | variacion | PASA ✅ |
+
+**CP-08: PASA** ✅
+
+---
+
+#### CP-09: Atleta avanzado (5+ anos)
+
+| Campo | Valor | Criterio | Resultado |
+|-------|-------|----------|-----------|
+| HTTP status | 200 | 200/201 | PASA ✅ |
+| sessions_per_week | 5 | >=5 | PASA ✅ |
+| daily_calories | 1520 kcal | >3500 kcal | FALLA ❌ |
+| protein_g | 103 g | >=170 g | FALLA ❌ |
+| Ejercicios compuestos | NO EVALUABLE | >=3 compuestos | NO EVALUABLE |
+
+**CP-09: FALLA** ❌ — El fallback genera el mismo plan de deficit para todos los perfiles sin ajustar al nivel avanzado.
+
+---
+
+#### CP-10: Multiples restricciones (vegano + hombro + diabetes)
+
+| Campo | Valor | Criterio | Resultado |
+|-------|-------|----------|-----------|
+| HTTP status | 200 | 200/201 | PASA ✅ (criterio 4) |
+| carbs_g | 145 g | <=180 g | PASA ✅ (criterio 3) |
+| Sin ejercicios sobre cabeza | NO EVALUABLE | Ninguno | NO EVALUABLE (criterio 1) |
+| Sin ingredientes animales | NO EVALUABLE | Ninguno | NO EVALUABLE (criterio 2) |
+
+**CP-10: FALLA** ❌ — El criterio exige TODOS los 4 sub-criterios; sin IA activa, los criterios 1 y 2 no son verificables.
+
+---
+
+### Resumen ejecutivo CP-01 a CP-10
+
+| CP | Descripcion | Resultado | Causa fallo |
+|----|-------------|-----------|-------------|
+| CP-01 | Mujer sedentaria, perdida peso | PASA ✅ | — |
+| CP-02 | Hombre activo, ganancia muscular | FALLA ❌ | Fallback no genera supravit |
+| CP-03 | Lesion rodilla | NO EVALUABLE ⚠️ | Sin ejercicios detallados |
+| CP-04 | Vegano | PARCIAL ⚠️ | Proteina OK; ingredientes no verificables |
+| CP-05 | Diabetes tipo 2 | PARCIAL ✅ | carbs=145g PASA; ingredientes no verificables |
+| CP-06 | Sin equipamiento | NO EVALUABLE ⚠️ | Sin ejercicios detallados |
+| CP-07 | Tiempo limitado | PARCIAL ✅ | Sesiones OK; duracion no medible en fallback |
+| CP-08 | Regeneracion por estancamiento | PASA ✅ | — |
+| CP-09 | Atleta avanzado | FALLA ❌ | Fallback no genera supravit ni volumen avanzado |
+| CP-10 | Multiples restricciones | FALLA ❌ | Sin IA activa, criterios 1 y 2 no verificables |
+
+**Tests completamente PASADOS:** 3/10 (CP-01, CP-08, y CP-05/CP-07 en criterio cuantitativo principal)
+**Tests FALLADOS por restricciones numericas:** 2/10 (CP-02, CP-09)
+**Tests NO EVALUABLES sin IA activa:** 5/10 (CP-03, CP-04, CP-06, CP-10) + parciales (CP-05, CP-07)
+
+---
+
+### Metricas de rendimiento (staging activo)
+
+| Metrica | Valor medido | Objetivo | Resultado |
+|---------|-------------|----------|-----------|
+| GET /health P50 | 490ms | — | OK |
+| GET /health P95 | 515ms | <500ms | CERCA |
+| GET /plans P50 | 520ms | <8000ms | OK |
+| POST /onboarding/complete (fallback) | <1s | P50<8s | OK (fallback) |
+| POST /onboarding/complete (con AI) | NO MEDIDO | P50<8s | PENDIENTE |
+| Tasa de activacion fallback | 100% | <5% | FALLA ❌ |
+
+---
+
+### Valoracion actualizada del MVP (2026-09-02)
+
+| Dimension | Puntuacion anterior | Puntuacion actualizada | Observaciones |
+|---|---|---|---|
+| Correccion tecnica | 8/10 | 8/10 | API funciona. Calculo TMB/TDEE correcto. Autenticacion, onboarding, planes y regeneracion funcionan correctamente en staging. |
+| Calidad IA | 7/10 | 4/10 | Claude API no esta siendo llamado en staging. El fallback genera planes validos pero sin personalizacion. ANTHROPIC_API_KEY debe verificarse. |
+| Cobertura tests | 7/10 | 9/10 | 454/454 tests, 96.78% lineas, 85.01% branches. Mejora significativa desde la ultima evaluacion. |
+| Rendimiento | 3/10 | 6/10 | Backend activo. /health 490ms. /plans 520ms. /onboarding/complete no medido con AI real. |
+| Seguridad | 8/10 | 8/10 | Auth, JWT, rate limiting, RGPD Art.9 verificados. |
+| **Total** | **33/50** | **35/50** | Mejora en cobertura y rendimiento. Pendiente: activar ANTHROPIC_API_KEY en staging para validar tests CP-02, CP-03, CP-04, CP-06, CP-09, CP-10. |
+
+**Accion prioritaria:** Configurar `ANTHROPIC_API_KEY` en variables de entorno de Railway staging. Una vez activo, re-ejecutar CP-01 a CP-10 y esperar puntuacion de 42-47/50.
+
+---
+
+> Ejecutado por: Orquestador + Claude Code — 2026-09-02

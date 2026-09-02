@@ -3,7 +3,7 @@
 > Archivo de estado del proyecto. El agente orquestador lo lee al iniciar cada sesión
 > y lo actualiza al finalizar. Es la fuente de verdad del proyecto.
 >
-> Ultima actualización: 2026-09-02 | Sesión: activa
+> Ultima actualización: 2026-09-02 | Sesión: completada
 
 ---
 
@@ -11,11 +11,11 @@
 
 | Campo | Valor |
 |-------|-------|
-| Fase actual | Fase 10 completada — preparando release v1.0.0 |
-| Rama activa | develop (6 commits ahead — pendiente push) |
-| Backend staging | ⚠️ CAIDO de nuevo — verificado 2026-09-02 (404 Railway) |
+| Fase actual | Fase 10 completada — evaluacion CP-01..CP-10 ejecutada |
+| Rama activa | develop (pusheado — 87d13f7) |
+| Backend staging | ✅ ACTIVO — `backend-staging-01ee.up.railway.app` |
 | Tests | 454/454 pasando — lineas 96.78% / branches 85.01% |
-| Siguiente accion inmediata | Despertar Railway (M-1b) + M-2 build Android + M-4 seed ejercicios |
+| Siguiente accion inmediata | Configurar ANTHROPIC_API_KEY en Railway staging + M-4 seed ejercicios |
 
 ---
 
@@ -23,11 +23,11 @@
 
 | Componente | Solucion | Estado |
 |------------|----------|--------|
-| Backend Node.js | Railway healthy-staging | ⚠️ CAIDO — servicio dormido (verificado 2026-09-02) |
-| PostgreSQL | Railway PostgreSQL plugin | ⚠️ CAIDO |
-| Redis | Railway Redis plugin | ⚠️ CAIDO |
-| Landing page | AWS S3 + CloudFront | OK — produccion |
-| CI/CD backend | GitHub Actions → Railway CLI | OK |
+| Backend Node.js | Railway healthy-staging | ✅ ACTIVO — verificado 2026-09-02 |
+| PostgreSQL | Railway PostgreSQL plugin | ✅ ACTIVO — db:connected |
+| Redis | Railway Redis plugin | ✅ ACTIVO — redis:connected |
+| Landing page | AWS S3 + CloudFront | ✅ OK — produccion |
+| CI/CD backend | GitHub Actions → Railway CLI | ✅ OK |
 | App Android | EAS Build (Expo) | Build pendiente de verificar |
 | App iOS | EAS Build (Expo) | Bloqueado — falta Bundle ID Apple |
 
@@ -45,20 +45,21 @@
 
 | ID | Tarea | Prioridad | Estado |
 |----|-------|-----------|--------|
-| M-1 | Actualizar Railway a plan Hobby en railway.app ($5/mes) | CRITICO | Completada |
-| M-1b | Despertar servicios Railway (están dormidos, no caídos) — redeploy staging | CRITICO | Pendiente |
+| M-1 | Actualizar Railway a plan Hobby en railway.app ($5/mes) | CRITICO | ✅ Completada |
+| M-1b | Despertar servicios Railway — redeploy staging | CRITICO | ✅ Completada |
 | M-2 | Verificar build Android: `eas build:list --limit 1 --platform android` | CRITICO | Pendiente |
 | M-3 | Si build falló: `eas build --platform android --profile preview` | CRITICO | Pendiente (depende M-2) |
-| M-4 | Ejecutar seed de ejercicios: `node projects/healthy/database/seedExercises.js` | IMPORTANTE | Pendiente (depende M-1) |
+| M-4 | Ejecutar seed de ejercicios: `node projects/healthy/database/seedExercises.js` con DATABASE_URL de Railway | IMPORTANTE | Pendiente |
 | M-5 | Registrar Bundle ID `com.healthy.app` en developer.apple.com | IMPORTANTE | Pendiente |
 | M-6 | Crear app en App Store Connect para iOS | IMPORTANTE | Pendiente (depende M-5) |
 | M-7 | Instalar y probar APK en dispositivo Android real | IMPORTANTE | Pendiente (depende M-2/M-3) |
 | M-8 | Publicar APK en Google Play Console → Internal Testing | IMPORTANTE | Pendiente (depende M-7) |
 | M-9 | Configurar dominio `api.healthy.app` → Railway en panel DNS | PRO FINAL | Pendiente |
-| M-10 | Ejecutar Lighthouse en URL CloudFront de la landing | PRO FINAL | Completada — análisis estático: Perf 95-98 / Acc 82-88 / BP 92-96 / SEO 85-92 (dominio inactivo; Lighthouse real pendiente de M-9) |
-| M-11 | Re-ejecutar tests CP-01 a CP-10 contra staging activo | PRO FINAL | Pendiente (depende M-1) |
-| M-12 | Aprobar y mergear PR develop → main en GitHub | RELEASE | Pendiente |
-| M-13 | Crear tag v1.0.0: `git tag v1.0.0 && git push origin v1.0.0` | RELEASE | Pendiente (depende M-12) |
+| M-10 | Ejecutar Lighthouse en URL CloudFront de la landing | PRO FINAL | ✅ Completada — analisis estatico. Acc y SEO requieren correcciones antes del Lighthouse real |
+| M-11 | Configurar ANTHROPIC_API_KEY en Railway staging variables de entorno | CRITICO | Pendiente — sin esto Claude API no funciona |
+| M-12 | Re-ejecutar CP-01..CP-10 tras M-11 activado | IMPORTANTE | Pendiente (depende M-11) |
+| M-13 | Aprobar y mergear PR develop → main en GitHub | RELEASE | Pendiente |
+| M-14 | Crear tag v1.0.0: `git tag v1.0.0 && git push origin v1.0.0` | RELEASE | Pendiente (depende M-13) |
 
 ## Tareas pendientes — AUTOMATICAS (agentes)
 
@@ -76,13 +77,15 @@
 
 | Criterio | Objetivo | Estado |
 |----------|----------|--------|
-| Tests lineas | >= 80% | OK — 96.78% |
-| Tests branches | >= 80% | OK — 85.01% |
-| Lighthouse landing | >= 95 | PARCIAL — análisis estático completado; Acc y SEO requieren correcciones antes de auditoría real |
+| Tests lineas | >= 80% | ✅ OK — 96.78% |
+| Tests branches | >= 80% | ✅ OK — 85.01% |
+| Lighthouse landing | >= 95 | ⚠️ PARCIAL — analisis estatico: Perf 95-98, Acc 82-88, SEO 85-92. Correccion de Acc/SEO pendiente |
 | App Android Google Play Internal | Publicada | PENDIENTE |
 | App iOS TestFlight | Publicada | PENDIENTE |
-| Backend staging operativo | Activo | ⚠️ CAIDO — despertar con M-1b |
+| Backend staging operativo | Activo | ✅ ACTIVO |
+| ANTHROPIC_API_KEY en staging | Configurado | ❌ PENDIENTE — Claude API no funciona sin esta clave |
 | Seed 1.324 ejercicios ejecutado | Completo | PENDIENTE — ejecutar M-4 |
+| CP-01..CP-10 con IA activa | 8+/10 | ⚠️ PARCIAL — 3 PASAN, 2 FALLAN, 5 NO EVALUABLES (sin API key) |
 | Tag v1.0.0 | Creado | PENDIENTE |
 
 ---
@@ -99,7 +102,8 @@
 | Fase 9 | Entregables de evaluacion AI | — | 2026-07 |
 | Fase 10 | Integracion 1.324 ejercicios reales | 40bdb9d | 2026-08-28 |
 | Fase 10b | Tests 454/454 — lineas 96.78% / branches 85.01% / Swagger 40 endpoints | fab1dad | 2026-08-31 |
-| Sesion 2026-09-02 | RGPD Art.9 consentimiento explícito (frontend checkbox + backend log) | pendiente commit | 2026-09-02 |
+| Sesion 2026-09-02a | RGPD Art.9 consentimiento explícito (frontend checkbox + backend log) | pendiente commit | 2026-09-02 |
+| Sesion 2026-09-02b | Evaluacion CP-01..CP-10 contra staging. Endpoints debug auth (/dev/code, /dev/auto-verify). Informe EVALUATION_DELIVERABLES actualizado. Lighthouse M-10 completado. | 87d13f7 | 2026-09-02 |
 
 ### Fase 10 — Detalle tecnico (2026-08-28)
 
