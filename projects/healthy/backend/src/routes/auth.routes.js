@@ -48,6 +48,9 @@ router.post('/refresh',
   [body('refresh_token').notEmpty().withMessage('Refresh token requerido')],
   validate, ctrl.refresh);
 
+// Debug — solo staging/dev (el controlador lo bloquea en NODE_ENV=production)
+router.get('/dev/code', ctrl.getDevCode);
+
 // Rutas protegidas
 router.post('/logout', authenticate, ctrl.logout);
 router.get('/me', authenticate, ctrl.me);

@@ -322,4 +322,25 @@ const me = async (req, res, next) => {
   }
 };
 
-module.exports = { register, verifyEmail, resendCode, setPassword, login, forgotPassword, resetPassword, logout, refresh, me };
+/** GET /auth/dev/code?email=xxx — solo funciona en NODE_ENV !== production */
+const getDevCode = async (req, res, next) => {
+  if (process.env.NODE_ENV === 'production') {
+    return res.status(404).json({ success: false });
+  }
+  try {
+    const { email } = req.query;
+    if (!email) return sendError(res, 'VALIDATION_ERROR', 'email requerido', 400);
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) return sendError(res, 'NOT_FOUND', 'Usuario no encontrado', 404);
+    const verification = await prisma.verificationCode.findFirst({
+      where: { user_id: user.id, type: 'email_verification', used_at: null },
+      orderBy: { created_at: 'desc' },
+    });
+    if (!verification) return sendError(res, 'NOT_FOUND', 'No hay código pendiente', 404);
+    return sendSuccess(res, { code: verification.code, expires_at: verification.expires_at }, 'Código (solo staging/dev)');
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { register, verifyEmail, resendCode, setPassword, login, forgotPassword, resetPassword, logout, refresh, me, getDevCode };
