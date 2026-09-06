@@ -57,6 +57,26 @@ app.use(express.urlencoded({ extended: true }));
 // Health check (BE-10)
 // ─────────────────────────────────────────────────────────────
 
+// Diagnóstico temporal de API key (solo staging/dev)
+app.get('/health/ai', async (_req, res) => {
+  if (process.env.NODE_ENV === 'production') return res.status(404).json({ success: false });
+  const keySet = !!process.env.ANTHROPIC_API_KEY;
+  const keyPrefix = process.env.ANTHROPIC_API_KEY ? process.env.ANTHROPIC_API_KEY.slice(0, 10) + '...' : 'NOT SET';
+  try {
+    const Anthropic = require('@anthropic-ai/sdk');
+    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    const r = await client.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 10,
+      system: 'Responde solo "OK".',
+      messages: [{ role: 'user', content: 'ping' }],
+    });
+    return res.json({ success: true, key_set: keySet, key_prefix: keyPrefix, model_response: r.content[0].text });
+  } catch (err) {
+    return res.json({ success: false, key_set: keySet, key_prefix: keyPrefix, error: err.message, status: err.status });
+  }
+});
+
 app.get('/health', async (_req, res) => {
   let dbStatus = 'connected';
   let redisStatus = 'connected';
