@@ -379,19 +379,11 @@ async function generatePlan(userId, onboardingData, requestType = 'plan_generati
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
     const userContextPrompt = buildUserContextPrompt(onboardingData, metrics, extraContext, exercises);
 
-    // Llamada con prompt caching en el system prompt (AI-05)
     const response = await client.messages.create({
       model: MODEL,
       max_tokens: 4096,
-      messages: [
-        {
-          role: 'user',
-          content: [
-            { type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } },
-            { type: 'text', text: userContextPrompt },
-          ],
-        },
-      ],
+      system: SYSTEM_PROMPT,
+      messages: [{ role: 'user', content: userContextPrompt }],
     });
 
     const rawContent = response.content[0];
@@ -417,7 +409,7 @@ async function generatePlan(userId, onboardingData, requestType = 'plan_generati
     return plan;
 
   } catch (err) {
-    logger.error('[AI] Error al generar plan con Claude:', err.message);
+    logger.error('[AI] Error al generar plan con Claude:', err.message, err.status || '', err.error || '');
     logger.warn('[AI] Activando plan de fallback.');
     const fallback = generateFallbackPlan(onboardingData);
 
